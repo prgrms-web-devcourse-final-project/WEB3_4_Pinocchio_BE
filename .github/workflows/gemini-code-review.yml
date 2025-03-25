@@ -80,8 +80,7 @@ jobs:
       - name: Add Pull Request Comments
         if: env.EVENT_TYPE == 'pull_request'
         run: |
-          # Markdown 코드블록 제거 후 JSON만 추출
-          comments=$(sed -n '/^\[/,/^\]/p' review_result.txt | jq -c .)
+          comments=$(sed -n '/^\[/,/^\]/p' review_result.txt | python3 -c 'import json,sys; print(json.dumps(json.loads(sys.stdin.read())))')
           echo "comments=$comments" >> $GITHUB_ENV
 
       - name: Post PR review comments

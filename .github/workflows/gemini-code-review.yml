@@ -2,7 +2,7 @@ name: Gemini Code Review
 
 on:
   push:
-    branches: [ main ] # 변경이 감지될 브랜치를 원하는대로 설정
+    branches: [  main, dev-main ] # 변경이 감지될 브랜치를 원하는대로 설정
     paths:
       - 'src/**'
   pull_request:

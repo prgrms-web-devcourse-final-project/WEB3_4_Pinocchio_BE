@@ -2,7 +2,7 @@ name: Gemini Code Review
 
 on:
   push:
-    branches: [  main, dev-main ] # 변경이 감지될 브랜치를 원하는대로 설정
+    branches: [ main, dev-main ]
     paths:
       - 'src/**'
   pull_request:
@@ -51,25 +51,30 @@ jobs:
             const genAI = new GoogleGenerativeAI('${{ secrets.GEMINI_API_KEY }}');
             const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
 
-            let prompt;
-            if (process.env.EVENT_TYPE === 'pull_request') {
-              prompt = `Explain in Korean. You're a senior engineer doing a PR code review. Identify changes, new files, and summarize their functionality clearly. Provide line-specific actionable comments based on the git diff.
+            let prompt = `
+            You are a senior engineer performing a pull request code review. 
+            Carefully review the provided git diff.
 
-              <git diff>${diff_output}</git diff>
+            Review rules (strictly follow!):
+            - Language: Only Korean.
+            - Format: Strict JSON array. No Markdown.
+            - Each item must contain exactly "path", "line", "text", "side".
+            - Do not include any backslashes (\\) or unescaped special characters.
+            - Always escape special characters like double-quotes.
+            - Ensure your output is strictly parsable as JSON.
 
-              Output in JSON:
-              [{"path":"filepath","line":linenumber,"text":"comment","side":"RIGHT"}]`;
-            } else {
-              prompt = `Explain in Korean. You're a senior engineer reviewing code pushed to the repository. Summarize clearly:
+            Git Diff:
+            <git-diff>${diff_output}</git-diff>
 
-              - New files created
-              - Changes made to existing files
-              - Brief summary of each file's functionality
-
-              <git diff>${diff_output}</git diff>
-
-              Format response clearly using Markdown.`;
-            }
+            Output Example (Follow this exactly!):
+            [
+              {
+                "path": "src/example.java",
+                "line": 10,
+                "text": "변수명이 명확하지 않습니다. 수정해주세요.",
+                "side": "RIGHT"
+              }
+            ]`;
 
             const result = await model.generateContent(prompt);
             const response = await result.response;
@@ -80,7 +85,7 @@ jobs:
       - name: Add Pull Request Comments
         if: env.EVENT_TYPE == 'pull_request'
         run: |
-          comments=$(sed -n '/^\[/,/^\]/p' review_result.txt | python3 -c 'import json,sys; print(json.dumps(json.loads(sys.stdin.read())))')
+          comments=$(python3 -c 'import json; print(json.dumps(json.load(open("review_result.txt", encoding="utf-8"))))')
           echo "comments=$comments" >> $GITHUB_ENV
 
       - name: Post PR review comments

@@ -2,7 +2,7 @@ name: Gemini Code Review
 
 on:
     push:
-        branches: [  main, dev-main ] # 변경이 감지될 브랜치를 원하는대로 설정
+        branches: [main, dev-main]
         paths:
             - 'src/**'
     pull_request:
@@ -46,42 +46,48 @@ jobs:
                   script: |
                       const fs = require('fs');
                       const diff_output = fs.readFileSync('diff.txt', 'utf8');
-                      
+
                       const { GoogleGenerativeAI } = require('@google/generative-ai');
                       const genAI = new GoogleGenerativeAI('${{ secrets.GEMINI_API_KEY }}');
                       const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
-                      
+
                       let prompt;
                       if (process.env.EVENT_TYPE === 'pull_request') {
-                        prompt = `Explain in Korean. You're a senior engineer doing a PR code review. Identify changes, new files, and summarize their functionality clearly. Provide line-specific actionable comments based on the git diff.
-                      
+                          prompt = `Explain in Korean. You're a senior engineer doing a PR code review. Identify changes, new files, and summarize their functionality clearly. Provide line-specific actionable comments based on the git diff.
+
                         <git diff>${diff_output}</git diff>
-                      
+
                         Output in JSON:
                         [{"path":"filepath","line":linenumber,"text":"comment","side":"RIGHT"}]`;
                       } else {
-                        prompt = `Explain in Korean. You're a senior engineer reviewing code pushed to the repository. Summarize clearly:
-                      
+                          prompt = `Explain in Korean. You're a senior engineer reviewing code pushed to the repository. Summarize clearly:
+
                         - New files created
                         - Changes made to existing files
                         - Brief summary of each file's functionality
-                      
+
                         <git diff>${diff_output}</git diff>
-                      
-                        Format response clearly using Markdown.`;
+
+                        Output in JSON:
+                        [{"path":"filepath","text":"summary"}]`;
                       }
-                      
+
                       const result = await model.generateContent(prompt);
                       const response = await result.response;
                       const text = response.text();
-                      
+
                       fs.writeFileSync('review_result.txt', text);
 
             - name: Add Pull Request Comments
               if: env.EVENT_TYPE == 'pull_request'
               run: |
-                  comments=$(sed '/^```/d' review_result.txt | jq -c .)
-                  echo "comments=$comments" >> $GITHUB_ENV
+                  if grep -q '^\[' review_result.txt; then
+                      comments=$(jq -c . review_result.txt)
+                      echo "comments=$comments" >> $GITHUB_ENV
+                  else
+                      echo "No valid JSON found in review_result.txt"
+                      echo "comments=[]" >> $GITHUB_ENV
+                  fi
 
             - name: Post PR review comments
               if: env.EVENT_TYPE == 'pull_request'

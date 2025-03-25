@@ -5,8 +5,9 @@ on:
     branches: [  main, dev-main ] # 변경이 감지될 브랜치를 원하는대로 설정
     paths:
       - 'src/**'
-      pull_request:
-        types: [ opened, synchronize ]
+  pull_request:
+    types: [opened, synchronize]
+
 
     jobs:
       gemini-review:

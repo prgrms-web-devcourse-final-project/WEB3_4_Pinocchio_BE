@@ -85,8 +85,12 @@ jobs:
       - name: Add Pull Request Comments
         if: env.EVENT_TYPE == 'pull_request'
         run: |
-          comments=$(python3 -c 'import json; print(json.dumps(json.load(open("review_result.txt", encoding="utf-8"))))')
-          echo "comments=$comments" >> $GITHUB_ENV
+          if [ -s review_result.txt ]; then
+            comments=$(cat review_result.txt | sed -n '/^\[/,/^\]/p' | python3 -c 'import sys,json; data=sys.stdin.read(); print(json.dumps(json.loads(data)))')
+            echo "comments=$comments" >> $GITHUB_ENV
+          else
+            echo "comments=[]" >> $GITHUB_ENV
+          fi
 
       - name: Post PR review comments
         if: env.EVENT_TYPE == 'pull_request'

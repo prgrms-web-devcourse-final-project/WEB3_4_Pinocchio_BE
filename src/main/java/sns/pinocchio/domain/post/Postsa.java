@@ -2,19 +2,19 @@ package sns.pinocchio.domain.post;
 
 import lombok.*;
 import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.index.Indexed;
+import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
-@Document(collection = "posts")
+@Document(collection = "postszx")
 @Getter
 @Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Post {
+public class Postsa {
 
     @Id
     private String id;  // _id

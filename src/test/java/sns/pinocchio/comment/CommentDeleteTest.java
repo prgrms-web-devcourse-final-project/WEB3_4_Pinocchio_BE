@@ -26,16 +26,15 @@ public class CommentDeleteTest {
 	private CommentRepository commentRepository;
 
 	public String 댓글_생성() {
-		CommentCreateRequest createRequest = CommentCreateRequest
-			.builder()
+		CommentCreateRequest createRequest = CommentCreateRequest.builder()
 			.userId("user_001")
 			.content("댓글이지롱")
 			.parentCommentId("comment_001")
 			.build();
 		String commentId = commentService.createComment(createRequest, "user_001", "post_001");
-		Comment comment1 = commentRepository.findById(commentId)
+		Comment comment = commentRepository.findById(commentId)
 			.orElseThrow(() -> new NoSuchElementException("댓글이 저장되지 않았습니다."));
-		assertNotNull(comment1);
+		assertNotNull(comment);
 		System.out.println("✅ 댓글이 MongoDB에 저장되었습니다.");
 		return commentId;
 	}
@@ -43,17 +42,16 @@ public class CommentDeleteTest {
 	@Test
 	public void 댓글_소프트_삭제_테스트() {
 		String commentId = 댓글_생성();
-		CommentDeleteRequest deleteRequest = CommentDeleteRequest
-			.builder()
+		CommentDeleteRequest deleteRequest = CommentDeleteRequest.builder()
 			.postId("post_001")
 			.commentId(commentId)
 			.action(DeleteType.SOFT_DELETED)
 			.build();
 
 		commentService.deleteComment(deleteRequest, "user_001");
-		Comment comment2 = commentRepository.findById(commentId)
+		Comment comment = commentRepository.findById(commentId)
 			.orElseThrow(() -> new NoSuchElementException("댓글이 존재하지 않았습니다."));
-		assertEquals(CommentStatus.DELETE, comment2.getStatus());
+		assertEquals(CommentStatus.DELETE, comment.getStatus());
 		System.out.println("✅ 댓글이 MongoDB에서 소프트 삭제 되었습니다.");
 
 	}
@@ -62,8 +60,7 @@ public class CommentDeleteTest {
 	public void 댓글_하드_삭제_테스트() {
 		String commentId = 댓글_생성();
 
-		CommentDeleteRequest deleteRequest = CommentDeleteRequest
-			.builder()
+		CommentDeleteRequest deleteRequest = CommentDeleteRequest.builder()
 			.postId("post_001")
 			.commentId(commentId)
 			.action(DeleteType.HARD_DELETED)

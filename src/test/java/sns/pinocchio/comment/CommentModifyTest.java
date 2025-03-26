@@ -23,13 +23,11 @@ public class CommentModifyTest {
 	private CommentRepository commentRepository;
 
 	public String 댓글_생성() {
-		CommentCreateRequest createRequest =
-			CommentCreateRequest
-				.builder()
-				.userId("user_001")
-				.content("댓글이지롱")
-				.parentCommentId("comment_001")
-				.build();
+		CommentCreateRequest createRequest = CommentCreateRequest.builder()
+			.userId("user_001")
+			.content("댓글이지롱")
+			.parentCommentId("comment_001")
+			.build();
 		String commentId = commentService.createComment(createRequest, "user_001", "post_001");
 		Comment comment = commentRepository.findById(commentId)
 			.orElseThrow(() -> new NoSuchElementException("댓글이 저장되지 않았습니다."));
@@ -41,17 +39,15 @@ public class CommentModifyTest {
 	@Test
 	public void 댓글_수정_테스트() {
 		String createdCommentId = 댓글_생성();
-		CommentModifyRequest modifyRequest =
-			CommentModifyRequest
-				.builder()
-				.commentId(createdCommentId)
-				.postId("post_001")
-				.content("댓글수정됐지롱")
-				.build();
-		String modifiedCommentId = commentService.modifyComment(modifyRequest,"user_001");
+		CommentModifyRequest modifyRequest = CommentModifyRequest.builder()
+			.commentId(createdCommentId)
+			.postId("post_001")
+			.content("댓글수정됐지롱")
+			.build();
+		String modifiedCommentId = commentService.modifyComment(modifyRequest, "user_001");
 		Comment comment = commentRepository.findById(createdCommentId)
 			.orElseThrow(() -> new NoSuchElementException("댓글이 존재하지 않습니다."));
-		assertEquals("댓글수정됐지롱",comment.getContent());
+		assertEquals("댓글수정됐지롱", comment.getContent());
 		System.out.println("✅ 댓글이 MongoDB에서 수정되었습니다.");
 
 	}

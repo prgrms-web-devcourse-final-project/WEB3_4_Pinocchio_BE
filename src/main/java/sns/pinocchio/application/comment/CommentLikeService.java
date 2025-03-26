@@ -14,6 +14,7 @@ import sns.pinocchio.infrastructure.persistence.mongodb.CommentLikeRepository;
 public class CommentLikeService {
 	private final CommentLikeRepository commentLikeRepository;
 
+	//댓글 좋아요 업데이트 함수 좋아요가이미 있을시 삭제 없을시 추가
 	public Optional<String> modifyCommentLike(String commentId,String loginUserId){
 		Optional<CommentLike> optCommentLike = commentLikeRepository.findByUserIdAndCommentId(loginUserId, commentId);
 		if(optCommentLike.isEmpty()){

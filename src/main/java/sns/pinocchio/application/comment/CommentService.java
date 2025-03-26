@@ -18,6 +18,7 @@ public class CommentService {
 	private final CommentRepository commentRepository;
 	private final CommentLikeService commentLikeService;
 
+	//댓글 생성 메서드
 	public String createComment(CommentCreateRequest request, String userId, String postId) {
 		Comment comment = Comment.builder()
 			.userId(userId)
@@ -33,6 +34,7 @@ public class CommentService {
 		return commentRepository.save(comment).getId();
 	}
 
+	//댓글 삭제 메서드 SOFT_DELETED:실제로 삭제 X 안보이게만 HARD_DELETED:실제로 삭제
 	public void deleteComment(CommentDeleteRequest request) {
 		Comment comment = commentRepository.findByIdAndPostId(request.commentId, request.postId)
 			.orElseThrow(() -> new NoSuchElementException("등록된 댓글을 찾을 수 없습니다."));
@@ -47,6 +49,7 @@ public class CommentService {
 		}
 	}
 
+	//댓글 수정 메서드
 	public String modifyComment(CommentModifyRequest request) {
 		Comment comment = commentRepository.findByIdAndPostId(request.commentId, request.postId)
 			.orElseThrow(() -> new NoSuchElementException("등록된 댓글을 찾을 수 없습니다."));
@@ -54,6 +57,7 @@ public class CommentService {
 		return commentRepository.save(comment).getId();
 	}
 
+	//댓글 좋아요 업데이트 메서드, 댓글_좋아요 테이블에 등록 이후 댓글 좋아요 카운트 증가 or 댓글_좋아요 테이블에 삭제 이후 댓글 좋아요 카운트 감소
 	public Optional<String> modifyCommentLike(CommentLikeRequest request, String commentId, String loginUserId) {
 		Optional<String> optCommentLikeId = commentLikeService.modifyCommentLike(commentId, loginUserId);
 		Comment comment = commentRepository.findByIdAndPostId(commentId, request.postId)

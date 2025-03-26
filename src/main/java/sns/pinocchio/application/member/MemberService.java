@@ -17,7 +17,7 @@ public class MemberService {
     private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
 
-    // 유저 생성
+    // 계정 생성
     @Transactional
     public void createMember(MemberRequestDto memberRequestDto) {
 
@@ -34,5 +34,23 @@ public class MemberService {
                 .build();
 
         this.memberRepository.save(member);
+    }
+
+    // 이메일 검증
+    public void validateEmail(String email) {
+        if(this.memberRepository.existsByEmail(email)) {
+            return;
+        }
+        throw new MemberException(MemberErrorCode.EMAIL_NOT_FOUND);
+    }
+
+    // 패스워드 검증
+    public void validatePassword(String password, String email) {
+        Member member = this.memberRepository.findByEmail(email);
+
+        if(passwordEncoder.matches(password, member.getPassword())) {
+            return;
+        }
+        throw new MemberException(MemberErrorCode.INVALID_PASSWORD);
     }
 }

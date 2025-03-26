@@ -1,5 +1,6 @@
 package sns.pinocchio.application.post;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import sns.pinocchio.domain.post.Post;
@@ -33,4 +34,19 @@ public class PostService {
         Post savedPost = postRepository.save(post);
         return savedPost.getId();
     }
+
+    @Transactional
+    public void modifyPost(PostModifyRequest request, String loginUserId) {
+        Post post = postRepository.findByIdAndUserIdAndStatus(
+                request.getPostId(), loginUserId, "active"
+        ).orElseThrow(() -> new IllegalArgumentException("게시물을 찾을 수 없습니다."));
+
+        post.setContent(request.getContent());
+        post.setImageUrls(request.getImageUrls());
+        post.setVisibility(Visibility.valueOf(request.getVisibility().toUpperCase()));  // 문자열 -> enum
+        post.setUpdatedAt(LocalDateTime.now());
+
+        postRepository.save(post);
+    }
+
 }

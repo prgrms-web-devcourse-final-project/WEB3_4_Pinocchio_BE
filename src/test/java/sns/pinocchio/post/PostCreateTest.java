@@ -49,7 +49,7 @@ public class PostCreateTest {
                 .commentsCount(0)
                 .views(0)
                 .visibility(Visibility.PRIVATE)  // Enum → String
-                .mentions(List.of("user_456"))
+                .mentions(List.of("user_123"))
                 .status("active")
                 .createdAt(LocalDateTime.now())
                 .updatedAt(LocalDateTime.now())

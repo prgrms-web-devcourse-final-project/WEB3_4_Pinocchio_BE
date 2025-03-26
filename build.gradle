@@ -44,6 +44,7 @@ dependencies {
     // Database
     runtimeOnly 'com.h2database:h2'
     runtimeOnly 'com.mysql:mysql-connector-j'
+    implementation("org.springframework.boot:spring-boot-starter-data-redis")
 
     // QueryDSL (JPA + Annotation Processor)
     implementation 'com.querydsl:querydsl-jpa:5.0.0:jakarta'

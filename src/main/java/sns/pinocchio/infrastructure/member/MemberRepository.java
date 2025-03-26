@@ -6,4 +6,5 @@ import sns.pinocchio.domain.member.Member;
 
 @Repository
 public interface MemberRepository extends JpaRepository<Member, Long> {
+    boolean existsByEmail(String email);
 }

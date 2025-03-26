@@ -1,11 +1,15 @@
 package sns.pinocchio.presentation.auth;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import sns.pinocchio.application.member.MemberService;
+import sns.pinocchio.application.member.memberDto.MemberRequestDto;
 
 @RequestMapping("/auth")
 @RequiredArgsConstructor
@@ -16,10 +20,15 @@ public class AuthController {
 
     // 회원가입
     @PostMapping("/signup")
-    public ResponseEntity<String> signup() {
+    public ResponseEntity<String> signup(@RequestBody @Valid MemberRequestDto memberRequestDto) {
 
-        return ResponseEntity.ok("회원가입 성공");
+        memberService.createMember(memberRequestDto);
+
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body("회원가입이 완료되었습니다.");
     }
+
 
     // 로그인
     @PostMapping("/login")

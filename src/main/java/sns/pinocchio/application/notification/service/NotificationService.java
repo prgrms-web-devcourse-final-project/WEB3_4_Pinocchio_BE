@@ -1,13 +1,15 @@
 package sns.pinocchio.application.notification.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import sns.pinocchio.application.notification.dto.NotificationRequestDto.UpdateNotifications;
 import sns.pinocchio.application.notification.dto.NotificationResponseDto.NotificationInfo;
-import sns.pinocchio.domain.notification.entity.Notification;
+import sns.pinocchio.domain.notification.Notification;
 import sns.pinocchio.infrastructure.persistence.mongodb.NotificationRepository;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class NotificationService {
 
@@ -42,6 +44,8 @@ public class NotificationService {
 
     // 수정된 알림 설정을 기반으로 DB 수정
     Notification updated = notificationRepository.save(notification);
+
+    log.info("Notification settings updated: {}", updated);
 
     return NotificationInfo.builder()
         .userId(userId)

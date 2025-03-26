@@ -13,7 +13,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import sns.pinocchio.application.notification.dto.NotificationRequestDto.UpdateNotifications;
 import sns.pinocchio.application.notification.dto.NotificationResponseDto.NotificationInfo;
-import sns.pinocchio.domain.notification.entity.Notification;
+import sns.pinocchio.domain.notification.Notification;
 import sns.pinocchio.infrastructure.persistence.mongodb.NotificationRepository;
 
 @ExtendWith(MockitoExtension.class)

@@ -1,0 +1,41 @@
+package sns.pinocchio.presentation.notification;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import sns.pinocchio.application.notification.dto.NotificationRequestDto;
+import sns.pinocchio.application.notification.dto.NotificationResponseDto.NotificationInfo;
+import sns.pinocchio.application.notification.service.NotificationService;
+
+@Tag(name = "Notification", description = "알림 설정 API")
+@RestController
+@RequiredArgsConstructor
+@RequestMapping("/api/notifications")
+public class NotificationController {
+
+  private final NotificationService notificationService;
+
+  @Operation(summary = "알림 설정 변경", description = "현재 로그인된 사용자의 알림 수신 설정을 변경합니다.")
+  @ApiResponses({
+    @ApiResponse(responseCode = "200", description = "알림 설정 변경 성공"),
+    @ApiResponse(responseCode = "400", description = "요청 값이 유효하지 않음"),
+    @ApiResponse(responseCode = "401", description = "인증 실패"),
+    @ApiResponse(responseCode = "500", description = "서버 오류")
+  })
+  @PutMapping("/settings")
+  public ResponseEntity<NotificationInfo> updateNotificationSettings(
+      @RequestHeader(value = "Authorization") String accessToken,
+      @RequestBody NotificationRequestDto.UpdateNotifications request) {
+
+    // todo: JWT 토큰 인증 기능 완료 시 변경 필요
+    NotificationInfo updated = notificationService.updateNotifications("mockUser", request);
+
+    return ResponseEntity.ok(updated);
+  }
+}

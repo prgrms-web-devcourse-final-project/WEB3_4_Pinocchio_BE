@@ -1,10 +1,8 @@
-package sns.pinocchio.domain.notification.entity;
+package sns.pinocchio.domain.notification;
 
 import java.time.LocalDateTime;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+
+import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -13,6 +11,7 @@ import sns.pinocchio.application.notification.dto.NotificationRequestDto.UpdateN
 @Document(collection = "notifications")
 @Getter
 @Builder
+@ToString
 @NoArgsConstructor
 @AllArgsConstructor
 public class Notification {

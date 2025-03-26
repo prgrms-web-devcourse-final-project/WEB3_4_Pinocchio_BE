@@ -18,13 +18,15 @@ public class SecurityConfig {
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable) // CSRF 비활성화
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .httpBasic(AbstractHttpConfigurer::disable)
-                .formLogin(AbstractHttpConfigurer::disable)
-                .logout(AbstractHttpConfigurer::disable)
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // 상태 없는 세션 정책 설정
+                .httpBasic(AbstractHttpConfigurer::disable) // 기본 HTTP 인증 비활성화
+                .formLogin(AbstractHttpConfigurer::disable) // 폼 로그인 비활성화
+                .logout(AbstractHttpConfigurer::disable) // 로그아웃 비활성화
                 .authorizeHttpRequests(auth -> auth
-                        .anyRequest().permitAll() // 모든 요청 허용
-                );
+                        .requestMatchers("/auth/**").permitAll()  // 로그인, 회원가입은 허용
+                        .anyRequest().authenticated()  // 나머지 요청은 인증 필요
+                )
+        ;
         return http.build();
     }
 

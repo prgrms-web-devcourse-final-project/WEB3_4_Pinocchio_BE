@@ -14,16 +14,14 @@ public class NotificationService {
   private final NotificationRepository notificationRepository;
 
   /**
-   * 사용자의 알림 설정을 업데이트
+   * 입력받은 사용자의 알림 설정을 업데이트
    *
    * @implNote 현재는 임시로 userId를 하드코딩하고 있으며, 실제 서비스 적용 시 JWT 인증을 통해 사용자 ID를 추출하도록 변경 필요
    * @param updateNotifications 변경할 알림 설정 값들을 담은 DTO
    * @return NotificationInfo 변경된 알림 설정 정보를 담은 응답 DTO
    */
-  public NotificationInfo updateNotifications(UpdateNotifications updateNotifications) {
-
-    // TODO : 회원 인증 필요 (임시 변수 삭제 필요)
-    String userId = "user_123";
+  public NotificationInfo updateNotifications(
+      String userId, UpdateNotifications updateNotifications) {
 
     // 회원의 알림 설정 조회
     Notification notification =

@@ -44,7 +44,7 @@ public class CommentModifyTest {
 			.postId("post_001")
 			.content("댓글수정됐지롱")
 			.build();
-		String modifiedCommentId = commentService.modifyComment(modifyRequest, "user_001");
+		String modifiedCommentId = commentService.modifyComment(modifyRequest);
 		Comment comment = commentRepository.findById(createdCommentId)
 			.orElseThrow(() -> new NoSuchElementException("댓글이 존재하지 않습니다."));
 		assertEquals("댓글수정됐지롱", comment.getContent());

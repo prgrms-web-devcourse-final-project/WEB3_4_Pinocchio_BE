@@ -48,7 +48,7 @@ public class CommentDeleteTest {
 			.action(DeleteType.SOFT_DELETED)
 			.build();
 
-		commentService.deleteComment(deleteRequest, "user_001");
+		commentService.deleteComment(deleteRequest);
 		Comment comment = commentRepository.findById(commentId)
 			.orElseThrow(() -> new NoSuchElementException("댓글이 존재하지 않았습니다."));
 		assertEquals(CommentStatus.DELETE, comment.getStatus());
@@ -66,7 +66,7 @@ public class CommentDeleteTest {
 			.action(DeleteType.HARD_DELETED)
 			.build();
 
-		commentService.deleteComment(deleteRequest, "user_001");
+		commentService.deleteComment(deleteRequest);
 		Optional<Comment> opt = commentRepository.findById(commentId);
 		assertTrue(opt.isEmpty());
 		System.out.println("✅ 댓글이 MongoDB에서 하드 삭제 되었습니다.");

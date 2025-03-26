@@ -34,7 +34,7 @@ public class Post {
 
     private int views;  // 조회수
 
-    private String visibility;  // 공개 여부: "public" or "private"
+    private Visibility visibility;  // 공개 여부: PUBLIC or PRIVATE
 
     private List<String> mentions;  // 언급된 사용자 ID 리스트
 

@@ -4,7 +4,7 @@ on:
     push:
         branches: [main, dev-main, feat-post, feat-comment]
         paths:
-            - 'src/**'
+            - './src/**'
     pull_request:
         types: [opened, synchronize]
 

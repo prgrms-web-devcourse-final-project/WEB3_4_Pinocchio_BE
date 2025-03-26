@@ -30,4 +30,19 @@ public class CommentService {
 		Comment savedComment = commentRepository.save(comment);
 		return savedComment.getId();
 	}
+
+	public void deleteComment(CommentDeleteRequest request, String loginUserId) {
+		Comment comment = commentRepository.findByIdAndUserIdAndPostId(request.commentId, loginUserId, request.postId)
+			.orElseThrow(() -> new NoSuchElementException("등록된 댓글을 찾을 수 없습니다."));
+
+		switch (request.action) {
+			case SOFT_DELETED -> {
+				comment.setStatus(CommentStatus.DELETE);
+				commentRepository.save(comment);
+			}
+			case HARD_DELETED -> {
+				commentRepository.delete(comment);
+			}
+		}
+	}
 }

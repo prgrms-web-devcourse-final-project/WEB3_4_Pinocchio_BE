@@ -14,7 +14,7 @@ import sns.pinocchio.infrastructure.persistence.mongodb.CommentLikeRepository;
 public class CommentLikeService {
 	private final CommentLikeRepository commentLikeRepository;
 
-	public Optional<String> setCommentLike(String commentId,String loginUserId){
+	public Optional<String> modifyCommentLike(String commentId,String loginUserId){
 		Optional<CommentLike> optCommentLike = commentLikeRepository.findByUserIdAndCommentId(loginUserId, commentId);
 		if(optCommentLike.isEmpty()){
 			CommentLike commentLike = CommentLike.builder()

@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import sns.pinocchio.application.member.MemberService;
+import sns.pinocchio.application.member.memberDto.MemberLoginRequestDto;
 import sns.pinocchio.application.member.memberDto.MemberRequestDto;
 
 @RequestMapping("/auth")
@@ -21,7 +22,7 @@ public class AuthController {
     // 회원가입
     @PostMapping("/signup")
     public ResponseEntity<String> signup(@RequestBody @Valid MemberRequestDto memberRequestDto) {
-
+        // 계정 생성
         memberService.createMember(memberRequestDto);
 
         return ResponseEntity
@@ -32,7 +33,11 @@ public class AuthController {
 
     // 로그인
     @PostMapping("/login")
-    public ResponseEntity<String> login() {
+    public ResponseEntity<String> login(@RequestBody @Valid MemberLoginRequestDto memberLoginRequestDto) {
+        // 이메일 검증
+        memberService.validateEmail(memberLoginRequestDto.getEmail());
+        // 패스워드 검증
+        memberService.validatePassword(memberLoginRequestDto.getPassword(), memberLoginRequestDto.getEmail());
 
         return ResponseEntity.ok("로그인 성공");
     }

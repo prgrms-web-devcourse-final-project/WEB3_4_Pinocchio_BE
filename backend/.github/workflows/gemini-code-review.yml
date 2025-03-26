@@ -108,4 +108,4 @@ jobs:
               uses: actions/upload-artifact@v4
               with:
                   name: gemini-code-review
-                  path: review_result.txtq1
+                  path: review_result.txt

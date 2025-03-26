@@ -1,4 +1,4 @@
-package sns.pinocchio.infrastructure.persistence;
+package sns.pinocchio.infrastructure.member;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;

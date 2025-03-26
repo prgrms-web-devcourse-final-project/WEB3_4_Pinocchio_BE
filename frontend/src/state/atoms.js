@@ -21,14 +21,3 @@ export const confirmAtom = atom({
         , onCancel : null
     },
 });
-
-// 검색 박스
-export const isSearchFormOpenAtom = atom({
-    key: 'confirmAtom',
-    default: true
-});
-
-export const showTooltipAtom = atom({
-    key: 'showTooltipAtom',
-    default: false
-});

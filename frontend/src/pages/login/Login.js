@@ -4,14 +4,12 @@ import googleLogin from "../../assets/images/google_login.png"
 import {useEffect, useState} from "react";
 import {useLocation, useNavigate} from "react-router-dom";
 import {useRecoilValue} from "recoil";
-import {siteAtom} from "../../state/atoms";
 import {isEmptyOrNull, useEnterKeySubmit} from "../../utils/utils";
 import Spinner from "../../shared/Spinner";
 import useConfirm from "../../hooks/useConfirm";
 import { Link } from 'react-router-dom';
 
 const Login = () => {
-    const site = useRecoilValue(siteAtom);
     const navigate = useNavigate();
     const location = useLocation();
     const { openConfirm } = useConfirm();
@@ -19,32 +17,25 @@ const Login = () => {
     const [password, setPassword] = useState("");
     const [isLoading, setIsLoading] = useState(false);
 
-    useEffect(() => {
-        if (site.toUpperCase() === 'SKT') {
-            // 해당 화면에 진입했다는건 이미 토큰 검증이 필요한 상황
-            // 토큰 제거 후 로그인 처리를 진행한다
-            localStorage.removeItem('token');
-           //handleClickLogin();
-        } else if (site.toUpperCase() === 'TMAP') {
-            localStorage.removeItem('token');
-            const query = new URLSearchParams(location.search);
-            const token = query.get('token');
-            const errorCodeFromQuery  = query.get('errorCode');
-
-            if (token) {
-                // JWT를 로컬 스토리지에 저장하거나 상태에 저장
-                localStorage.setItem('token', token);
-                navigate("/dashboard/dashboard");
-            }
-            if (errorCodeFromQuery) {
-                openConfirm({
-                    title: '로그인 중 오류가 발생했습니다.',
-                    html: 'TMAP 사용자 인증에 실패하였습니다'
-                });
-                // showToast('TMAP 사용자 인증에 실패하였습니다.','error');
-            }
-        }
-    }, [])
+    // useEffect(() => {
+    //         localStorage.removeItem('token');
+    //         const query = new URLSearchParams(location.search);
+    //         const token = query.get('token');
+    //         const errorCodeFromQuery  = query.get('errorCode');
+    //
+    //         if (token) {
+    //             // JWT를 로컬 스토리지에 저장하거나 상태에 저장
+    //             localStorage.setItem('token', token);
+    //             navigate("/dashboard/dashboard");
+    //         }
+    //         if (errorCodeFromQuery) {
+    //             openConfirm({
+    //                 title: '로그인 중 오류가 발생했습니다.',
+    //                 html: 'TMAP 사용자 인증에 실패하였습니다'
+    //             });
+    //             // showToast('TMAP 사용자 인증에 실패하였습니다.','error');
+    //         }
+    // }, [])
 
     const handleClickLogin = () => {
         let sendData = undefined;

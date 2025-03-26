@@ -1,4 +1,4 @@
-package sns.pinocchio.config.global.ExceptionHandler;
+package sns.pinocchio.config.global.exceptionHandler;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;

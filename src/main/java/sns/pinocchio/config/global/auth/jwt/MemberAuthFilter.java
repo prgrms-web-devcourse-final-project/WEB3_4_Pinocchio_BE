@@ -11,12 +11,16 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
+import sns.pinocchio.application.member.MemberService;
 import sns.pinocchio.config.global.auth.exception.AuthErrorCode;
 import sns.pinocchio.config.global.auth.exception.AuthException;
 import sns.pinocchio.config.global.auth.model.CustomUserDetails;
 import sns.pinocchio.config.global.auth.service.CookieService;
 import sns.pinocchio.config.global.auth.service.CustomUserDetailService;
 import sns.pinocchio.config.global.auth.util.JwtUtil;
+import sns.pinocchio.config.global.auth.util.TokenProvider;
+import sns.pinocchio.domain.member.Member;
+import sns.pinocchio.infrastructure.persistence.redis.redisService.RedisService;
 
 import java.io.IOException;
 
@@ -25,9 +29,12 @@ import java.io.IOException;
 @Slf4j
 public class MemberAuthFilter extends OncePerRequestFilter {
 
+    private final MemberService memberService;
     private final CookieService cookieService;
+    private final RedisService redisService;
     private final CustomUserDetailService customUserDetailService;
     private final JwtUtil jwtUtil;
+    private final TokenProvider tokenProvider;
 
     ObjectCodec objectMapper;
 
@@ -116,11 +123,15 @@ public class MemberAuthFilter extends OncePerRequestFilter {
 
 
     // 토큰 재발급 및 쿠키에 토큰 정보 저장하는 메서드
-    private String reissueToken(String refreshToken, HttpServletRequest request, HttpServletResponse response) {
-        // TODO : 엑세스토큰 재발급 로직
-        // 1. 리프레시토큰으로 레디스 내부 존재 여부 확인.
-        // 2. 토큰 유효시 저장된 유저 ID로 MemberRepository.findById()
-        // 3. 유저 객체로 엑세스토큰 생성 후 쿠키 저장.
+    private String reissueToken(String refreshToken, HttpServletRequest request, HttpServletResponse response) throws IOException {
+
+        if(!redisService.exists(refreshToken)) {
+            handleAuthError(AuthErrorCode.INVALID_TOKEN, request, response);
+        }
+        String memberId = redisService.get(refreshToken);
+        Member member = memberService.findByUserId(Long.valueOf(memberId));
+        String newAccessToken = tokenProvider.generateAccessToken(member);
+        cookieService.addAccessTokenToCookie(newAccessToken, response);
         return refreshToken;
     }
 }

@@ -3,6 +3,7 @@ package sns.pinocchio.application.post;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import sns.pinocchio.domain.post.Post;
+import sns.pinocchio.domain.post.Visibility;
 import sns.pinocchio.infrastructure.persistence.mongodb.PostRepository;
 
 import java.time.LocalDateTime;
@@ -20,7 +21,7 @@ public class PostService {
                 .imageUrls(request.getImageUrls())
                 .hashtags(request.getHashtags())
                 .mentions(request.getMentions())
-                .visibility(request.getVisibility())
+                .visibility(Visibility.valueOf(request.getVisibility().toUpperCase()))
                 .likes(0)
                 .commentsCount(0)
                 .views(0)

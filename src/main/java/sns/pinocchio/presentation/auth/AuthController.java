@@ -1,5 +1,6 @@
 package sns.pinocchio.presentation.auth;
 
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -33,19 +34,27 @@ public class AuthController {
 
     // 로그인
     @PostMapping("/login")
-    public ResponseEntity<String> login(@RequestBody @Valid MemberLoginRequestDto memberLoginRequestDto) {
+    public ResponseEntity<String> login(@RequestBody @Valid MemberLoginRequestDto memberLoginRequestDto, HttpServletResponse response) {
+
+        String email = memberLoginRequestDto.email();
+        String password = memberLoginRequestDto.password();
+
         // 이메일 검증
-        memberService.validateEmail(memberLoginRequestDto.getEmail());
+        memberService.validateEmail(email);
         // 패스워드 검증
-        memberService.validatePassword(memberLoginRequestDto.getPassword(), memberLoginRequestDto.getEmail());
+        memberService.validatePassword(password, email);
+
+        // 토콘 생성 및 저장
+        this.memberService.generateToken(email, response);
+        this.memberService.generateAndSaveRefreshToken(response);
 
         return ResponseEntity.ok("로그인 성공");
     }
 
     // 로그아웃
     @PostMapping("/logout")
-    public ResponseEntity<String> logout() {
-
+    public ResponseEntity<String> logout(HttpServletResponse response) {
+        this.memberService.logout(response);
         return ResponseEntity.ok("로그아웃 성공");
     }
 }

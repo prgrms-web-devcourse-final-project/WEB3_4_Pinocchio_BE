@@ -94,4 +94,9 @@ public class MemberService {
     public Member findByUsername(String username) {
         return this.memberRepository.findByName(username);
     }
+
+    public Member findByUserId(Long memberId) {
+        return this.memberRepository.findById(memberId)
+                .orElseThrow(() -> new MemberException(MemberErrorCode.USER_NOT_FOUND));
+    }
 }

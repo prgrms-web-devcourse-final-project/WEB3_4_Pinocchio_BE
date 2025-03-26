@@ -1,5 +1,6 @@
 package sns.pinocchio.presentation.auth;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -45,16 +46,16 @@ public class AuthController {
         memberService.validatePassword(password, email);
 
         // 토콘 생성 및 저장
-        this.memberService.generateToken(email, response);
-        this.memberService.generateAndSaveRefreshToken(response);
+        memberService.generateToken(email, response);
+        memberService.generateAndSaveRefreshToken(email, response);
 
         return ResponseEntity.ok("로그인 성공");
     }
 
     // 로그아웃
     @PostMapping("/logout")
-    public ResponseEntity<String> logout(HttpServletResponse response) {
-        this.memberService.logout(response);
+    public ResponseEntity<String> logout(HttpServletRequest request, HttpServletResponse response) {
+        memberService.logout(request, response);
         return ResponseEntity.ok("로그아웃 성공");
     }
 }

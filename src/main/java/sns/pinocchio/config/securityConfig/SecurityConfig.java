@@ -1,7 +1,9 @@
 package sns.pinocchio.config.securityConfig;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -9,10 +11,16 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import sns.pinocchio.config.global.auth.jwt.MemberAuthFilter;
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
+
+    @Autowired
+    @Lazy
+    private MemberAuthFilter memberAuthFilter;
 
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -23,9 +31,9 @@ public class SecurityConfig {
                 .formLogin(AbstractHttpConfigurer::disable) // 폼 로그인 비활성화
                 .logout(AbstractHttpConfigurer::disable) // 로그아웃 비활성화
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/**").permitAll()  // 로그인, 회원가입은 허용
-                        .anyRequest().authenticated()  // 나머지 요청은 인증 필요
+                        .anyRequest().permitAll()
                 )
+                .addFilterBefore(memberAuthFilter, UsernamePasswordAuthenticationFilter.class);
         ;
         return http.build();
     }

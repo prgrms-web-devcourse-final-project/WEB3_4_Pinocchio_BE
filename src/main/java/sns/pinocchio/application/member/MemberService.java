@@ -57,7 +57,7 @@ public class MemberService {
 
     // 패스워드 검증
     public void validatePassword(String password, String email) {
-        Member member = memberRepository.findByEmail(email);
+        Member member = findByEmail(email);
 
         if(passwordEncoder.matches(password, member.getPassword())) {
             return;
@@ -65,38 +65,34 @@ public class MemberService {
         throw new MemberException(MemberErrorCode.INVALID_PASSWORD);
     }
 
-    // 엑세스토큰 생성 및 저장
-    public void generateToken(String email, HttpServletResponse response) {
-        Member member = memberRepository.findByEmail(email);
-        String accessToken = tokenProvider.generateAccessToken(member);
-        this.cookieService.addAccessTokenToCookie(accessToken, response);
-    }
+    // 엑세스토큰, 리프래시토큰 생성 및 저장
+    public void generateAndSaveToken(String email, HttpServletResponse response) {
+        Member member = findByEmail(email);
 
-    // 리프래시토큰 생성 및 저장
-    public void generateAndSaveRefreshToken(String email, HttpServletResponse response) {
-        Member member = memberRepository.findByEmail(email);
+        String accessToken = tokenProvider.generateAccessToken(member);
         String refreshToken = tokenProvider.generateRefreshToken();
 
-        this.redisService.save(refreshToken, String.valueOf(member.getId()), jwtUtil.getRefreshTokenExpirationTime());
-        this.cookieService.addRefreshTokenToCookie(refreshToken, response);
-
+        cookieService.addAccessTokenToCookie(accessToken, response);
+        cookieService.addRefreshTokenToCookie(refreshToken, response);
+        redisService.save(refreshToken, String.valueOf(member.getId()), jwtUtil.getRefreshTokenExpirationTime());
     }
 
     // 토큰 제거
     public void logout(HttpServletRequest request, HttpServletResponse response) {
-        String accessToken = this.cookieService.getAccessTokenFromCookie(request);
-        MemberInfoDto member = this.jwtUtil.getMemberInfoDto(accessToken);
+        String accessToken = cookieService.getAccessTokenFromCookie(request);
+        MemberInfoDto member = jwtUtil.getMemberInfoDto(accessToken);
 
-        this.redisService.addBlackList(String.valueOf(member.id()), this.jwtUtil.getRefreshTokenExpirationTime());
-        this.cookieService.clearTokenFromCookie(response);
-    }
-
-    public Member findByUsername(String username) {
-        return this.memberRepository.findByName(username);
+        redisService.addBlackList(String.valueOf(member.id()), jwtUtil.getRefreshTokenExpirationTime());
+        cookieService.clearTokenFromCookie(response);
     }
 
     public Member findByUserId(Long memberId) {
-        return this.memberRepository.findById(memberId)
+        return memberRepository.findById(memberId)
+                .orElseThrow(() -> new MemberException(MemberErrorCode.USER_NOT_FOUND));
+    }
+
+    public Member findByEmail(String email) {
+        return memberRepository.findByEmail(email)
                 .orElseThrow(() -> new MemberException(MemberErrorCode.USER_NOT_FOUND));
     }
 }

@@ -67,7 +67,7 @@ public class JwtUtil {
     public MemberInfoDto getMemberInfoDto(String token) {
         Claims claims = parseToken(token);
         return MemberInfoDto.builder()
-                .id(claims.get("id", Long.class))
+                .id(claims.get("id", String.class))
                 .nickname(claims.getSubject())
                 .email(claims.get("email", String.class))
                 .build();

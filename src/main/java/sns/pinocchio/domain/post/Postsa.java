@@ -19,7 +19,7 @@ public class Postsa {
     @Id
     private String id;  // _id
 
-    @Indexed
+    @Indexed// 테스트 주석
     private String userId;  // 게시글 작성자 ID
 
     private String content;  // 게시글 내용

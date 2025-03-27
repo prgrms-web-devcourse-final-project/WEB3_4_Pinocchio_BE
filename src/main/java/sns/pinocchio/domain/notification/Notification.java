@@ -1,14 +1,11 @@
 package sns.pinocchio.domain.notification;
 
+import jakarta.persistence.*;
 import java.time.LocalDateTime;
-
 import lombok.*;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.index.Indexed;
-import org.springframework.data.mongodb.core.mapping.Document;
 import sns.pinocchio.application.notification.dto.NotificationRequestDto.UpdateNotifications;
 
-@Document(collection = "notifications")
+@Entity
 @Getter
 @Builder
 @ToString
@@ -16,9 +13,9 @@ import sns.pinocchio.application.notification.dto.NotificationRequestDto.UpdateN
 @AllArgsConstructor
 public class Notification {
 
-  @Id private String id; // 알림 ID
-
-  @Indexed private String userId; // 알림 설정 사용자
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id; // 알림 ID
 
   private boolean message; // DM 메시지 알림
 
@@ -31,6 +28,14 @@ public class Notification {
   private boolean mention; // 멘션 알림
 
   private LocalDateTime updatedAt; // 알림 설정 변경 날짜
+
+  // todo: user 테이블 생성 시 아래 주석과 교체 필요
+  private String userId;  // 알림 설정 사용자
+
+  /*
+   * @OneToOne(mappedBy = "user")
+   * private Users users;  // 알림 설정 사용자
+   * */
 
   /**
    * @implNote 기존 알림 설정을 모두 덮어쓰는 방식으로 동작하기 때문에, 모든 항목을 포함한 updateNotifications 요청값이 필요.

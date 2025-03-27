@@ -1,4 +1,4 @@
-package sns.pinocchio.comment;
+package sns.pinocchio.comment.service;
 
 import static org.mockito.Mockito.*;
 
@@ -16,7 +16,7 @@ import sns.pinocchio.domain.comment.CommentLike;
 import sns.pinocchio.infrastructure.persistence.mongodb.CommentLikeRepository;
 
 @SpringBootTest
-public class CommentLikelikeServiceTest {
+public class CommentLikeLikeServiceTest {
 	@InjectMocks
 	private CommentLikeService commentLikeService;
 

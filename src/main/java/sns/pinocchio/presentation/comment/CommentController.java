@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -23,7 +22,6 @@ import sns.pinocchio.application.comment.CommentDeleteRequest;
 import sns.pinocchio.application.comment.CommentLikeRequest;
 import sns.pinocchio.application.comment.CommentModifyRequest;
 import sns.pinocchio.application.comment.CommentService;
-import sns.pinocchio.application.comment.DeleteType;
 
 @Tag(name = "댓글", description = "댓글 관련 API")
 @RestController
@@ -32,17 +30,11 @@ import sns.pinocchio.application.comment.DeleteType;
 public class CommentController {
 	private final CommentService commentService;
 
-
-	@Operation(
-		summary = "댓글 수정",
-		description = "댓글을 수정합니다."
-	)
-	@ApiResponses({
-		@ApiResponse(responseCode = "200", description = "댓글 수정 성공"),
+	@Operation(summary = "댓글 수정", description = "댓글을 수정합니다.")
+	@ApiResponses({@ApiResponse(responseCode = "200", description = "댓글 수정 성공"),
 		@ApiResponse(responseCode = "401", description = "JWT 토큰 누락 또는 인증 실패"),
 		@ApiResponse(responseCode = "404", description = "댓글 조회 실패"),
-		@ApiResponse(responseCode = "500", description = "서버 내부 오류")
-	})
+		@ApiResponse(responseCode = "500", description = "서버 내부 오류")})
 	@PutMapping("/modify")
 	public ResponseEntity<Map<String, Object>> updateComment(Principal principal,
 		@RequestBody CommentModifyRequest request) {
@@ -61,17 +53,12 @@ public class CommentController {
 		Map<String, Object> response = commentService.modifyComment(request);
 		return ResponseEntity.status(HttpStatus.OK).body(response);
 	}
-	
-	@Operation(
-		summary = "댓글 좋아요",
-		description = "댓글을 좋아요 토글"
-	)
-	@ApiResponses({
-		@ApiResponse(responseCode = "200", description = "좋아요 성공"),
+
+	@Operation(summary = "댓글 좋아요", description = "댓글을 좋아요 토글")
+	@ApiResponses({@ApiResponse(responseCode = "200", description = "좋아요 성공"),
 		@ApiResponse(responseCode = "401", description = "JWT 토큰 누락 또는 인증 실패"),
 		@ApiResponse(responseCode = "404", description = "댓글 조회 실패"),
-		@ApiResponse(responseCode = "500", description = "서버 내부 오류")
-	})
+		@ApiResponse(responseCode = "500", description = "서버 내부 오류")})
 	@PostMapping("/{commentId}/like")
 	public ResponseEntity<Map<String, Object>> setCommentLike(Principal principal, @PathVariable String commentId,
 		@RequestBody CommentLikeRequest request) {
@@ -87,23 +74,19 @@ public class CommentController {
 		if (commentService.isInvalidComment(commentId, request.getPostId())) {
 			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("message", "등록된 댓글을 찾을 수 없습니다."));
 		}
-		String loginUserId = principal.getName();//유저이름을 id로 쓰기 나중에 실제 유저로 바꿀것 테스트용
+		String loginUserId = "user_001";//jwt 마지이후 삭제하기
 		Map<String, Object> response = commentService.toggleCommentLike(request, commentId, loginUserId);
 		return ResponseEntity.status(HttpStatus.OK).body(response);
 	}
-	
-	@Operation(
-		summary = "댓글 삭제",
-		description = "댓글을 삭제합니다."
-	)
-	@ApiResponses({
-		@ApiResponse(responseCode = "200", description = "댓글 삭제 성공"),
+
+	@Operation(summary = "댓글 삭제", description = "댓글을 삭제합니다.")
+	@ApiResponses({@ApiResponse(responseCode = "200", description = "댓글 삭제 성공"),
 		@ApiResponse(responseCode = "401", description = "JWT 토큰 누락 또는 인증 실패"),
 		@ApiResponse(responseCode = "404", description = "댓글 조회 실패"),
-		@ApiResponse(responseCode = "500", description = "서버 내부 오류")
-	})
+		@ApiResponse(responseCode = "500", description = "서버 내부 오류")})
 	@DeleteMapping
-	public ResponseEntity<Map<String, Object>> deleteComment(Principal principal, @RequestBody CommentDeleteRequest request) {
+	public ResponseEntity<Map<String, Object>> deleteComment(Principal principal,
+		@RequestBody CommentDeleteRequest request) {
 				/*
 		jwt 마지전까진 프리패스
 		if (principal == null) {
@@ -114,6 +97,7 @@ public class CommentController {
 		}
 		*/
 		if (commentService.isInvalidComment(request.getCommentId(), request.getPostId())) {
+
 			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("message", "등록된 댓글을 찾을 수 없습니다."));
 		}
 		Map<String, Object> response = commentService.deleteComment(request);

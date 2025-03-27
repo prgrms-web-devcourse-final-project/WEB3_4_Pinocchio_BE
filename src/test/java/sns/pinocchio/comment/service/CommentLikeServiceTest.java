@@ -1,4 +1,4 @@
-package sns.pinocchio.comment;
+package sns.pinocchio.comment.service;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;

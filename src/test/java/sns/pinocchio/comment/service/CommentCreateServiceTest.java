@@ -31,23 +31,15 @@ public class CommentCreateServiceTest {
 		String postId = "post_001";
 		String commentId = "comment_001";
 
-		CommentCreateRequest createRequest = CommentCreateRequest.builder()
-			.userId(userId)
-			.content("댓글이지롱")
-			.build();
+		CommentCreateRequest createRequest = CommentCreateRequest.builder().userId(userId).content("댓글이지롱").build();
 
-		Comment mockComment = Comment.builder()
-			.id(commentId)
-			.userId(userId)
-			.postId(postId)
-			.content("댓글이지롱")
-			.build();
+		Comment mockComment = Comment.builder().id(commentId).userId(userId).postId(postId).content("댓글이지롱").build();
 
 		when(commentRepositoryMock.save(any(Comment.class))).thenReturn(mockComment);
 		when(commentRepositoryMock.findById(commentId)).thenReturn(Optional.of(mockComment));
 
 		Map<String, Object> response = commentService.createComment(createRequest, userId, postId);
-		String createdCommentId = (String) response.get("commentId");
+		String createdCommentId = (String)response.get("commentId");
 
 		assertNotNull(createdCommentId);
 		assertEquals(commentId, createdCommentId);

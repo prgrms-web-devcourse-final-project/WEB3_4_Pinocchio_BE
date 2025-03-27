@@ -21,7 +21,6 @@ import sns.pinocchio.application.comment.CommentModifyRequest;
 import sns.pinocchio.application.comment.CommentService;
 import sns.pinocchio.presentation.comment.CommentController;
 
-
 @WebMvcTest(CommentController.class)
 
 public class CommentModifyTest {
@@ -42,12 +41,8 @@ public class CommentModifyTest {
 			.postId(postId)
 			.content("수정된 댓글 내용")
 			.build();
-		Map<String, Object> response = Map.of(
-			"message", "댓글이 성공적으로 수정되었습니다.",
-			"postId", postId,
-			"commentId", commetId,
-			"updatedAt", LocalDateTime.now().toString()
-		);
+		Map<String, Object> response = Map.of("message", "댓글이 성공적으로 수정되었습니다.", "postId", postId, "commentId", commetId,
+			"updatedAt", LocalDateTime.now().toString());
 
 		when(commentService.modifyComment(any(CommentModifyRequest.class))).thenReturn(response);
 		mockMvc.perform(put("/comments/modify").contentType(MediaType.APPLICATION_JSON)
@@ -70,12 +65,8 @@ public class CommentModifyTest {
 			.postId(postId)
 			.content("수정된 댓글 내용")
 			.build();
-		Map<String, Object> response = Map.of(
-			"message", "댓글이 성공적으로 수정되었습니다.",
-			"postId", postId,
-			"commentId", commentId,
-			"updatedAt", LocalDateTime.now().toString()
-		);
+		Map<String, Object> response = Map.of("message", "댓글이 성공적으로 수정되었습니다.", "postId", postId, "commentId", commentId,
+			"updatedAt", LocalDateTime.now().toString());
 
 		when(commentService.modifyComment(any(CommentModifyRequest.class))).thenReturn(response);
 		when(commentService.isInvalidComment(commentId, postId)).thenReturn(true);

@@ -35,8 +35,6 @@ public class CommentService {
 			.build();
 		String commentId = commentRepository.save(comment).getId();
 
-		//게시글 댓글 갯수 증가
-
 		return Map.of("message", "댓글이 등록되었습니다.", "commentId", commentId);
 	}
 

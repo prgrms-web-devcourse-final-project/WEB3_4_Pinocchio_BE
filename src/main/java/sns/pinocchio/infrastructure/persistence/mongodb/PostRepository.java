@@ -12,6 +12,7 @@ public interface PostRepository extends MongoRepository<Post, String> {
     // post 본문 수정
     Optional<Post> findByIdAndUserTsidAndStatus(String id, String userTsid, String status);
 
+    // 테스트 코드를 위해서 추가
     List<Post> findAllByUserTsid(String userTsid);
 
 }

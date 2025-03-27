@@ -38,18 +38,19 @@ public class CommentController {
 	@PutMapping("/modify")
 	public ResponseEntity<Map<String, Object>> updateComment(Principal principal,
 		@RequestBody CommentModifyRequest request) {
-		/*
-		jwt 마지전까진 프리패스
-		if (principal == null) {
+
+		if (false/*JWT인증*/) {
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", "유효하지 않은 인증 정보입니다."));
 		}
-		 */
+
+		if (false/*본인 댓글인지 확인해서 403에러 발생 자기 댓글 좋아요는 불가능*/) {
+			return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("message", "이 댓글을 수정할 권한이 없습니다. 작성자만 수정할 수 있습니다."));
+		}
+
 		if (commentService.isInvalidComment(request.getCommentId(), request.getPostId())) {
 			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("message", "등록된 댓글을 찾을 수 없습니다."));
 		}
-		if (true/*사용자와 댓글 작성자 확인 + 관리자권한 프리패스*/) {
 
-		}
 		Map<String, Object> response = commentService.modifyComment(request);
 		return ResponseEntity.status(HttpStatus.OK).body(response);
 	}
@@ -60,17 +61,17 @@ public class CommentController {
 		@ApiResponse(responseCode = "404", description = "댓글 조회 실패"),
 		@ApiResponse(responseCode = "500", description = "서버 내부 오류")})
 	@PostMapping("/{commentId}/like")
-	public ResponseEntity<Map<String, Object>> setCommentLike(Principal principal, @PathVariable String commentId,
+	public ResponseEntity<Map<String, Object>> toggleCommentLike(Principal principal, @PathVariable String commentId,
 		@RequestBody CommentLikeRequest request) {
-				/*
-		jwt 마지전까진 프리패스
-		if (principal == null) {
+
+		if (false/*JWT인증*/) {
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", "유효하지 않은 인증 정보입니다."));
 		}
-		*/
-		if (true/*본인 댓글인지 확인해서 400에러 발생 자기 댓글 좋아요는 불가능*/) {
 
+		if (false/*본인 댓글인지 확인해서 403에러 발생 자기 댓글 좋아요는 불가능*/) {
+			return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("message", "이 댓글을 수정할 권한이 없습니다. 작성자만 수정할 수 있습니다."));
 		}
+
 		if (commentService.isInvalidComment(commentId, request.getPostId())) {
 			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("message", "등록된 댓글을 찾을 수 없습니다."));
 		}
@@ -87,17 +88,15 @@ public class CommentController {
 	@DeleteMapping
 	public ResponseEntity<Map<String, Object>> deleteComment(Principal principal,
 		@RequestBody CommentDeleteRequest request) {
-				/*
-		jwt 마지전까진 프리패스
-		if (principal == null) {
+		if (false/*JWT인증*/) {
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", "유효하지 않은 인증 정보입니다."));
 		}
-		if (true/*본인 댓글인지 확인해서 400에러 발생 자기 댓글 좋아요는 불가능) {
 
+		if (false/*본인 댓글인지 확인해서 403에러 발생 자기 댓글 좋아요는 불가능*/) {
+			return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("message", "이 댓글을 수정할 권한이 없습니다. 작성자만 수정할 수 있습니다."));
 		}
-		*/
-		if (commentService.isInvalidComment(request.getCommentId(), request.getPostId())) {
 
+		if (commentService.isInvalidComment(request.getCommentId(), request.getPostId())) {
 			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("message", "등록된 댓글을 찾을 수 없습니다."));
 		}
 		Map<String, Object> response = commentService.deleteComment(request);

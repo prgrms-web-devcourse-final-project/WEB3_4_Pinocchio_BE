@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.springframework.http.HttpStatus;
 
+// auth 관련 예외 코드
 @AllArgsConstructor
 @Getter
 public enum AuthErrorCode {

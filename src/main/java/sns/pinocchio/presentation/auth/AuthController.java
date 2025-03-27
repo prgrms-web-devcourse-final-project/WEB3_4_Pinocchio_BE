@@ -14,7 +14,7 @@ import sns.pinocchio.application.member.MemberService;
 import sns.pinocchio.application.member.memberDto.MemberLoginRequestDto;
 import sns.pinocchio.application.member.memberDto.MemberRequestDto;
 
-@RequestMapping("/auth")
+@RequestMapping("/api/auth")
 @RequiredArgsConstructor
 @RestController
 public class AuthController {
@@ -35,27 +35,22 @@ public class AuthController {
 
     // 로그인
     @PostMapping("/login")
-    public ResponseEntity<String> login(@RequestBody @Valid MemberLoginRequestDto memberLoginRequestDto, HttpServletResponse response) {
-
-        String email = memberLoginRequestDto.email();
-        String password = memberLoginRequestDto.password();
-
+    public ResponseEntity<String> login(@RequestBody @Valid MemberLoginRequestDto loginRequestDto, HttpServletResponse response) {
         // 이메일 검증
-        memberService.validateEmail(email);
+        memberService.validateEmail(loginRequestDto.email());
         // 패스워드 검증
-        memberService.validatePassword(password, email);
+        memberService.validatePassword(loginRequestDto.password(), loginRequestDto.email());
 
         // 토콘 생성 및 저장
-        memberService.generateToken(email, response);
-        memberService.generateAndSaveRefreshToken(email, response);
+        memberService.generateAndSaveToken(loginRequestDto.email(), response);
 
-        return ResponseEntity.ok("로그인 성공");
+        return ResponseEntity.ok("로그인이 완료되었습니다.");
     }
 
     // 로그아웃
     @PostMapping("/logout")
     public ResponseEntity<String> logout(HttpServletRequest request, HttpServletResponse response) {
         memberService.logout(request, response);
-        return ResponseEntity.ok("로그아웃 성공");
+        return ResponseEntity.ok("로그아웃 되었습니다.");
     }
 }

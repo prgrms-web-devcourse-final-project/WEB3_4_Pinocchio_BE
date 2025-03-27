@@ -2,6 +2,7 @@ package sns.pinocchio.config.global.auth.exception;
 
 import org.springframework.http.HttpStatus;
 
+// auth 관련 예외 처리
 public class AuthException extends RuntimeException {
     private final AuthErrorCode authErrorCode;
 

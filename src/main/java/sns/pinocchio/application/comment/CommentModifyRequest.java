@@ -1,5 +1,6 @@
 package sns.pinocchio.application.comment;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 import lombok.Data;
 
@@ -7,8 +8,12 @@ import lombok.Data;
 @Data
 @Builder
 public class CommentModifyRequest {
+	@Schema(description = "댓글의 userId")
 	String userId;
-	String postId;     // 게시글 ID
-	String commentId;  // 댓글 ID
-	String content;  // 수정할 댓글 내용
+	@Schema(description = "댓글의 postId")
+	String postId;
+	@Schema(description = "댓글 commentId")
+	String commentId;
+	@Schema(description = "수정할 내용",example = "스웨거로 수정했습니다.")
+	String content;
 }

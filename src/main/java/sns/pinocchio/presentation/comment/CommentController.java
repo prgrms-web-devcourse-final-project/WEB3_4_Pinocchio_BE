@@ -1,4 +1,4 @@
-package sns.pinocchio.comment;
+package sns.pinocchio.presentation.comment;
 
 import java.security.Principal;
 import java.util.Map;

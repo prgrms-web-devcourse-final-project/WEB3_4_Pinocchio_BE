@@ -17,10 +17,10 @@ import java.util.List;
 public class Post {
 
     @Id
-    private String id;  // _id
+    private String id;  // MongoDB가 자동으로 생성하는 _id (ObjectId)
 
     @Indexed
-    private String userId;  // 게시글 작성자 ID
+    private String userTsid;  // 게시글 작성자 TSID , 토큰에서 추출한 사용자 고유 TSID
 
     private String content;  // 게시글 내용
 
@@ -34,7 +34,7 @@ public class Post {
 
     private int views;  // 조회수
 
-    private String visibility;  // 공개 여부: "public" or "private"
+    private Visibility visibility;  // 공개 여부: PUBLIC or PRIVATE
 
     private List<String> mentions;  // 언급된 사용자 ID 리스트
 

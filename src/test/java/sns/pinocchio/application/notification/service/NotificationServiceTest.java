@@ -15,7 +15,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import sns.pinocchio.application.notification.dto.NotificationRequestDto.UpdateNotifications;
 import sns.pinocchio.application.notification.dto.NotificationResponseDto.NotificationInfo;
 import sns.pinocchio.domain.notification.Notification;
-import sns.pinocchio.domain.notification.exception.NotificationBadRequestException;
+import sns.pinocchio.domain.notification.NotificationException;
+import sns.pinocchio.domain.notification.NotificationException.NotificationBadRequestException;
 import sns.pinocchio.infrastructure.persistence.mysql.NotificationRepository;
 
 @ExtendWith(MockitoExtension.class)
@@ -96,6 +97,45 @@ class NotificationServiceTest {
     assertThat(updated.comment()).isTrue();
     assertThat(updated.follow()).isTrue();
     assertThat(updated.mention()).isTrue();
+  }
+
+  @Test
+  @DisplayName("알림 설정 Fail: 설정한 알림을 DB에 수정하는 동안 문제가 발생했을 경우")
+  void updateNotificationsInternalServerErrorTest() {
+
+    // given
+    String errorMsg = "서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.";
+
+    Notification existed =
+        Notification.builder()
+            .id(1L)
+            .userId(userId)
+            .messageAlert(false)
+            .likeAlert(false)
+            .commentAlert(false)
+            .followAlert(false)
+            .mentionAlert(false)
+            .build();
+
+    UpdateNotifications update =
+        UpdateNotifications.builder()
+            .message(true)
+            .like(true)
+            .comment(true)
+            .follow(true)
+            .mention(true)
+            .build();
+
+    when(notificationRepository.findByUserId(userId)).thenReturn(Optional.of(existed));
+
+    // when
+    NotificationException.NotificationInternalServerErrorException exception =
+        assertThrows(
+            NotificationException.NotificationInternalServerErrorException.class,
+            () -> notificationService.updateNotifications(userId, update));
+
+    // then
+    assertThat(exception.getMessage()).isEqualTo(errorMsg);
   }
 
   @Test

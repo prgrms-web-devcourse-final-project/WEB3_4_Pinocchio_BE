@@ -7,7 +7,8 @@ import org.springframework.transaction.annotation.Transactional;
 import sns.pinocchio.application.notification.dto.NotificationRequestDto.UpdateNotifications;
 import sns.pinocchio.application.notification.dto.NotificationResponseDto.NotificationInfo;
 import sns.pinocchio.domain.notification.Notification;
-import sns.pinocchio.domain.notification.exception.NotificationBadRequestException;
+import sns.pinocchio.domain.notification.NotificationException.NotificationBadRequestException;
+import sns.pinocchio.domain.notification.NotificationException.NotificationInternalServerErrorException;
 import sns.pinocchio.infrastructure.persistence.mysql.NotificationRepository;
 
 @Service
@@ -28,6 +29,12 @@ public class NotificationService {
   public NotificationInfo updateNotifications(
       String userId, UpdateNotifications updateNotifications) {
 
+    // 설정 정보가 존재하지 않을 경우, 400에러 반환
+    if (!updateNotifications.checkNotifications()) {
+      log.error("The requested notification settings are invalid: {}", updateNotifications);
+      throw new NotificationBadRequestException("입력값이 유효하지 않습니다.");
+    }
+
     // 회원의 알림 설정 조회
     Notification notification =
         notificationRepository
@@ -47,6 +54,12 @@ public class NotificationService {
 
     // 수정된 알림 설정을 기반으로 DB 수정
     Notification updated = notificationRepository.save(notification);
+
+    // DB에 수정하는 도중 에러가 발생했을 경우, 500에러 반환
+    if (updated == null) {
+      log.error("Failed to save notification: {}", notification);
+      throw new NotificationInternalServerErrorException("서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.");
+    }
 
     log.info("Notification settings updated: {}", updated);
 
@@ -88,6 +101,8 @@ public class NotificationService {
                     .followAlert(false)
                     .mentionAlert(false)
                     .build());
+
+    log.info("Notification settings: {}", notification);
 
     return NotificationInfo.builder()
         .userId(userId)

@@ -19,9 +19,9 @@ public class CustomUserDetailService implements UserDetailsService {
     private final JwtUtil jwtUtil;
 
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
 
-        Member member = memberService.findByUsername(username);
+        Member member = memberService.findByEmail(email);
         return new CustomUserDetails(MemberInfoDto.of(member));
     }
 

@@ -6,7 +6,7 @@ import sns.pinocchio.domain.member.Member;
 // 사용자 기본 정보만 담는 dto
 @Builder
 public record MemberInfoDto(
-        Long id,
+        String id,
         String nickname,
         String email
 ) {

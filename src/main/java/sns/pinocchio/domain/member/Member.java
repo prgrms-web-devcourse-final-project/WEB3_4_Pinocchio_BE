@@ -1,6 +1,9 @@
 package sns.pinocchio.domain.member;
 
-import jakarta.persistence.*;
+import com.github.f4b6a3.tsid.Tsid;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -12,8 +15,7 @@ import lombok.NoArgsConstructor;
 public class Member {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long Id;
+    private String id;
 
     @Column(nullable = false, unique = true)
     private String email;
@@ -36,10 +38,11 @@ public class Member {
     private Boolean isActive;
 
     @Builder
-    public Member(String password, String email, String name, String nickname) {
+    public Member(String password, String email, String name, String nickname, Tsid id) {
         this.password = password;
         this.email = email;
         this.name = name;
         this.nickname = nickname;
+        this.id = Tsid.fast().toString();
     }
 }

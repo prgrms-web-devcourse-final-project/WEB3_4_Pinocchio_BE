@@ -10,8 +10,8 @@ import java.util.Optional;
 
 public interface PostRepository extends MongoRepository<Post, String> {
     // post 본문 수정
-    Optional<Post> findByIdAndUserIdAndStatus(String id, String userId, String status);
+    Optional<Post> findByIdAndUserTsidAndStatus(String id, String userTsid, String status);
 
-    List<Post> findAllByUserId(String userId);
+    List<Post> findAllByUserTsid(String userTsid);
 
 }

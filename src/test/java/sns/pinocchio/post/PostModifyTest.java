@@ -23,7 +23,7 @@ public class PostModifyTest {
     @Test
     public void 게시글_수정_테스트() {
         // 1️⃣ 먼저 user_123이 작성한 게시물 중 하나 조회
-        Optional<Post> optionalPost = postRepository.findAllByUserId("user_123")
+        Optional<Post> optionalPost = postRepository.findAllByUserTsid("user_123")
                 .stream()
                 .filter(p -> "active".equals(p.getStatus()))
                 .findFirst();

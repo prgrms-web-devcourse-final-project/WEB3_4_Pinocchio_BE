@@ -17,10 +17,10 @@ import java.util.List;
 public class Post {
 
     @Id
-    private String id;  // _id
+    private String id;  // MongoDB가 자동으로 생성하는 _id (ObjectId)
 
     @Indexed
-    private String userId;  // 게시글 작성자 ID
+    private String userTsid;  // 게시글 작성자 TSID , 토큰에서 추출한 사용자 고유 TSID
 
     private String content;  // 게시글 내용
 

@@ -2,6 +2,7 @@ package sns.pinocchio.comment;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.util.Map;
 import java.util.NoSuchElementException;
 
 import org.junit.jupiter.api.Test;
@@ -26,9 +27,9 @@ public class CommentModifyTest {
 		CommentCreateRequest createRequest = CommentCreateRequest.builder()
 			.userId("user_001")
 			.content("댓글이지롱")
-			.parentCommentId("comment_001")
 			.build();
-		String commentId = commentService.createComment(createRequest, "user_001", "post_001");
+		Map<String, Object> response = commentService.createComment(createRequest, "user_001", "post_001");
+		String commentId = (String)response.get("commentId");
 		Comment comment = commentRepository.findById(commentId)
 			.orElseThrow(() -> new NoSuchElementException("댓글이 저장되지 않았습니다."));
 		assertNotNull(comment);
@@ -44,7 +45,7 @@ public class CommentModifyTest {
 			.postId("post_001")
 			.content("댓글수정됐지롱")
 			.build();
-		String modifiedCommentId = commentService.modifyComment(modifyRequest);
+		commentService.modifyComment(modifyRequest);
 		Comment comment = commentRepository.findById(createdCommentId)
 			.orElseThrow(() -> new NoSuchElementException("댓글이 존재하지 않습니다."));
 		assertEquals("댓글수정됐지롱", comment.getContent());

@@ -1,10 +1,16 @@
 package sns.pinocchio.comment;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
+import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.Objects;
+import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -21,14 +27,15 @@ public class CommentCreateTest {
 	@Autowired
 	private CommentRepository commentRepository;
 
+	//댓글 생성 테스트 메서드 실제 DB에 업데이트
 	@Test
-	public void 댓글_생성_테스트() {
-		CommentCreateRequest request = CommentCreateRequest.builder()
+	void 댓글_생성_테스트() {
+		CommentCreateRequest createRequest = CommentCreateRequest.builder()
 			.userId("user_001")
 			.content("댓글이지롱")
-			.parentCommentId("comment_001")
 			.build();
-		String commentId = commentService.createComment(request, "user_001", "post_001");
+		Map<String, Object> response = commentService.createComment(createRequest, "user_001", "post_001");
+		String commentId = (String)response.get("commentId");
 		Comment comment = commentRepository.findById(commentId)
 			.orElseThrow(() -> new NoSuchElementException("댓글이 저장되지 않았습니다."));
 		assertNotNull(comment);

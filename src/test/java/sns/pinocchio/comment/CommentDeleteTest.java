@@ -2,6 +2,7 @@ package sns.pinocchio.comment;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
@@ -25,13 +26,14 @@ public class CommentDeleteTest {
 	@Autowired
 	private CommentRepository commentRepository;
 
+	//댓글 생성 메서드 실제 DB에 업데이트
 	public String 댓글_생성() {
 		CommentCreateRequest createRequest = CommentCreateRequest.builder()
 			.userId("user_001")
 			.content("댓글이지롱")
-			.parentCommentId("comment_001")
 			.build();
-		String commentId = commentService.createComment(createRequest, "user_001", "post_001");
+		Map<String, Object> response = commentService.createComment(createRequest, "user_001", "post_001");
+		String commentId = (String)response.get("commentId");
 		Comment comment = commentRepository.findById(commentId)
 			.orElseThrow(() -> new NoSuchElementException("댓글이 저장되지 않았습니다."));
 		assertNotNull(comment);
@@ -39,6 +41,7 @@ public class CommentDeleteTest {
 		return commentId;
 	}
 
+	//댓글 삭제 테스트 메서드 실제 DB에 업데이트 소프트 삭제:안보이게 설정 실제 DB에 업데이트
 	@Test
 	public void 댓글_소프트_삭제_테스트() {
 		String commentId = 댓글_생성();
@@ -56,6 +59,7 @@ public class CommentDeleteTest {
 
 	}
 
+	//댓글 삭제 테스트 메서드 실제 DB에 업데이트 하드 삭제:실제로 삭제 실제 DB에 업데이트
 	@Test
 	public void 댓글_하드_삭제_테스트() {
 		String commentId = 댓글_생성();

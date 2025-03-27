@@ -15,6 +15,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import sns.pinocchio.application.notification.dto.NotificationRequestDto.UpdateNotifications;
 import sns.pinocchio.application.notification.dto.NotificationResponseDto.NotificationInfo;
 import sns.pinocchio.domain.notification.Notification;
+import sns.pinocchio.domain.notification.exception.NotificationBadRequestException;
 import sns.pinocchio.infrastructure.persistence.mysql.NotificationRepository;
 
 @ExtendWith(MockitoExtension.class)
@@ -65,11 +66,11 @@ class NotificationServiceTest {
         Notification.builder()
             .id(1L)
             .userId(userId)
-            .message(false)
-            .like(false)
-            .comment(false)
-            .follow(false)
-            .mention(false)
+            .messageAlert(false)
+            .likeAlert(false)
+            .commentAlert(false)
+            .followAlert(false)
+            .mentionAlert(false)
             .build();
 
     UpdateNotifications update =
@@ -126,11 +127,11 @@ class NotificationServiceTest {
         Notification.builder()
             .id(1L)
             .userId(userId)
-            .message(false)
-            .like(true)
-            .comment(false)
-            .follow(true)
-            .mention(false)
+            .messageAlert(false)
+            .likeAlert(true)
+            .commentAlert(false)
+            .followAlert(true)
+            .mentionAlert(false)
             .build();
 
     when(notificationRepository.findByUserId(userId)).thenReturn(Optional.of(existed));
@@ -156,9 +157,10 @@ class NotificationServiceTest {
     String errorMsg = "[userId] 정보가 존재하지 않습니다.";
 
     // when
-    IllegalArgumentException exception =
+    NotificationBadRequestException exception =
         assertThrows(
-            IllegalArgumentException.class, () -> notificationService.getNotifications(null));
+            NotificationBadRequestException.class,
+            () -> notificationService.getNotifications(null));
 
     // then
     assertThat(exception.getMessage()).isEqualTo(errorMsg);

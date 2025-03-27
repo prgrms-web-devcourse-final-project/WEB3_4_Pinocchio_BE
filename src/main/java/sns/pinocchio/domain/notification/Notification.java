@@ -17,20 +17,20 @@ public class Notification {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id; // 알림 ID
 
-  private boolean message; // DM 메시지 알림
+  private boolean messageAlert; // DM 메시지 알림
 
-  private boolean like; // 좋아요 알림
+  private boolean likeAlert; // 좋아요 알림
 
-  private boolean comment; // 댓글 알림
+  private boolean commentAlert; // 댓글 알림
 
-  private boolean follow; // 팔로우 알림
+  private boolean followAlert; // 팔로우 알림
 
-  private boolean mention; // 멘션 알림
+  private boolean mentionAlert; // 멘션 알림
 
   private LocalDateTime updatedAt; // 알림 설정 변경 날짜
 
   // todo: user 테이블 생성 시 아래 주석과 교체 필요
-  private String userId;  // 알림 설정 사용자
+  private String userId; // 알림 설정 사용자
 
   /*
    * @OneToOne(mappedBy = "user")
@@ -43,11 +43,11 @@ public class Notification {
    */
   public void update(UpdateNotifications updateNotifications) {
 
-    this.message = updateNotifications.message();
-    this.like = updateNotifications.like();
-    this.comment = updateNotifications.comment();
-    this.follow = updateNotifications.follow();
-    this.mention = updateNotifications.mention();
+    this.messageAlert = updateNotifications.message();
+    this.likeAlert = updateNotifications.like();
+    this.commentAlert = updateNotifications.comment();
+    this.followAlert = updateNotifications.follow();
+    this.mentionAlert = updateNotifications.mention();
     this.updatedAt = LocalDateTime.now();
   }
 }

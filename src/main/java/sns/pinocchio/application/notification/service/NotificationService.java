@@ -7,6 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 import sns.pinocchio.application.notification.dto.NotificationRequestDto.UpdateNotifications;
 import sns.pinocchio.application.notification.dto.NotificationResponseDto.NotificationInfo;
 import sns.pinocchio.domain.notification.Notification;
+import sns.pinocchio.domain.notification.exception.NotificationBadRequestException;
 import sns.pinocchio.infrastructure.persistence.mysql.NotificationRepository;
 
 @Service
@@ -34,11 +35,11 @@ public class NotificationService {
             .orElse(
                 Notification.builder()
                     .userId(userId)
-                    .message(updateNotifications.message())
-                    .like(updateNotifications.like())
-                    .comment(updateNotifications.comment())
-                    .follow(updateNotifications.follow())
-                    .mention(updateNotifications.mention())
+                    .messageAlert(updateNotifications.message())
+                    .likeAlert(updateNotifications.like())
+                    .commentAlert(updateNotifications.comment())
+                    .followAlert(updateNotifications.follow())
+                    .mentionAlert(updateNotifications.mention())
                     .build());
 
     // 요청받은 알림 변경 사항들로 알림 수정
@@ -51,11 +52,11 @@ public class NotificationService {
 
     return NotificationInfo.builder()
         .userId(userId)
-        .message(updated.isMessage())
-        .like(updated.isLike())
-        .comment(updated.isComment())
-        .follow(updated.isFollow())
-        .mention(updated.isMention())
+        .message(updated.isMessageAlert())
+        .like(updated.isLikeAlert())
+        .comment(updated.isCommentAlert())
+        .follow(updated.isFollowAlert())
+        .mention(updated.isMentionAlert())
         .build();
   }
 
@@ -72,7 +73,7 @@ public class NotificationService {
 
     if (userId == null) {
       log.error("[userId] is null. Can't get notifications.");
-      throw new IllegalArgumentException("[userId] 정보가 존재하지 않습니다.");
+      throw new NotificationBadRequestException("[userId] 정보가 존재하지 않습니다.");
     }
 
     Notification notification =
@@ -81,20 +82,20 @@ public class NotificationService {
             .orElse(
                 Notification.builder()
                     .userId(userId)
-                    .message(false)
-                    .like(false)
-                    .comment(false)
-                    .follow(false)
-                    .mention(false)
+                    .messageAlert(false)
+                    .likeAlert(false)
+                    .commentAlert(false)
+                    .followAlert(false)
+                    .mentionAlert(false)
                     .build());
 
     return NotificationInfo.builder()
         .userId(userId)
-        .message(notification.isMessage())
-        .like(notification.isLike())
-        .comment(notification.isComment())
-        .follow(notification.isFollow())
-        .mention(notification.isMention())
+        .message(notification.isMessageAlert())
+        .like(notification.isLikeAlert())
+        .comment(notification.isCommentAlert())
+        .follow(notification.isFollowAlert())
+        .mention(notification.isMentionAlert())
         .build();
   }
 }

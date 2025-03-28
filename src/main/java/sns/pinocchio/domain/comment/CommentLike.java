@@ -22,10 +22,13 @@ public class CommentLike {
 	@Id
 	private String id;  // MongoDB의 _id 필드
 
-	@Indexed
-	private String userId;  // 작성자 ID
+	private String userTsid;  // 작성자 ID
 
 	private String commentId;
 
 	private LocalDateTime createdAt;
+
+	private LocalDateTime updatedAt;
+
+	private CommentLikeStatus status;
 }

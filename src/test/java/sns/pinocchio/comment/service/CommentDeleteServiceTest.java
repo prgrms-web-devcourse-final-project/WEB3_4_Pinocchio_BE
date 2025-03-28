@@ -13,6 +13,7 @@ import org.mockito.Mock;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import sns.pinocchio.application.comment.CommentDeleteRequest;
+import sns.pinocchio.application.comment.CommentLikeService;
 import sns.pinocchio.application.comment.CommentService;
 import sns.pinocchio.application.comment.DeleteType;
 import sns.pinocchio.domain.comment.Comment;
@@ -27,6 +28,8 @@ public class CommentDeleteServiceTest {
 	@Mock
 	private CommentRepository commentRepository;
 
+	@Mock
+	private CommentLikeService commentLikeService;
 	@Test
 	public void 댓글_소프트_삭제_테스트() {
 		// Given
@@ -70,6 +73,7 @@ public class CommentDeleteServiceTest {
 			.action(DeleteType.HARD_DELETED)
 			.build();
 
+		when(commentRepository.findByIdAndPostId(commentId, postId)).thenReturn(Optional.of(comment));
 		when(commentRepository.findByIdAndPostId(commentId, postId)).thenReturn(Optional.of(comment));
 
 		Map<String, Object> response = commentService.deleteComment(deleteRequest);
@@ -119,7 +123,6 @@ public class CommentDeleteServiceTest {
 		Comment comment = Comment.builder().id(commentId).postId(postId).status(CommentStatus.ACTIVE).build();
 
 		when(commentRepository.findByIdAndPostId(commentId, postId)).thenReturn(Optional.of(comment));
-
 		// When & Then
 		assertThrows(IllegalArgumentException.class, () -> {
 			commentService.deleteComment(deleteRequest);

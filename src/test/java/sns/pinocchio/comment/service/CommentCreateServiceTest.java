@@ -27,18 +27,18 @@ public class CommentCreateServiceTest {
 	//댓글 생성 테스트 메서드 Mock으로 실행
 	@Test
 	void 댓글_생성_테스트() {
-		String userId = "user_001";
+		String authorId = "user_001";
 		String postId = "post_001";
 		String commentId = "comment_001";
 
-		CommentCreateRequest createRequest = CommentCreateRequest.builder().userId(userId).content("댓글이지롱").build();
+		CommentCreateRequest createRequest = CommentCreateRequest.builder().authorId(authorId).content("댓글이지롱").build();
 
-		Comment mockComment = Comment.builder().id(commentId).userId(userId).postId(postId).content("댓글이지롱").build();
+		Comment mockComment = Comment.builder().id(commentId).userTsid(authorId).postId(postId).content("댓글이지롱").build();
 
 		when(commentRepositoryMock.save(any(Comment.class))).thenReturn(mockComment);
 		when(commentRepositoryMock.findById(commentId)).thenReturn(Optional.of(mockComment));
 
-		Map<String, Object> response = commentService.createComment(createRequest, userId, postId);
+		Map<String, Object> response = commentService.createComment(createRequest, authorId, postId);
 		String createdCommentId = (String)response.get("commentId");
 
 		assertNotNull(createdCommentId);

@@ -38,14 +38,14 @@ public class CommentLikeServiceTest {
 	@Test
 	public void 댓글_좋아요_테스트() {
 		String loginUserId = "user_002";
-		String userId = "user_001";
+		String userTsid = "user_001";
 		String postId = "post_001";
 		String commentId = "comment_001";
 		String commentLikeId = "commentLike_001";
 
 		Comment mockComment = Comment.builder()
 			.id(commentId)
-			.userId(userId)
+			.userTsid(userTsid)
 			.postId(postId)
 			.content("댓글이지롱")
 			.status(CommentStatus.ACTIVE)
@@ -79,13 +79,13 @@ public class CommentLikeServiceTest {
 	@Test
 	public void 댓글_좋아요_취소_테스트() {
 		String loginUserId = "user_002";
-		String userId = "user_001";
+		String userTsid = "user_001";
 		String postId = "post_001";
 		String commentId = "comment_001";
 
 		Comment mockComment = Comment.builder()
 			.id(commentId)
-			.userId(userId)
+			.userTsid(userTsid)
 			.postId(postId)
 			.content("댓글이지롱")
 			.status(CommentStatus.ACTIVE)

@@ -9,7 +9,7 @@ import lombok.Data;
 @Builder
 public class CommentCreateRequest {
 	@Schema(description = "댓글 userID")
-	String userId;
+	String authorId;
 	@Schema(description = "댓글 내용")
 	String content;
 	@Schema(description = "댓글 부모 commentId")

@@ -4,6 +4,7 @@ import static sns.pinocchio.application.comment.DeleteType.*;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -21,10 +22,11 @@ public class CommentService {
 	private final CommentRepository commentRepository;
 	private final CommentLikeService commentLikeService;
 
+
 	//댓글 생성 메서드
-	public Map<String, Object> createComment(CommentCreateRequest request, String userId, String postId) {
+	public Map<String, Object> createComment(CommentCreateRequest request, String authorId, String postId) {
 		Comment comment = Comment.builder()
-			.userId(userId)
+			.userTsid(authorId)
 			.postId(postId)
 			.content(request.getContent())
 			.parentCommentId(request.getParentCommentId())
@@ -50,6 +52,7 @@ public class CommentService {
 			comment.setUpdatedAt(updatedAt);
 			commentRepository.save(comment);
 		} else if (request.action == HARD_DELETED) {
+			commentLikeService.deleteAllCommentlikes(request.commentId);
 			commentRepository.delete(comment);
 		} else {
 			throw new IllegalArgumentException("잘못된 요청입니다.");
@@ -80,11 +83,11 @@ public class CommentService {
 	}
 
 	//댓글 좋아요 업데이트 메서드, 댓글_좋아요 테이블에 등록 이후 댓글 좋아요 카운트 증가 or 댓글_좋아요 테이블에 삭제 이후 댓글 좋아요 카운트 감소
-	public Map<String, Object> toggleCommentLike(CommentLikeRequest request, String commentId, String loginUserId) {
+	public Map<String, Object> toggleCommentLike(CommentLikeRequest request, String commentId, String authorId) {
 		Comment comment = commentRepository.findByIdAndPostId(commentId, request.postId)
 			.orElseThrow(() -> new NoSuchElementException("등록된 댓글을 찾을 수 없습니다."));
 
-		Optional<String> optCommentLikeId = commentLikeService.toggleCommentLike(commentId, loginUserId);
+		Optional<String> optCommentLikeId = commentLikeService.toggleCommentLike(commentId, authorId);
 		boolean isLiked = optCommentLikeId.isPresent();
 
 		int updatedLikes = comment.getLikes() + (isLiked ? 1 : -1);

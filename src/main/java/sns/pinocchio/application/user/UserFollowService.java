@@ -7,29 +7,38 @@ import java.util.Optional;
 import org.springframework.stereotype.Service;
 
 import lombok.RequiredArgsConstructor;
+import sns.pinocchio.application.comment.CommentLikeService;
 import sns.pinocchio.domain.user.UserFollow;
+import sns.pinocchio.domain.user.UserFollowStatus;
 import sns.pinocchio.infrastructure.persistence.mongodb.UserFollowRepository;
 
 @Service
 @RequiredArgsConstructor
 public class UserFollowService {
-	private UserFollowRepository userFollowRepository;
+	private final UserFollowRepository userFollowRepository;
 
-	public Map<String, Object> followingUser(String userId, String loginUserId) {
-		Optional<UserFollow> optUserFollow = userFollowRepository.findByFollowerIdAndFollowingId(loginUserId, userId);
+	public Map<String, Object> followingUser(String followingId, String authorId) {
+		Optional<UserFollow> optUserFollow = userFollowRepository.findByFollowerIdAndFollowingId(authorId,
+			followingId);
 
 		if (optUserFollow.isEmpty()) {
 			UserFollow newUserFollow = UserFollow.builder()
-				.followingId(loginUserId)
-				.followerId(userId)
+				.followingId(authorId)
+				.followerId(followingId)
+				.status(UserFollowStatus.ACTIVE)
 				.createdAt(LocalDateTime.now())
 				.build();
 			userFollowRepository.save(newUserFollow);
 			return Map.of("message", "팔로우에 성공하였습니다.", "followed", true);
 		} else {
-			userFollowRepository.delete(optUserFollow.get());
-			return Map.of("message", "팔로우 취소에 성공하였습니다.", "followed", false);
+			UserFollow userFollow = optUserFollow.get();
+			boolean isActive = userFollow.getStatus() == UserFollowStatus.ACTIVE;
+			userFollow.setStatus(isActive ? UserFollowStatus.DELETE : UserFollowStatus.ACTIVE);
+			userFollowRepository.save(userFollow);
+			return Map.of(
+				"message", isActive ? "팔로우 취소에 성공하였습니다." : "팔로우에 성공하였습니다.",
+				"followed", isActive ? false : true
+			);
 		}
-
 	}
 }

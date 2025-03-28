@@ -26,7 +26,7 @@ public class CommentService {
 	//댓글 생성 메서드
 	public Map<String, Object> createComment(CommentCreateRequest request, String authorId, String postId) {
 		Comment comment = Comment.builder()
-			.userTsid(authorId)
+			.userId(authorId)
 			.postId(postId)
 			.content(request.getContent())
 			.parentCommentId(request.getParentCommentId())

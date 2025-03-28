@@ -17,13 +17,13 @@ public class CommentLikeService {
 	private final CommentLikeRepository commentLikeRepository;
 
 	//댓글 좋아요 업데이트 함수 좋아요가이미 있을시 삭제 없을시 추가
-	public Optional<String> toggleCommentLike(String commentId, String loginUserTsid) {
-		Optional<CommentLike> optCommentLike = commentLikeRepository.findByUserTsidAndCommentId(loginUserTsid,
+	public Optional<String> toggleCommentLike(String commentId, String authorId) {
+		Optional<CommentLike> optCommentLike = commentLikeRepository.findByUserIdAndCommentId(authorId,
 			commentId);
 		if (optCommentLike.isEmpty()) {
 			CommentLike commentLike = CommentLike.builder()
 				.commentId(commentId)
-				.userTsid(loginUserTsid)
+				.userId(authorId)
 				.createdAt(LocalDateTime.now())
 				.status(CommentLikeStatus.ACTIVE)
 				.build();
@@ -45,8 +45,8 @@ public class CommentLikeService {
 	}
 
 	//유저의 좋아요 리스트 가져오기
-	public Map<String, Object> findLikesByUsers(String likeTsid) {
+	public Map<String, Object> findLikesByUsers(String likeId) {
 		return Map.of("CommentLikeList",
-			commentLikeRepository.findAllByUserTsidAndStatus(likeTsid, CommentLikeStatus.ACTIVE));
+			commentLikeRepository.findAllByUserIdAndStatus(likeId, CommentLikeStatus.ACTIVE));
 	}
 }

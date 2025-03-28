@@ -60,21 +60,21 @@ public class UserFollowerServiceTest {
 	//유저 팔로우 취소 테스트 메서드
 	@Test
 	void 유저_팔로우_취소_테스트() {
-		String userTsid = "user_002";
+		String userId = "user_002";
 		String authorId = "user_001";
 		String authorNickname = "홍길동";
 		UserFollowRequest request = UserFollowRequest.builder().followingNickname("고길동").build();
 
-		UserFollow userFollow = UserFollow.builder().followingId(userTsid).followerId(authorId).status(UserFollowStatus.ACTIVE).build();
-		UserFollow userFollowCancel = UserFollow.builder().followingId(userTsid).followerId(authorId).status(UserFollowStatus.DELETE).build();
+		UserFollow userFollow = UserFollow.builder().followingId(userId).followerId(authorId).status(UserFollowStatus.ACTIVE).build();
+		UserFollow userFollowCancel = UserFollow.builder().followingId(userId).followerId(authorId).status(UserFollowStatus.DELETE).build();
 
 
 
 		when(userFollowRepository.save(any(UserFollow.class))).thenReturn(userFollowCancel);
-		when(userFollowRepository.findByFollowerIdAndFollowingId(authorId,userTsid)).thenReturn(Optional.of(userFollow));
+		when(userFollowRepository.findByFollowerIdAndFollowingId(authorId,userId)).thenReturn(Optional.of(userFollow));
 
 
-		Map<String, Object> response = userFollowService.followingUser(request,userTsid,authorId,authorNickname);
+		Map<String, Object> response = userFollowService.followingUser(request,userId,authorId,authorNickname);
 		String message = (String)response.get("message");
 		boolean followed = (boolean)response.get("followed");
 
@@ -82,7 +82,7 @@ public class UserFollowerServiceTest {
 		assertEquals(false,followed);
 
 		verify(userFollowRepository, times(1)).save(any(UserFollow.class));
-		verify(userFollowRepository, times(1)).findByFollowerIdAndFollowingId(authorId,userTsid);
+		verify(userFollowRepository, times(1)).findByFollowerIdAndFollowingId(authorId,userId);
 		System.out.println("✅ 팔로우 성공");
 
 	}

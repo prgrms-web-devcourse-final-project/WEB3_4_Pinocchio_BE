@@ -23,7 +23,7 @@ public class Comment {
 	private String id;  // MongoDB의 _id 필드
 
 	@Indexed
-	private String userTsid;  // 작성자 ID
+	private String userId;  // 작성자 ID
 
 	private String postId;  // 게시글 ID
 

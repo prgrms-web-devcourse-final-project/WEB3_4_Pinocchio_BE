@@ -96,11 +96,17 @@ public class CommentService {
 
 		Map<String, Object> response = new HashMap<>();
 		response.put("message", isLiked ? "좋아요 요청에 성공했습니다." : "좋아요 취소 요청에 성공했습니다.");
-		response.put("userId", loginUserId);
+		response.put("userId", authorId);
 		response.put("liked", isLiked);
 		response.put("likes", updatedLikes);
 
 		return response;
+	}
+
+	public Map<String,Object> findCommentsByPost(String postId){
+		List<Comment> commentList = commentRepository.findAllByPostId(postId);
+		return Map.of("message","댓글요청에 성공하였습니다."
+			,"comments",commentList);
 	}
 
 	//댓글 유효성 검사 댓글과 게시글로 검색결과가 없을시 true반환

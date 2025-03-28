@@ -14,6 +14,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import sns.pinocchio.application.comment.CommentCreateRequest;
 import sns.pinocchio.application.comment.CommentService;
+import sns.pinocchio.application.user.UserFollowRequest;
 import sns.pinocchio.application.user.UserFollowService;
 import sns.pinocchio.domain.comment.Comment;
 import sns.pinocchio.domain.user.UserFollow;
@@ -32,17 +33,19 @@ public class UserFollowerServiceTest {
 	//유저 팔로우 테스트 메서드
 	@Test
 	void 유저_팔로우_테스트() {
-		String userTsid = "user_002";
-		String loginUserTsid = "user_001";
+		String userId = "user_002";
+		String authorId = "user_001";
+		String authorNickname = "홍길동";
+		UserFollowRequest request = UserFollowRequest.builder().followingNickname("고길동").build();
 
-		UserFollow userFollow = UserFollow.builder().followingId(userTsid).followerId(loginUserTsid).status(UserFollowStatus.ACTIVE).build();
+		UserFollow userFollow = UserFollow.builder().followingId(userId).followerId(authorId).status(UserFollowStatus.ACTIVE).build();
 
 
 		when(userFollowRepository.save(any(UserFollow.class))).thenReturn(userFollow);
-		when(userFollowRepository.findByFollowerIdAndFollowingId(loginUserTsid,userTsid)).thenReturn(Optional.empty());
+		when(userFollowRepository.findByFollowerIdAndFollowingId(authorId,userId)).thenReturn(Optional.empty());
 
 
-		Map<String, Object> response = userFollowService.followingUser(userTsid,loginUserTsid);
+		Map<String, Object> response = userFollowService.followingUser(request,userId,authorId,authorNickname);
 		String message = (String)response.get("message");
 		boolean followed = (boolean)response.get("followed");
 
@@ -50,7 +53,7 @@ public class UserFollowerServiceTest {
 		assertEquals(true,followed);
 
 		verify(userFollowRepository, times(1)).save(any(UserFollow.class));
-		verify(userFollowRepository, times(1)).findByFollowerIdAndFollowingId(loginUserTsid,userTsid);
+		verify(userFollowRepository, times(1)).findByFollowerIdAndFollowingId(authorId,userId);
 		System.out.println("✅ 팔로우 성공");
 
 	}
@@ -58,18 +61,20 @@ public class UserFollowerServiceTest {
 	@Test
 	void 유저_팔로우_취소_테스트() {
 		String userTsid = "user_002";
-		String loginUserTsid = "user_001";
+		String authorId = "user_001";
+		String authorNickname = "홍길동";
+		UserFollowRequest request = UserFollowRequest.builder().followingNickname("고길동").build();
 
-		UserFollow userFollow = UserFollow.builder().followingId(userTsid).followerId(loginUserTsid).status(UserFollowStatus.ACTIVE).build();
-		UserFollow userFollowCancel = UserFollow.builder().followingId(userTsid).followerId(loginUserTsid).status(UserFollowStatus.DELETE).build();
+		UserFollow userFollow = UserFollow.builder().followingId(userTsid).followerId(authorId).status(UserFollowStatus.ACTIVE).build();
+		UserFollow userFollowCancel = UserFollow.builder().followingId(userTsid).followerId(authorId).status(UserFollowStatus.DELETE).build();
 
 
 
 		when(userFollowRepository.save(any(UserFollow.class))).thenReturn(userFollowCancel);
-		when(userFollowRepository.findByFollowerIdAndFollowingId(loginUserTsid,userTsid)).thenReturn(Optional.of(userFollow));
+		when(userFollowRepository.findByFollowerIdAndFollowingId(authorId,userTsid)).thenReturn(Optional.of(userFollow));
 
 
-		Map<String, Object> response = userFollowService.followingUser(userTsid,loginUserTsid);
+		Map<String, Object> response = userFollowService.followingUser(request,userTsid,authorId,authorNickname);
 		String message = (String)response.get("message");
 		boolean followed = (boolean)response.get("followed");
 
@@ -77,7 +82,7 @@ public class UserFollowerServiceTest {
 		assertEquals(false,followed);
 
 		verify(userFollowRepository, times(1)).save(any(UserFollow.class));
-		verify(userFollowRepository, times(1)).findByFollowerIdAndFollowingId(loginUserTsid,userTsid);
+		verify(userFollowRepository, times(1)).findByFollowerIdAndFollowingId(authorId,userTsid);
 		System.out.println("✅ 팔로우 성공");
 
 	}

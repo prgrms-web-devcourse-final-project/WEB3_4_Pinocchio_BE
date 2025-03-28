@@ -25,6 +25,8 @@ public class UserFollow {
 
 	private String followingId;
 
+	private UserFollowStatus status;
+
 	private LocalDateTime createdAt;
 
 }

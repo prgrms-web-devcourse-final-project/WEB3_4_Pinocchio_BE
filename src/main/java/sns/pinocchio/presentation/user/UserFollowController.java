@@ -56,4 +56,34 @@ public class UserFollowController {
 		return ResponseEntity.status(HttpStatus.OK).body(response);
 	}
 
+	@Operation(summary = "유저 팔로워 목록", description = "유저 팔로워 목록 가져오기")
+	@ApiResponses({@ApiResponse(responseCode = "200", description = "팔로워 목록 조회 성공"),
+		@ApiResponse(responseCode = "404", description = "유저 조회 실패"),
+		@ApiResponse(responseCode = "500", description = "서버 내부 오류")})
+	@PostMapping("/{userId}/followers")
+	public ResponseEntity<Map<String, Object>> findFollowers(@PathVariable String userId){
+		if (false/*유저 확인*/) {
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("message", "등록된 유저를 찾을 수 없습니다."));
+		}
+
+		Map<String,Object> response = userFollowService.findFollowers(userId);
+
+		return ResponseEntity.status(HttpStatus.OK).body(response);
+	}
+
+	@Operation(summary = "유저 팔로잉 목록", description = "유저 팔로잉 목록 가져오기")
+	@ApiResponses({@ApiResponse(responseCode = "200", description = "팔로잉 목록 조회 성공"),
+		@ApiResponse(responseCode = "404", description = "유저 조회 실패"),
+		@ApiResponse(responseCode = "500", description = "서버 내부 오류")})
+	@PostMapping("/{userId}/followings")
+	public ResponseEntity<Map<String, Object>> findFollowings(@PathVariable String userId){
+		if (false/*유저 확인*/) {
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("message", "등록된 유저를 찾을 수 없습니다."));
+		}
+
+		Map<String,Object> response = userFollowService.findFollowings(userId);
+
+		return ResponseEntity.status(HttpStatus.OK).body(response);
+	}
+
 }

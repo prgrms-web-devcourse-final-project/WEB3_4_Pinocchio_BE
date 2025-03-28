@@ -9,5 +9,5 @@ import sns.pinocchio.domain.comment.Comment;
 
 public interface CommentRepository extends MongoRepository<Comment, String> {
 	Optional<Comment> findByIdAndPostId(String id, String postId);
-
+	List<Comment> findAllByPostId(String postId);
 }

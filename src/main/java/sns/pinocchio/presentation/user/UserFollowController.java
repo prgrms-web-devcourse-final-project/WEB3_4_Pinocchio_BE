@@ -7,6 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -15,6 +16,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import sns.pinocchio.application.comment.CommentLikeRequest;
+import sns.pinocchio.application.user.UserFollowRequest;
 import sns.pinocchio.application.user.UserFollowService;
 
 @Tag(name = "유저 팔로우", description = "유저 팔로우 관련 API")
@@ -32,7 +35,7 @@ public class UserFollowController {
 		@ApiResponse(responseCode = "404", description = "유저 조회 실패"),
 		@ApiResponse(responseCode = "500", description = "서버 내부 오류")})
 	@PostMapping("/{userId}/follow")
-	public ResponseEntity<Map<String, Object>> toggleUserFollow(Principal principal, @PathVariable String userId){
+	public ResponseEntity<Map<String, Object>> toggleUserFollow(Principal principal, @PathVariable String userId, @RequestBody UserFollowRequest request){
 		if (false/*JWT인증*/) {
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", "유효하지 않은 인증 정보입니다."));
 		}
@@ -47,11 +50,10 @@ public class UserFollowController {
 		}
 
 		String authorId = "user_001";//jwt구현시 제거
-		Map<String,Object> response = userFollowService.followingUser(userId,authorId);
+		String authorNickname = "고길동";//jwt구현시 제거
+		Map<String,Object> response = userFollowService.followingUser(request,userId,authorId,authorNickname);
 
 		return ResponseEntity.status(HttpStatus.OK).body(response);
-
-
 	}
 
 }

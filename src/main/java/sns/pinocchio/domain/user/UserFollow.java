@@ -23,7 +23,11 @@ public class UserFollow {
 
 	private String followerId;
 
+	private String followerNickname;
+
 	private String followingId;
+
+	private String followingNickname;
 
 	private UserFollowStatus status;
 

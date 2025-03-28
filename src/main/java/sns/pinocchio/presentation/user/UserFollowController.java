@@ -16,7 +16,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import sns.pinocchio.application.comment.CommentLikeRequest;
 import sns.pinocchio.application.user.UserFollowRequest;
 import sns.pinocchio.application.user.UserFollowService;
 
@@ -27,7 +26,6 @@ import sns.pinocchio.application.user.UserFollowService;
 public class UserFollowController {
 	private final UserFollowService userFollowService;
 
-
 	@Operation(summary = "유저 팔로우", description = "유저 팔로우 토글")
 	@ApiResponses({@ApiResponse(responseCode = "200", description = "팔로우 성공"),
 		@ApiResponse(responseCode = "400", description = "잘못된 값"),
@@ -35,13 +33,15 @@ public class UserFollowController {
 		@ApiResponse(responseCode = "404", description = "유저 조회 실패"),
 		@ApiResponse(responseCode = "500", description = "서버 내부 오류")})
 	@PostMapping("/{userId}/follow")
-	public ResponseEntity<Map<String, Object>> toggleUserFollow(Principal principal, @PathVariable String userId, @RequestBody UserFollowRequest request){
+	public ResponseEntity<Map<String, Object>> toggleUserFollow(Principal principal, @PathVariable String userId,
+		@RequestBody UserFollowRequest request) {
 		if (false/*JWT인증*/) {
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", "유효하지 않은 인증 정보입니다."));
 		}
 
 		if (false/*본인인지 확인해서 400에러 발생 자기 스스로 팔로잉은 불가능*/) {
-			return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("message", "이 댓글을 수정할 권한이 없습니다. 작성자만 수정할 수 있습니다."));
+			return ResponseEntity.status(HttpStatus.FORBIDDEN)
+				.body(Map.of("message", "이 댓글을 수정할 권한이 없습니다. 작성자만 수정할 수 있습니다."));
 
 		}
 
@@ -51,7 +51,7 @@ public class UserFollowController {
 
 		String authorId = "user_001";//jwt구현시 제거
 		String authorNickname = "고길동";//jwt구현시 제거
-		Map<String,Object> response = userFollowService.followingUser(request,userId,authorId,authorNickname);
+		Map<String, Object> response = userFollowService.followingUser(request, userId, authorId, authorNickname);
 
 		return ResponseEntity.status(HttpStatus.OK).body(response);
 	}
@@ -61,12 +61,12 @@ public class UserFollowController {
 		@ApiResponse(responseCode = "404", description = "유저 조회 실패"),
 		@ApiResponse(responseCode = "500", description = "서버 내부 오류")})
 	@PostMapping("/{userId}/followers")
-	public ResponseEntity<Map<String, Object>> findFollowers(@PathVariable String userId){
+	public ResponseEntity<Map<String, Object>> findFollowers(@PathVariable String userId) {
 		if (false/*유저 확인*/) {
 			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("message", "등록된 유저를 찾을 수 없습니다."));
 		}
 
-		Map<String,Object> response = userFollowService.findFollowers(userId);
+		Map<String, Object> response = userFollowService.findFollowers(userId);
 
 		return ResponseEntity.status(HttpStatus.OK).body(response);
 	}
@@ -76,12 +76,12 @@ public class UserFollowController {
 		@ApiResponse(responseCode = "404", description = "유저 조회 실패"),
 		@ApiResponse(responseCode = "500", description = "서버 내부 오류")})
 	@PostMapping("/{userId}/followings")
-	public ResponseEntity<Map<String, Object>> findFollowings(@PathVariable String userId){
+	public ResponseEntity<Map<String, Object>> findFollowings(@PathVariable String userId) {
 		if (false/*유저 확인*/) {
 			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("message", "등록된 유저를 찾을 수 없습니다."));
 		}
 
-		Map<String,Object> response = userFollowService.findFollowings(userId);
+		Map<String, Object> response = userFollowService.findFollowings(userId);
 
 		return ResponseEntity.status(HttpStatus.OK).body(response);
 	}

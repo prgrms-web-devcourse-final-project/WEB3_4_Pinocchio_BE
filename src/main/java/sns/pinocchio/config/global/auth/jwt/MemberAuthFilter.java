@@ -96,7 +96,12 @@ public class MemberAuthFilter extends OncePerRequestFilter {
                 (method.equals("GET") && path.equals("/api/posts/search")) ||
                         (method.equals("POST") && path.equals("/api/auth/signup")) ||
                         (method.equals("POST") && path.equals("/api/auth/login")) ||
-                        (method.equals("POST") && path.equals("/api/auth/logout"))
+                        (method.equals("POST") && path.equals("/api/auth/logout")) ||
+                        path.startsWith("/swagger") ||
+                        path.startsWith("/v3/api-docs") ||
+                        path.startsWith("/swagger-ui") ||
+                        path.startsWith("/swagger-resources") ||
+                        path.startsWith("/webjars")
         );
     }
 
@@ -132,6 +137,6 @@ public class MemberAuthFilter extends OncePerRequestFilter {
         Member member = memberService.findByUserId(Long.valueOf(memberId));
         String newAccessToken = tokenProvider.generateAccessToken(member);
         cookieService.addAccessTokenToCookie(newAccessToken, response);
-        return refreshToken;
+        return newAccessToken;
     }
 }

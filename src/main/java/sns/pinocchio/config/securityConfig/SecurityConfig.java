@@ -31,7 +31,20 @@ public class SecurityConfig {
                 .formLogin(AbstractHttpConfigurer::disable) // 폼 로그인 비활성화
                 .logout(AbstractHttpConfigurer::disable) // 로그아웃 비활성화
                 .authorizeHttpRequests(auth -> auth
-                        .anyRequest().permitAll()
+                        .requestMatchers(
+                                "/swagger-ui/**",
+                                "/swagger-ui.html",
+                                "/v3/api-docs/**",
+                                "/swagger-resources/**",
+                                "/webjars/**"
+                        ).permitAll()
+                        .requestMatchers(
+                                "/api/auth/signup",
+                                "/api/auth/login",
+                                "/api/auth/logout",
+                                "/api/posts/search"
+                        ).permitAll()
+                        .anyRequest().authenticated()
                 )
                 .addFilterBefore(memberAuthFilter, UsernamePasswordAuthenticationFilter.class);
         ;

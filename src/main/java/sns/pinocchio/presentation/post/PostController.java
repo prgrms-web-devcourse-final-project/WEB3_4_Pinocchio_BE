@@ -63,4 +63,30 @@ public class PostController {
         postService.modifyPost(request, userId);
         return ResponseEntity.ok("게시글이 수정되었습니다.");
     }
+
+    @Operation(
+            summary = "게시글 삭제",
+            description = "작성자가 자신의 게시글을 삭제합니다. (소프트 딜리트 방식)"
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "게시글 삭제 성공"),
+            @ApiResponse(responseCode = "400", description = "잘못된 요청 또는 이미 삭제된 게시글"),
+            @ApiResponse(responseCode = "401", description = "JWT 토큰 누락 또는 인증 실패"),
+            @ApiResponse(responseCode = "403", description = "작성자 본인만 삭제 가능"),
+            @ApiResponse(responseCode = "404", description = "게시글을 찾을 수 없음"),
+            @ApiResponse(responseCode = "500", description = "서버 내부 오류")
+    })
+    @DeleteMapping("/{postId}")
+    public ResponseEntity<String> deletePost(
+            @PathVariable String postId,
+            @RequestHeader("Authorization") String accessToken
+    ) {
+        String userTsid = "mockTsid"; // TODO: JWT에서 TSID 파싱 예정
+
+        postService.deletePost(postId, userTsid);
+        return ResponseEntity.ok("게시글이 삭제되었습니다.");
+    }
+
+
+
 }

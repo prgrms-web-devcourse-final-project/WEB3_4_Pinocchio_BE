@@ -83,4 +83,16 @@ public class PostService {
         postRepository.save(post);  // 수정 내용 저장
     }
 
+    // 게시글 삭제
+    @Transactional
+    public void deletePost(String postId, String loginUserTsid) {
+        Post post = postRepository.findByIdAndUserTsidAndStatus(postId, loginUserTsid, "active")
+                .orElseThrow(() -> new IllegalArgumentException("게시글을 찾을 수 없습니다."));
+
+        post.setStatus("deleted");
+        post.setUpdatedAt(LocalDateTime.now());
+
+        postRepository.save(post);
+    }
+
 }

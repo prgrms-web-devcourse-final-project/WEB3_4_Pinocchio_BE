@@ -6,6 +6,7 @@ import java.util.Map;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -44,7 +45,8 @@ public class CommentController {
 		}
 
 		if (false/*본인 댓글인지 확인해서 403에러 발생 자기 댓글 좋아요는 불가능*/) {
-			return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("message", "이 댓글을 수정할 권한이 없습니다. 작성자만 수정할 수 있습니다."));
+			return ResponseEntity.status(HttpStatus.FORBIDDEN)
+				.body(Map.of("message", "이 댓글을 수정할 권한이 없습니다. 작성자만 수정할 수 있습니다."));
 		}
 
 		if (commentService.isInvalidComment(request.getCommentId(), request.getPostId())) {
@@ -69,14 +71,16 @@ public class CommentController {
 		}
 
 		if (false/*본인 댓글인지 확인해서 403에러 발생 자기 댓글 좋아요는 불가능*/) {
-			return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("message", "이 댓글을 수정할 권한이 없습니다. 작성자만 수정할 수 있습니다."));
+			return ResponseEntity.status(HttpStatus.FORBIDDEN)
+				.body(Map.of("message", "이 댓글을 수정할 권한이 없습니다. 작성자만 수정할 수 있습니다."));
 		}
 
 		if (commentService.isInvalidComment(commentId, request.getPostId())) {
 			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("message", "등록된 댓글을 찾을 수 없습니다."));
 		}
-		String loginUserId = "user_001";//jwt 마지이후 삭제하기
-		Map<String, Object> response = commentService.toggleCommentLike(request, commentId, loginUserId);
+
+		String authorId = "user_001";//jwt 마지이후 삭제하기
+		Map<String, Object> response = commentService.toggleCommentLike(request, commentId, authorId);
 		return ResponseEntity.status(HttpStatus.OK).body(response);
 	}
 
@@ -93,7 +97,8 @@ public class CommentController {
 		}
 
 		if (false/*본인 댓글인지 확인해서 403에러 발생 자기 댓글 좋아요는 불가능*/) {
-			return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("message", "이 댓글을 수정할 권한이 없습니다. 작성자만 수정할 수 있습니다."));
+			return ResponseEntity.status(HttpStatus.FORBIDDEN)
+				.body(Map.of("message", "이 댓글을 수정할 권한이 없습니다. 작성자만 수정할 수 있습니다."));
 		}
 
 		if (commentService.isInvalidComment(request.getCommentId(), request.getPostId())) {
@@ -103,4 +108,16 @@ public class CommentController {
 		return ResponseEntity.status(HttpStatus.OK).body(response);
 	}
 
+	@Operation(summary = "댓글 조회", description = "댓글을 조회합니다.")
+	@ApiResponses({@ApiResponse(responseCode = "200", description = "댓글 조회 성공"),
+		@ApiResponse(responseCode = "404", description = "댓글 조회 실패")
+	})
+	@GetMapping("/{postId}")
+	public ResponseEntity<Map<String, Object>> findComment(@PathVariable String postId) {
+		if (false/*게시글 유효성 검사*/) {
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("message", "게시글을 찾을 수 없습니다."));
+		}
+		Map<String, Object> response = commentService.findCommentsByPost(postId);
+		return ResponseEntity.status(HttpStatus.OK).body(response);
+	}
 }

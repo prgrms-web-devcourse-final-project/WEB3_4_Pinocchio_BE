@@ -12,8 +12,8 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
 import sns.pinocchio.application.member.MemberService;
-import sns.pinocchio.config.global.auth.exception.AuthErrorCode;
-import sns.pinocchio.config.global.auth.exception.AuthException;
+import sns.pinocchio.config.global.auth.exception.auth.AuthErrorCode;
+import sns.pinocchio.config.global.auth.exception.auth.AuthException;
 import sns.pinocchio.config.global.auth.model.CustomUserDetails;
 import sns.pinocchio.config.global.auth.service.CookieService;
 import sns.pinocchio.config.global.auth.service.CustomUserDetailService;
@@ -96,7 +96,12 @@ public class MemberAuthFilter extends OncePerRequestFilter {
                 (method.equals("GET") && path.equals("/api/posts/search")) ||
                         (method.equals("POST") && path.equals("/api/auth/signup")) ||
                         (method.equals("POST") && path.equals("/api/auth/login")) ||
-                        (method.equals("POST") && path.equals("/api/auth/logout"))
+                        (method.equals("POST") && path.equals("/api/auth/logout")) ||
+                        path.startsWith("/swagger") ||
+                        path.startsWith("/v3/api-docs") ||
+                        path.startsWith("/swagger-ui") ||
+                        path.startsWith("/swagger-resources") ||
+                        path.startsWith("/webjars")
         );
     }
 
@@ -129,9 +134,9 @@ public class MemberAuthFilter extends OncePerRequestFilter {
             handleAuthError(AuthErrorCode.INVALID_TOKEN, request, response);
         }
         String memberId = redisService.get(refreshToken);
-        Member member = memberService.findByUserId(Long.valueOf(memberId));
+        Member member = memberService.findById(Long.valueOf(memberId));
         String newAccessToken = tokenProvider.generateAccessToken(member);
         cookieService.addAccessTokenToCookie(newAccessToken, response);
-        return refreshToken;
+        return newAccessToken;
     }
 }

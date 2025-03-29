@@ -3,10 +3,10 @@ package sns.pinocchio.application.member.memberDto;
 import lombok.Builder;
 import sns.pinocchio.domain.member.Member;
 
-// 사용자 기본 정보만 담는 dto
+// 사용자 기본 정보만 담는 Dto
 @Builder
 public record MemberInfoDto(
-        String id,
+        Long id,
         String nickname,
         String email
 ) {

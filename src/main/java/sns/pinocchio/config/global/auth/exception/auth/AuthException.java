@@ -1,4 +1,4 @@
-package sns.pinocchio.config.global.auth.exception;
+package sns.pinocchio.config.global.auth.exception.auth;
 
 import org.springframework.http.HttpStatus;
 

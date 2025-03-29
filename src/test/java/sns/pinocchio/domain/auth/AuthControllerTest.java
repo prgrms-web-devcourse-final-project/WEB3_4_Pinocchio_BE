@@ -14,7 +14,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.transaction.annotation.Transactional;
 import sns.pinocchio.application.member.MemberService;
-import sns.pinocchio.application.member.memberDto.MemberRequestDto;
+import sns.pinocchio.application.member.memberDto.SignupRequestDto;
+import sns.pinocchio.domain.member.Member;
 import sns.pinocchio.infrastructure.member.MemberRepository;
 
 import static com.mongodb.assertions.Assertions.assertNotNull;
@@ -57,7 +58,7 @@ public class AuthControllerTest {
     @BeforeEach
     public void init() {
         memberRepository.deleteAll();
-        MemberRequestDto member = new MemberRequestDto("member", "example@naver.com", "nick", "memberPassword123!");
+        SignupRequestDto member = new SignupRequestDto("member", "example@naver.com", "nick", "memberPassword123!");
         memberService.createMember(member);
     }
 
@@ -79,8 +80,9 @@ public class AuthControllerTest {
                         .content(signupRequestJson)
         );
 
-        boolean result = memberRepository.existsByEmail("example1@naver.com");
-        assertThat(result).isTrue();
+        Member member = memberService.findByEmail("example1@naver.com");
+        assertThat(member.getName()).isEqualTo("member");
+        assertThat(member.getNickname()).isEqualTo("nickname");
     }
 
     @Test

@@ -20,6 +20,7 @@ public class TokenProvider {
                 .setSubject(member.getName())  // 사용자 이름
                 .claim("id", member.getId())  // 사용자 ID
                 .claim("email", member.getEmail())  // 사용자 이메일
+                .claim("tsid", member.getTsid())
                 .setIssuedAt(new Date())  // 토큰 발급 시간
                 .setExpiration(new Date(System.currentTimeMillis() + jwtUtil.getAccessTokenExpirationTime()))  // 만료시간
                 .signWith(jwtUtil.getKey())  // 서명 알고리즘 및 키

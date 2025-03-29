@@ -31,7 +31,7 @@ public class CustomUserDetails implements UserDetails {
         return memberInfoDto.nickname(); // 닉네임 반환
     }
 
-    public String getUserId() {
+    public Long getUserId() {
         return memberInfoDto.id(); // 유저 ID 반환
     }
 

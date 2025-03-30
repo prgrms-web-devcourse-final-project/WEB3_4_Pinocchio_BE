@@ -94,14 +94,14 @@ public class MemberController {
     // 계정 신고
     @PostMapping("/{memberId}/report")
     public ResponseEntity<String> reportMember(@PathVariable Long memberId, @Valid @RequestBody ReportRequestDto reportRequestDto) {
-        // 신고자 조회
-        Member report = memberService.findById(memberId);
+        // 신고자 조회 (사용자 조회)
+        Member reporter = memberService.findById(memberId);
 
-        // 신고 대상 조회
+        // 신고 대상 조회 (닉네임 유니크)
         Member reported = memberService.findByNickname(reportRequestDto.reportedNickname());
 
         // 신고 내역 저장
-        reportService.createReport(report.getId(), reported.getId(), reportRequestDto.reportedType(), reportRequestDto.reason());
+        reportService.createReport(reporter.getId(), reported.getId(), reportRequestDto.reportedType(), reportRequestDto.reason());
 
         return ResponseEntity.ok("계정 신고가 완료되었습니다. 신고 내용은 검토 후 처리됩니다.");
     }

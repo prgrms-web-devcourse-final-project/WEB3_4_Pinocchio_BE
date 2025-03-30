@@ -5,6 +5,8 @@ import org.springframework.stereotype.Service;
 import sns.pinocchio.domain.report.Report;
 import sns.pinocchio.domain.report.ReportedType;
 import sns.pinocchio.infrastructure.report.ReportRepository;
+import sns.pinocchio.presentation.report.exception.ReportErrorCode;
+import sns.pinocchio.presentation.report.exception.ReportException;
 
 @RequiredArgsConstructor
 @Service
@@ -22,5 +24,10 @@ public class ReportService {
                 .build();
 
         reportRepository.save(report);
+    }
+
+    public Report findByReporter(long id) {
+        return reportRepository.findByReporterId(id)
+                .orElseThrow(() -> new ReportException(ReportErrorCode.REPORT_NOT_FOUND));
     }
 }

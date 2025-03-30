@@ -14,13 +14,17 @@ import org.springframework.transaction.annotation.Transactional;
 import sns.pinocchio.application.auth.AuthService;
 import sns.pinocchio.application.member.MemberService;
 import sns.pinocchio.application.member.memberDto.SignupRequestDto;
+import sns.pinocchio.application.member.memberDto.UpdateRequestDto;
+import sns.pinocchio.application.report.ReportService;
 import sns.pinocchio.domain.member.Member;
+import sns.pinocchio.domain.report.Report;
 import sns.pinocchio.infrastructure.member.MemberRepository;
 import sns.pinocchio.presentation.member.exception.MemberException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatCode;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
+import static sns.pinocchio.domain.report.ReportedType.POST;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -40,6 +44,9 @@ public class AuthServiceTest {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private ReportService reportService;
 
     @BeforeEach
     public void init() {
@@ -98,6 +105,43 @@ public class AuthServiceTest {
         assertThatThrownBy(() -> authService.validatePassword("notFoundPassword123!", member))
                 .isInstanceOf(MemberException.class)
                 .hasMessageContaining("비밀번호가 올바르지 않습니다.");
+    }
+
+    @Test
+    @DisplayName("패스워드 변경 테스트")
+    public void modifyPasswordTest() {
+        Member member = memberService.findByEmail("example@naver.com");
+
+        memberService.changePassword(member, "abcd123@");
+
+        assertThatCode(() -> authService.validatePassword("abcd123@", member))
+                .doesNotThrowAnyException();
+    }
+
+    @Test
+    @DisplayName("프로필 수정 성고 테스트")
+    public void modifyProfile() {
+        Member member = memberService.findByEmail("example@naver.com");
+
+        UpdateRequestDto updateRequestDto = new UpdateRequestDto("bob", "bob", "me", "null", "null", true);
+        member.updateProfile(updateRequestDto);
+
+        Member updateMember = memberService.findByNickname("bob");
+
+        assertThat(updateMember.getName()).isEqualTo("bob");
+        assertThat(updateMember.getBio()).isEqualTo("me");
+        assertThat(updateMember.getIsActive()).isTrue();
+    }
+
+    @Test
+    @DisplayName("신고 내역 저장 테스트")
+    public void createReportTest() {
+        reportService.createReport(1L, 2L, POST, "욕햇어용");
+        Report report = reportService.findByReporter(1L);
+
+        assertThat(report.getReportedId()).isEqualTo(2L);
+        assertThat(report.getReportedType()).isEqualTo(POST);
+        assertThat(report.getReason()).isEqualTo("욕햇어용");
     }
 
     @AfterEach

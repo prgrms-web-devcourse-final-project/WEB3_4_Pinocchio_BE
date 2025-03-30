@@ -38,7 +38,7 @@ public class Chat {
 
   @Indexed private Instant createdAt; // 메시지 생성 날짜
 
-  @Indexed private Instant createdAtForTsid; // TSID용 메시지 생성 날짜
+  @Indexed private String createdAtForTsid; // TSID용 메시지 생성 날짜
 
   private Instant modifiedAt; // 메시지 수정 날짜
 }

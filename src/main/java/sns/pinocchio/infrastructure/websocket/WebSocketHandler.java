@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 @Component
 @Slf4j
 @RequiredArgsConstructor
-public class ChatMessageHandler {
+public class WebSocketHandler {
 
   private final SimpMessagingTemplate messagingTemplate;
 
@@ -22,16 +22,45 @@ public class ChatMessageHandler {
    * @exception MessageConversionException 메시지 내용 JSON 직렬화 실패했을 경우
    * @exception MessagingException 메시지 채널이 닫혔거나 비정상일 경우
    */
-  public void sendMsgToChatroom(String roomId, String message) {
+  public boolean sendMsgToChatroom(String roomId, String message) {
 
     try {
       messagingTemplate.convertAndSend("/topic/chatroom/" + roomId, message);
 
     } catch (MessageConversionException e) {
       log.error("메시지 직렬화 실패: {}", e.getMessage());
+      return false;
 
     } catch (MessagingException e) {
       log.error("WebSocket 메시지 전송 실패: {}", e.getMessage());
+      return false;
     }
+
+    return true;
+  }
+
+  /**
+   * 해당 유저에게 알림 메시지를 전송하는 기능
+   *
+   * @param userTsid 수신자 TSID
+   * @param message 알림 메시지 내용
+   * @exception MessageConversionException 알림 메시지 내용 JSON 직렬화 실패했을 경우
+   * @exception MessagingException 알림 메시지 채널이 닫혔거나 비정상일 경우
+   */
+  public boolean sendNotificationToUser(String userTsid, String message) {
+
+    try {
+      messagingTemplate.convertAndSendToUser(userTsid, "/queue/notify", message);
+
+    } catch (MessageConversionException e) {
+      log.error("알림 직렬화 실패: {}", e.getMessage());
+      return false;
+
+    } catch (MessagingException e) {
+      log.error("알림 전송 실패: {}", e.getMessage());
+      return false;
+    }
+
+    return true;
   }
 }

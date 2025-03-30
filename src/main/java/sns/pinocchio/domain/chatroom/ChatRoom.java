@@ -56,7 +56,7 @@ public class ChatRoom {
   /**
    * 채팅방 고유 ID가 현재 participantTsids 기준으로 유효한지 검사
    *
-   * @implNote ID 형식: "chatroom:user1-user2"
+   * @implNote ID 형식 "chatroom:user_123-user_455"
    * @return 유효하면 true, 그렇지 않으면 false
    */
   public boolean validateChatRoomId() {
@@ -69,5 +69,18 @@ public class ChatRoom {
     String[] participants = id.substring(id.indexOf(":") + 1).split("-");
 
     return Arrays.stream(participants).allMatch(participantTsids::contains);
+  }
+
+  /**
+   * 채팅방의 마지막 메시지 정보 변경
+   *
+   * @param lastMessage 마지막 메시지 정보
+   */
+  public void updateLastMsg(LastMessage lastMessage) {
+    if (lastMessage == null) {
+      throw new IllegalArgumentException("채팅방의 마지막 메시지 정보가 존재하지 않습니다.");
+    }
+
+    this.lastMessage = lastMessage;
   }
 }

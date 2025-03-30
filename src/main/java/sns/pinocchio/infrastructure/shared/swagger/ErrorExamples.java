@@ -1,4 +1,4 @@
-package sns.pinocchio.shared.swagger;
+package sns.pinocchio.infrastructure.shared.swagger;
 
 public class ErrorExamples {
 

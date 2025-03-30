@@ -1,7 +1,7 @@
 package sns.pinocchio.presentation.notification;
 
-import static sns.pinocchio.shared.response.GlobalApiResponse.success;
-import static sns.pinocchio.shared.swagger.ErrorExamples.*;
+import static sns.pinocchio.infrastructure.shared.response.GlobalApiResponse.success;
+import static sns.pinocchio.infrastructure.shared.swagger.ErrorExamples.*;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -16,8 +16,8 @@ import org.springframework.web.bind.annotation.*;
 import sns.pinocchio.application.notification.dto.NotificationRequestDto.UpdateNotifications;
 import sns.pinocchio.application.notification.dto.NotificationResponseDto.NotificationInfo;
 import sns.pinocchio.application.notification.service.NotificationService;
-import sns.pinocchio.shared.response.GlobalApiResponse;
-import sns.pinocchio.shared.swagger.ErrorResponseSchema;
+import sns.pinocchio.infrastructure.shared.response.GlobalApiResponse;
+import sns.pinocchio.infrastructure.shared.swagger.ErrorResponseSchema;
 
 @Tag(name = "Notification", description = "알림 설정 API")
 @RestController

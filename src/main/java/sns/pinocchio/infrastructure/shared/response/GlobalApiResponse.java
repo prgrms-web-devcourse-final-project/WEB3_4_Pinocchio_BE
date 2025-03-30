@@ -1,4 +1,4 @@
-package sns.pinocchio.shared.response;
+package sns.pinocchio.infrastructure.shared.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

@@ -1,4 +1,4 @@
-package sns.pinocchio.shared.exception;
+package sns.pinocchio.infrastructure.shared.exception;
 
 import lombok.Getter;
 

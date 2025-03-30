@@ -1,6 +1,6 @@
 package sns.pinocchio.domain.notification;
 
-import sns.pinocchio.shared.exception.BaseException;
+import sns.pinocchio.infrastructure.shared.exception.BaseException;
 
 public class NotificationException {
 

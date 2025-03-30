@@ -1,4 +1,4 @@
-package sns.pinocchio.shared.swagger;
+package sns.pinocchio.infrastructure.shared.swagger;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.List;

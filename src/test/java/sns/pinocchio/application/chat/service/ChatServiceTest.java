@@ -16,9 +16,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import sns.pinocchio.application.chat.dto.ChatRequestDto.SendMessage;
+import sns.pinocchio.application.chat.dto.ChatResponseDto.SendMessageInfo;
 import sns.pinocchio.domain.chat.Chat;
 import sns.pinocchio.domain.chat.ChatException.ChatBadRequestException;
 import sns.pinocchio.domain.chat.ChatException.ChatInternalServerErrorException;
+import sns.pinocchio.domain.chat.ChatStatus;
 import sns.pinocchio.domain.chatroom.ChatRoom;
 import sns.pinocchio.domain.chatroom.ChatRoomStatus;
 import sns.pinocchio.infrastructure.persistence.mongodb.ChatRepository;
@@ -42,6 +44,8 @@ class ChatServiceTest {
 
   private ChatRoom mockChatRoom;
 
+  private Chat mockChat;
+
   private SendMessage mockSendMessage;
 
   @BeforeEach
@@ -61,12 +65,26 @@ class ChatServiceTest {
             .status(ChatRoomStatus.PENDING)
             .build();
 
-    // 전송 메시지 정보
+    // 요청 전송 메시지 정보
     mockSendMessage =
         SendMessage.builder()
-            .receiverTsid("user_456")
+            .receiverId("user_456")
             .messageText("테스트 메시지 입니다.")
             .sentAt(Instant.now())
+            .build();
+
+    // 메시지 정보
+    mockChat =
+        Chat.builder()
+            .id("msg_1")
+            .roomId(mockChatRoom.getId())
+            .senderId(testSenderTsid)
+            .receiverId(testReceiverTsid)
+            .content(mockSendMessage.messageText())
+            .status(ChatStatus.SENT)
+            .readStatus(false)
+            .likeStatus(false)
+            .createdAt(mockSendMessage.sentAt())
             .build();
   }
 
@@ -75,17 +93,28 @@ class ChatServiceTest {
   void sendMessageToChatroomTest() {
 
     // given
-    when(chatRoomRepository.findByParticipantsTsidContainingAll(any()))
-        .thenReturn(Optional.of(mockChatRoom));
+    when(chatRoomRepository.findByParticipantTsids(any())).thenReturn(Optional.of(mockChatRoom));
     when(webSocketHandler.sendMsgToChatroom(any(), any())).thenReturn(true);
     when(webSocketHandler.sendNotificationToUser(any(), any())).thenReturn(true);
+    when(chatRepository.save(any())).thenReturn(mockChat);
+    when(chatRoomRepository.save(any())).thenReturn(mockChatRoom);
 
     // when
-    chatService.sendMessageToChatroom(testSenderTsid, mockSendMessage);
+    SendMessageInfo messageInfo =
+        chatService.sendMessageToChatroom(testSenderTsid, mockSendMessage);
 
     // then
     verify(chatRepository, times(1)).save(any(Chat.class));
     verify(chatRoomRepository, times(1)).save(any(ChatRoom.class));
+
+    assertThat(messageInfo.chatId()).isEqualTo(mockChatRoom.getId());
+    assertThat(messageInfo.msgId()).isEqualTo(mockChat.getId());
+    assertThat(messageInfo.senderId()).isEqualTo(mockChat.getSenderId());
+    assertThat(messageInfo.receiverId()).isEqualTo(mockChat.getReceiverId());
+    assertThat(messageInfo.messageText()).isEqualTo(mockChat.getContent());
+    assertThat(messageInfo.isRead()).isEqualTo(mockChat.isReadStatus());
+    assertThat(messageInfo.messageLike()).isEqualTo(mockChat.isLikeStatus());
+    assertThat(messageInfo.sentAt()).isEqualTo(mockChat.getCreatedAt());
   }
 
   @Test
@@ -129,8 +158,7 @@ class ChatServiceTest {
     // given
     String errorMsg = "메시지 전송에 실패했습니다. 다시 시도해주세요.";
 
-    when(chatRoomRepository.findByParticipantsTsidContainingAll(any()))
-        .thenReturn(Optional.of(mockChatRoom));
+    when(chatRoomRepository.findByParticipantTsids(any())).thenReturn(Optional.of(mockChatRoom));
 
     // when
     ChatInternalServerErrorException exception =
@@ -149,8 +177,7 @@ class ChatServiceTest {
     // given
     String errorMsg = "메시지 알림 전송에 실패했습니다.";
 
-    when(chatRoomRepository.findByParticipantsTsidContainingAll(any()))
-        .thenReturn(Optional.of(mockChatRoom));
+    when(chatRoomRepository.findByParticipantTsids(any())).thenReturn(Optional.of(mockChatRoom));
     when(webSocketHandler.sendMsgToChatroom(any(), any())).thenReturn(true);
 
     // when

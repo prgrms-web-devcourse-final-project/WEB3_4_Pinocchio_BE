@@ -8,13 +8,13 @@ public class ChatRequestDto {
 
   @Builder
   public record SendMessage(
-      String receiverTsid,
+      String receiverId,
       String messageText,
       @JsonFormat(shape = JsonFormat.Shape.STRING) Instant sentAt) {
 
     // 요청값 유효성 체크 (실패 시, 400에러 반환)
     public boolean validateRequest() {
-      return receiverTsid != null && messageText != null && sentAt != null;
+      return receiverId != null && messageText != null && sentAt != null;
     }
   }
 }

@@ -12,8 +12,8 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
 import sns.pinocchio.application.member.MemberService;
-import sns.pinocchio.config.global.auth.exception.auth.AuthErrorCode;
-import sns.pinocchio.config.global.auth.exception.auth.AuthException;
+import sns.pinocchio.presentation.auth.exception.AuthErrorCode;
+import sns.pinocchio.presentation.auth.exception.AuthException;
 import sns.pinocchio.config.global.auth.model.CustomUserDetails;
 import sns.pinocchio.config.global.auth.service.CookieService;
 import sns.pinocchio.config.global.auth.service.CustomUserDetailService;

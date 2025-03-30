@@ -1,4 +1,4 @@
-package sns.pinocchio.config.global.auth.exception.email;
+package sns.pinocchio.presentation.mail.exception;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

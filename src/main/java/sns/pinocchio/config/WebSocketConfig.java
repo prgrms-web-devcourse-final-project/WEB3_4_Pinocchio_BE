@@ -12,12 +12,13 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
   @Override
   public void registerStompEndpoints(StompEndpointRegistry registry) {
-    registry.addEndpoint("/ws").setAllowedOrigins("*").withSockJS();
+    registry.addEndpoint("/ws").setAllowedOriginPatterns("*").withSockJS();
   }
 
   @Override
   public void configureMessageBroker(MessageBrokerRegistry registry) {
-    registry.enableSimpleBroker("/topic", "/queue"); // 구독 주소
-    registry.setApplicationDestinationPrefixes("/app"); // 클라이언트 전송 주소
+    registry.enableSimpleBroker("/sub", "/queue"); // 구독 주소
+    registry.setApplicationDestinationPrefixes("/pub"); // 클라이언트 전송 주소
+    registry.setUserDestinationPrefix("/user"); // 특정 사용자에게만 메시지를 전송 주소
   }
 }

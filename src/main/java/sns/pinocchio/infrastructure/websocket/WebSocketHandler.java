@@ -25,7 +25,7 @@ public class WebSocketHandler {
   public boolean sendMsgToChatroom(String roomId, String message) {
 
     try {
-      messagingTemplate.convertAndSend("/topic/chatroom/" + roomId, message);
+      messagingTemplate.convertAndSend("/sub/chatroom/" + roomId, message);
 
     } catch (MessageConversionException e) {
       log.error("메시지 직렬화 실패: {}", e.getMessage());

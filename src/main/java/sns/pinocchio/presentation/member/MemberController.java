@@ -8,6 +8,8 @@ import org.springframework.web.bind.annotation.*;
 import sns.pinocchio.application.auth.AuthService;
 import sns.pinocchio.application.member.MemberService;
 import sns.pinocchio.application.member.memberDto.*;
+import sns.pinocchio.application.report.ReportService;
+import sns.pinocchio.application.report.reportDto.ReportRequestDto;
 import sns.pinocchio.domain.member.Member;
 
 @RequestMapping("/member")
@@ -17,6 +19,7 @@ public class MemberController {
 
     private final MemberService memberService;
     private final AuthService authService;
+    private final ReportService reportService;
 
     // 유저 프로필 조회
     @GetMapping("/{memberId}")
@@ -89,8 +92,16 @@ public class MemberController {
     }
 
     // 계정 신고
-    @PostMapping("/report")
-    public ResponseEntity<String> reportMember() {
+    @PostMapping("/{memberId}/report")
+    public ResponseEntity<String> reportMember(@PathVariable Long memberId, @Valid @RequestBody ReportRequestDto reportRequestDto) {
+        // 신고자 조회
+        Member report = memberService.findById(memberId);
+
+        // 신고 대상 조회
+        Member reported = memberService.findByNickname(reportRequestDto.reportedNickname());
+
+        // 신고 내역 저장
+        reportService.createReport(report.getId(), reported.getId(), reportRequestDto.reportedType(), reportRequestDto.reason());
 
         return ResponseEntity.ok("계정 신고가 완료되었습니다. 신고 내용은 검토 후 처리됩니다.");
     }

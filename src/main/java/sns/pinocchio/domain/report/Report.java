@@ -8,6 +8,8 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
+import static sns.pinocchio.domain.report.ReportStatus.PENDING;
+
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
@@ -34,13 +36,13 @@ public class Report {
     private LocalDateTime updatedAt;
 
     @Builder
-    public Report(Long reporterId, ReportedType reportedType, Long reportedId, String reason, ReportStatus status, LocalDateTime createdAt, LocalDateTime updatedAt) {
+    public Report(Long reporterId, ReportedType reportedType, Long reportedId, String reason) {
         this.reporterId = reporterId;
         this.reportedType = reportedType;
         this.reportedId = reportedId;
         this.reason = reason;
-        this.status = status;
-        this.createdAt = createdAt;
-        this.updatedAt = updatedAt;
+        this.status = PENDING;
+        this.createdAt = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now();
     }
 }

@@ -11,6 +11,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import sns.pinocchio.application.member.memberDto.MemberInfoDto;
 import sns.pinocchio.config.global.auth.jwt.TokenStatus;
+import sns.pinocchio.config.global.redis.redisService.RedisService;
+import sns.pinocchio.presentation.auth.exception.AuthErrorCode;
+import sns.pinocchio.presentation.auth.exception.AuthException;
 
 import java.security.Key;
 
@@ -18,14 +21,23 @@ import java.security.Key;
 @Component
 public class JwtUtil {
 
+  private final RedisService redisService;
+
   @Value("${spring.security.jwt.secret-key}")
   private String SECRET_KEY;
 
   @Value("${spring.security.jwt.access-token.expiration}")
   private long ACCESS_TOKEN_EXPIRATION_TIME; // 6시간 (단위: ms)
 
+  @Value("${spring.security.jwt.refresh-token.expiration}")
+  private long REFRESH_TOKEN_EXPIRATION_TIME; // 60일(약 2달) (단위: ms)
+
   public Long getAccessTokenExpirationTime() {
     return ACCESS_TOKEN_EXPIRATION_TIME;
+  }
+
+  public Long getRefreshTokenExpirationTime() {
+    return REFRESH_TOKEN_EXPIRATION_TIME;
   }
 
   private Key key;
@@ -67,5 +79,13 @@ public class JwtUtil {
   // JWT 검증 및 정보 추출
   public Claims parseToken(String token) {
     return Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody();
+  }
+
+  // 리프레시 토큰 검증
+  public void isRefreshTokenValid(String refreshToken) {
+    if (redisService.isValidRefreshToken(refreshToken)) {
+      return;
+    }
+    throw new AuthException(AuthErrorCode.TOKEN_EXPIRED);
   }
 }

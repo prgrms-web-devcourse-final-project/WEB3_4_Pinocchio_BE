@@ -5,6 +5,7 @@ import NewPost from "../pages/board/NewPost";
 import Error404 from "../pages/error/Error404";
 import MainBoardList from "../pages/board/MainBoardList";
 import Signup from "../pages/login/Signup";
+import MyPage from "../pages/board/MyPage";
 
 const BaseRoutes = () => {
     return (
@@ -16,6 +17,7 @@ const BaseRoutes = () => {
                 <Route path="" element={<Navigate to="login" replace />} />
                 <Route path="board/list" element={<MainBoardList />} />
                 <Route path="board/new" element={<NewPost />} />
+                <Route path="board/mypage" element={<MyPage />} />
             </Route>
             {/* 에러페이지 */}
             <Route path={"*"} element={<Error404 />} />

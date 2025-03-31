@@ -13,6 +13,10 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 import sns.pinocchio.application.comment.CommentDeleteRequest;
 import sns.pinocchio.application.comment.CommentService;
@@ -43,7 +47,7 @@ public class CommentFIndServiceTest {
 
 		verify(commentRepository, times(1)).findAllByPostIdAndStatus(postId, CommentStatus.ACTIVE);
 
-		System.out.println("✅ 댓글요청에 성공");
+		System.out.println("✅ 댓글 댓글 요청(댓글없음) 성공");
 
 	}
 
@@ -64,7 +68,35 @@ public class CommentFIndServiceTest {
 
 		verify(commentRepository, times(1)).findAllByPostIdAndStatus(postId, CommentStatus.ACTIVE);
 
-		System.out.println("✅ 댓글요청에 성공");
+		System.out.println("✅ 게시글 댓글 조회 성공");
+
+	}
+
+	//유저 댓글 목록 조회 성공
+	@Test
+	void 유저_댓글_목록_조회_테스트() {
+		String authorId = "user_001";
+		String postId = "post_001";
+		String content = "댓글";
+		int page = 0;
+		Pageable pageable = PageRequest.of(page, 10);
+
+		Comment comment = Comment.builder().userId(authorId).postId(postId).content(content).build();
+
+		Page<Comment> followingsPage = new PageImpl<>(List.of(comment, comment, comment));
+
+		when(commentRepository.findAllByUserIdAndStatus(authorId, pageable, CommentStatus.ACTIVE)).thenReturn(
+			followingsPage);
+
+		Map<String, Object> result = commentService.findCommentsByUser(authorId, page);
+		String meesage = (String)result.get("message");
+
+		List<Map<String, String>> comments = (List<Map<String, String>>)result.get("comments");
+
+		assertEquals("댓글요청에 성공하였습니다.", meesage);
+		assertEquals(3, comments.size());
+		verify(commentRepository, times(1)).findAllByUserIdAndStatus(authorId, pageable, CommentStatus.ACTIVE);
+		System.out.println("✅ 유저 댓글 목록 조회 성공");
 
 	}
 }

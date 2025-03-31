@@ -6,18 +6,17 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestConstructor;
 import org.springframework.transaction.annotation.Transactional;
+import sns.pinocchio.PinocchioApplication;
 import sns.pinocchio.application.member.MemberService;
 import sns.pinocchio.application.member.memberDto.UpdateRequestDto;
 import sns.pinocchio.infrastructure.member.MemberRepository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@SpringBootTest
+@SpringBootTest(classes = PinocchioApplication.class)
 @AutoConfigureMockMvc
-@ActiveProfiles("test")
 @Transactional
 @TestConstructor(autowireMode = TestConstructor.AutowireMode.ALL)
 public class MemberServiceTest {

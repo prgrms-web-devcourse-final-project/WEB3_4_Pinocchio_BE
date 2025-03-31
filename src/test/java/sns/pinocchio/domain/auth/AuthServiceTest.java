@@ -1,6 +1,5 @@
 package sns.pinocchio.domain.auth;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -8,14 +7,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestConstructor;
 import org.springframework.transaction.annotation.Transactional;
+import sns.pinocchio.PinocchioApplication;
 import sns.pinocchio.application.auth.AuthService;
 import sns.pinocchio.application.member.MemberService;
 import sns.pinocchio.application.member.memberDto.SignupRequestDto;
 import sns.pinocchio.application.member.memberDto.UpdateRequestDto;
 import sns.pinocchio.application.report.ReportService;
+import sns.pinocchio.config.global.auth.util.TokenProvider;
 import sns.pinocchio.domain.member.Member;
 import sns.pinocchio.domain.report.Report;
 import sns.pinocchio.infrastructure.member.MemberRepository;
@@ -26,9 +26,8 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThatCode;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static sns.pinocchio.domain.report.ReportedType.POST;
 
-@SpringBootTest
+@SpringBootTest(classes = PinocchioApplication.class)
 @AutoConfigureMockMvc
-@ActiveProfiles("test")
 @Transactional
 @TestConstructor(autowireMode = TestConstructor.AutowireMode.ALL)
 public class AuthServiceTest {
@@ -47,6 +46,9 @@ public class AuthServiceTest {
 
     @Autowired
     private ReportService reportService;
+
+    @Autowired
+    private TokenProvider tokenProvider;
 
     @BeforeEach
     public void init() {
@@ -144,9 +146,13 @@ public class AuthServiceTest {
         assertThat(report.getReason()).isEqualTo("욕햇어용");
     }
 
-    @AfterEach
-    public void cleanup() {
-        // 테스트가 끝난 후 데이터베이스 초기화
-        memberRepository.deleteAll(); // 모든 데이터를 삭제
+    @Test
+    @DisplayName("토큰 생성 테스트")
+    public void createToken() {
+        Member member = memberService.findByEmail("example@naver.com");
+
+        String accessToken = tokenProvider.generateAccessToken(member);
+
+        assertThat(accessToken).isNotNull();
     }
 }

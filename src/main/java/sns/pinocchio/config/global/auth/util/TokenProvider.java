@@ -6,7 +6,6 @@ import org.springframework.stereotype.Component;
 import sns.pinocchio.domain.member.Member;
 
 import java.util.Date;
-import java.util.UUID;
 
 @Component
 @RequiredArgsConstructor
@@ -25,10 +24,5 @@ public class TokenProvider {
                 .setExpiration(new Date(System.currentTimeMillis() + jwtUtil.getAccessTokenExpirationTime()))  // 만료시간
                 .signWith(jwtUtil.getKey())  // 서명 알고리즘 및 키
                 .compact();
-    }
-
-    // 리프레시 토큰 생성
-    public String generateRefreshToken() {
-        return UUID.randomUUID().toString();
     }
 }

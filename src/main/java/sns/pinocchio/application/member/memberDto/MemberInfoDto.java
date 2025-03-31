@@ -8,7 +8,8 @@ import sns.pinocchio.domain.member.Member;
 public record MemberInfoDto(
         Long id,
         String nickname,
-        String email
+        String email,
+        String tsid
 ) {
 
     public static MemberInfoDto of(Member member) {
@@ -16,6 +17,7 @@ public record MemberInfoDto(
                 .id(member.getId())
                 .nickname(member.getNickname())
                 .email(member.getEmail())
+                .tsid(member.getTsid())
                 .build();
     }
 }

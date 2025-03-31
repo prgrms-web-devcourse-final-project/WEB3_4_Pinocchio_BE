@@ -24,15 +24,8 @@ public class JwtUtil {
     @Value("${spring.security.jwt.access-token.expiration}")
     private long ACCESS_TOKEN_EXPIRATION_TIME; // 6시간 (단위: ms)
 
-    @Value("${spring.security.jwt.refresh-token.expiration}")
-    private long REFRESH_TOKEN_EXPIRATION_TIME; // 60일(약 2달) (단위: ms)
-
     public Long getAccessTokenExpirationTime() {
         return ACCESS_TOKEN_EXPIRATION_TIME;
-    }
-
-    public Long getRefreshTokenExpirationTime() {
-        return REFRESH_TOKEN_EXPIRATION_TIME;
     }
 
     private Key key;
@@ -70,6 +63,7 @@ public class JwtUtil {
                 .id(claims.get("id", Long.class))
                 .nickname(claims.getSubject())
                 .email(claims.get("email", String.class))
+                .tsid(claims.get("tsid", String.class))
                 .build();
     }
 

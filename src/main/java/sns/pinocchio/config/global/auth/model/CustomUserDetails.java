@@ -21,6 +21,8 @@ public class CustomUserDetails implements UserDetails {
         return List.of(new SimpleGrantedAuthority("USER"));
     }
 
+    public MemberInfoDto getMemberInfoDto() { return memberInfoDto; }
+
     @Override
     public String getPassword() {
         return null; // 비밀번호 반환 - 보안상 null 로 설정

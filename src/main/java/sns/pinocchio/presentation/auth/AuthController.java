@@ -1,9 +1,9 @@
 package sns.pinocchio.presentation.auth;
 
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -51,8 +51,8 @@ public class AuthController {
         // 패스워드 검증
         authService.validatePassword(loginRequestDto.password(), member);
 
-        // 토콘 생성 및 저장
-        authService.generateAndSaveToken(member, response);
+        // 토콘 생성
+        String accessToken = authService.generateAndSaveToken(member);
 
         // 응답 DTO 변환
         SignupResponseDto signupResponseDto = new SignupResponseDto(
@@ -61,13 +61,12 @@ public class AuthController {
                 "로그인에 성공했습니다.",
                 SignupResponseDto.UserData.of(member));
 
-        return ResponseEntity.status(HttpStatus.OK).body(signupResponseDto);
+        return ResponseEntity.status(HttpStatus.OK).header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken).body(signupResponseDto);
     }
 
     // 로그아웃
     @PostMapping("/logout")
-    public ResponseEntity<String> logout(HttpServletRequest request, HttpServletResponse response) {
-        authService.logout(request, response);
+    public ResponseEntity<String> logout() {
         return ResponseEntity.ok("로그아웃에 성공했습니다.");
     }
 }

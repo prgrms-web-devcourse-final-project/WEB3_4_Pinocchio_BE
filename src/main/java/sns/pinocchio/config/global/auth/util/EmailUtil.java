@@ -35,7 +35,7 @@ public class EmailUtil {
       // 이메일 전송
       javaMailSender.send(mimeMessage);
     } catch (Exception e) {
-      throw new MailException(MailErrorCode.INVALID_EMAIL_ADDRESS);
+      throw new MailException(MailErrorCode.MAIL_SEND_FAILED);
     }
   }
 }

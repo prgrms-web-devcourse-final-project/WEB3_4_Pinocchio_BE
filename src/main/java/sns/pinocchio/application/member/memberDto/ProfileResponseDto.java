@@ -7,6 +7,7 @@ import sns.pinocchio.domain.member.Member;
 public record ProfileResponseDto(String status, int statusCode, String message, UserData data) {
   @Builder
   public record UserData(
+      Long id,
       String email,
       String name,
       String nickname,
@@ -16,6 +17,7 @@ public record ProfileResponseDto(String status, int statusCode, String message, 
       Boolean isActive) {
     public static UserData of(Member member) {
       return UserData.builder()
+          .id(member.getId())
           .email(member.getEmail())
           .name(member.getName())
           .nickname(member.getNickname())

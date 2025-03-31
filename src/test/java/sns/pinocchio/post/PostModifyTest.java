@@ -34,11 +34,11 @@ public class PostModifyTest {
         }
 
         Post originalPost = optionalPost.get();
-
+// 테스트용 주석
         // 2️⃣ 수정 요청 생성
         PostModifyRequest request = PostModifyRequest.builder()
                 .postId(originalPost.getId())
-                .userId("user_123")
+                .tsid("user_123")
                 .content("✅ 수정된 게시물입니다. #수정됨")
                 .imageUrls(List.of("https://example.com/modified_image.jpg"))
                 .visibility("private") // 문자열로 줘도 내부에서 Enum으로 처리됨

@@ -12,6 +12,12 @@ public class ChatException {
     }
   }
 
+  public static class ChatNotFoundException extends BaseException {
+    public ChatNotFoundException(String message) {
+      super(message, 404);
+    }
+  }
+
   public static class ChatInternalServerErrorException extends BaseException {
     public ChatInternalServerErrorException(String message) {
       super(message, 500);

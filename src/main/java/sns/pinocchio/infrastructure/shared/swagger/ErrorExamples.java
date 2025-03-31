@@ -31,4 +31,14 @@ public class ErrorExamples {
               "data": []
             }
           """;
+
+  public static final String FIND_CHAT_ROOM_NOT_FOUND_EXAMPLE =
+      """
+      {
+        "status": "error",
+        "statusCode": 404,
+        "message": "등록된 사용자를 찾을 수 없습니다.",
+        "data": []
+      }
+    """;
 }

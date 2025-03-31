@@ -19,6 +19,9 @@ public class MemberService {
 
   private final MemberRepository memberRepository;
   private final PasswordEncoder passwordEncoder;
+  private final CookieService cookieService;
+  private final RedisService redisService;
+  private final JwtUtil jwtUtil;
 
   // 계정 생성
   @Transactional
@@ -116,13 +119,33 @@ public class MemberService {
             });
   }
 
-    // 사용자 삭제
-    public void deleteMember(Member member) {
-        memberRepository.deleteById(member.getId());
-    }
+  // 사용자 삭제
+  public void deleteMember(Member member) {
+    memberRepository.deleteById(member.getId());
+  }
 
-    public Member findByTsid(String tsid) {
-        return memberRepository.findByTsid(tsid)
-                .orElseThrow(() -> new IllegalArgumentException("해당 사용자를 찾을 수 없습니다."));
+  // 리프레시 토큰 쿠키, 레디스 저장
+  public void saveRefreshToken(String refreshToken, Member member, HttpServletResponse response) {
+    cookieService.addRefreshTokenToCookie(
+        refreshToken, jwtUtil.getRefreshTokenExpirationTime(), response);
+    redisService.save(
+        refreshToken, String.valueOf(member.getId()), jwtUtil.getRefreshTokenExpirationTime());
+  }
+
+  public void tokenClear(HttpServletRequest request, HttpServletResponse response) {
+    String refreshToken = cookieService.getRefreshTokenFromCookie(request);
+
+    if (refreshToken != null) {
+      cookieService.clearTokenFromCookie(response);
+      redisService.addBlackList(refreshToken, jwtUtil.getRefreshTokenExpirationTime());
+    } else {
+      throw new AuthException(AuthErrorCode.INVALID_TOKEN);
     }
+  }
+
+  public Member findByTsid(String tsid) {
+    return memberRepository
+        .findByTsid(tsid)
+        .orElseThrow(() -> new IllegalArgumentException("해당 사용자를 찾을 수 없습니다."));
+  }
 }

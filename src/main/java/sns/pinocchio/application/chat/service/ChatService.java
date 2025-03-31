@@ -218,20 +218,27 @@ public class ChatService {
         chatRoom.getParticipantTsids().stream()
             .filter(id -> !id.equals(userTsid))
             .findFirst()
-            .orElseGet(null);
+            .orElse(null);
 
     // 읽지 않은 메시지 개수 확인: 없으면 0
     int unreadCounts = 0;
-
     if (chatRoom.getUnreadCounts() != null && chatRoom.getUnreadCounts().containsKey(userTsid)) {
       unreadCounts = chatRoom.getUnreadCounts().get(userTsid);
+    }
+
+    // 마지막 메시지 정보 확인: 없으면 null
+    String lastMessage = null;
+    Instant lastMessageTime = null;
+    if (chatRoom.getLastMessage() != null) {
+      lastMessage = chatRoom.getLastMessage().getContent();
+      lastMessageTime = chatRoom.getLastMessage().getCreatedAt();
     }
 
     return ChatRoomsDetail.builder()
         .roomId(chatRoom.getId())
         .targetUserId(targetUserTsid)
-        .lastMessage(chatRoom.getLastMessage().getContent())
-        .lastMessageTime(chatRoom.getLastMessage().getCreatedAt())
+        .lastMessage(lastMessage)
+        .lastMessageTime(lastMessageTime)
         .unreadCounts(unreadCounts)
         .build();
   }

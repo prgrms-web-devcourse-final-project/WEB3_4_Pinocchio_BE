@@ -3,6 +3,7 @@ package sns.pinocchio.application.chat.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 
 import java.time.Instant;
@@ -16,15 +17,19 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import sns.pinocchio.application.chat.dto.ChatRequestDto.SendMessage;
+import sns.pinocchio.application.chat.dto.ChatResponseDto.ChatRoomsInfo;
 import sns.pinocchio.application.chat.dto.ChatResponseDto.SendMessageInfo;
 import sns.pinocchio.domain.chat.Chat;
 import sns.pinocchio.domain.chat.ChatException.ChatBadRequestException;
 import sns.pinocchio.domain.chat.ChatException.ChatInternalServerErrorException;
+import sns.pinocchio.domain.chat.ChatException.ChatNotFoundException;
 import sns.pinocchio.domain.chat.ChatStatus;
 import sns.pinocchio.domain.chatroom.ChatRoom;
+import sns.pinocchio.domain.chatroom.ChatRoomSortType;
 import sns.pinocchio.domain.chatroom.ChatRoomStatus;
 import sns.pinocchio.infrastructure.persistence.mongodb.ChatRepository;
 import sns.pinocchio.infrastructure.persistence.mongodb.ChatRoomRepository;
+import sns.pinocchio.infrastructure.persistence.mongodb.ChatRoomRepositoryCustom;
 import sns.pinocchio.infrastructure.websocket.WebSocketHandler;
 
 @ExtendWith(MockitoExtension.class)
@@ -33,6 +38,8 @@ class ChatServiceTest {
   @InjectMocks private ChatService chatService;
 
   @Mock private ChatRoomRepository chatRoomRepository;
+
+  @Mock private ChatRoomRepositoryCustom chatRoomRepositoryCustom;
 
   @Mock private ChatRepository chatRepository;
 
@@ -223,6 +230,99 @@ class ChatServiceTest {
             () ->
                 chatService.createNewChatRoom(
                     testSenderTsid, testReceiverTsid, mockChatRoom.getCreatedAt()));
+
+    // then
+    assertThat(exception.getMessage()).isEqualTo(errorMsg);
+  }
+
+  @Test
+  @DisplayName("채팅방 리스트 조회 Success")
+  void findChatRoomsSuccessTest() {
+
+    // given
+    int limit = 2;
+    String sortBy = "latest";
+    String cursor = null;
+
+    ChatRoom room1 =
+        ChatRoom.builder()
+            .id("room1")
+            .participantTsids(List.of("user_123", "user_456"))
+            .createdAt(Instant.parse("2025-03-30T10:00:00Z"))
+            .build();
+
+    ChatRoom room2 =
+        ChatRoom.builder()
+            .id("room2")
+            .participantTsids(List.of("user_123", "user_789"))
+            .createdAt(Instant.parse("2025-03-29T10:00:00Z"))
+            .build();
+
+    ChatRoom extra =
+        ChatRoom.builder()
+            .id("room3")
+            .participantTsids(List.of("user_123", "user_999"))
+            .createdAt(Instant.parse("2025-03-28T10:00:00Z"))
+            .build();
+
+    // limit+1 만큼 리턴 → hasNext = true
+    List<ChatRoom> fakeRooms = List.of(room1, room2, extra);
+
+    given(
+            chatRoomRepositoryCustom.findChatRoomsByUserWithCursor(
+                eq(testSenderTsid), isNull(), eq(limit + 1), eq(ChatRoomSortType.LATEST)))
+        .willReturn(fakeRooms);
+
+    // when
+    ChatRoomsInfo chatRooms = chatService.getChatRooms(testSenderTsid, limit, sortBy, cursor);
+
+    // then
+    assertThat(chatRooms).isNotNull();
+    assertThat(chatRooms.getChatrooms()).hasSize(limit); // limit 개수
+    assertThat(chatRooms.isHasNext()).isTrue();
+    assertThat(chatRooms.getNextCursor()).isEqualTo(room2.getCreatedAt().toString());
+  }
+
+  @Test
+  @DisplayName("채팅방 리스트 조회 Success: 커서 기반 조회 확인")
+  void findChatRoomsWithCursorSuccessTest() {
+
+    // given
+    String userTsid = "user_123";
+    String cursor = "2025-03-28T00:00:00Z";
+
+    ChatRoom room =
+        ChatRoom.builder()
+            .id("room4")
+            .participantTsids(List.of("user_123", "user_999"))
+            .createdAt(Instant.parse("2025-03-27T10:00:00Z"))
+            .build();
+
+    given(
+            chatRoomRepositoryCustom.findChatRoomsByUserWithCursor(
+                eq(userTsid), eq(Instant.parse(cursor)), eq(4), eq(ChatRoomSortType.LATEST)))
+        .willReturn(List.of(room));
+
+    // when
+    ChatRoomsInfo result = chatService.getChatRooms(userTsid, 3, "latest", cursor);
+
+    // then
+    assertThat(result.isHasNext()).isFalse();
+    assertThat(result.getChatrooms()).hasSize(1);
+    assertThat(result.getNextCursor()).isNull();
+  }
+
+  @Test
+  @DisplayName("채팅방 리스트 조회 Fail: 등록된 사용자를 찾을 수 없을 경우")
+  void findChatRoomsFailNoUserTest() {
+
+    // given
+    String errorMsg = "등록된 사용자를 찾을 수 없습니다.";
+
+    // when
+    ChatNotFoundException exception =
+        assertThrows(
+            ChatNotFoundException.class, () -> chatService.getChatRooms(null, 1, "latest", null));
 
     // then
     assertThat(exception.getMessage()).isEqualTo(errorMsg);

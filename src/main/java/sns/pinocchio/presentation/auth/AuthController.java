@@ -17,7 +17,7 @@ import sns.pinocchio.application.member.memberDto.SignupRequestDto;
 import sns.pinocchio.application.member.memberDto.SignupResponseDto;
 import sns.pinocchio.domain.member.Member;
 
-@RequestMapping("/api/auth")
+@RequestMapping("/auth")
 @RequiredArgsConstructor
 @RestController
 public class AuthController {

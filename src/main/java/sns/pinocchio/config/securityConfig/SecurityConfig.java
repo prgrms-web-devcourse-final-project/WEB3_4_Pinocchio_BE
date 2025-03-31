@@ -39,10 +39,10 @@ public class SecurityConfig {
                                 "/webjars/**"
                         ).permitAll()
                         .requestMatchers(
-                                "/api/auth/signup",
-                                "/api/auth/login",
-                                "/api/auth/logout",
-                                "/api/posts/search"
+                                "/auth/signup",
+                                "/auth/login",
+                                "/auth/logout",
+                                "/posts/search"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )

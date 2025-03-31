@@ -4,11 +4,13 @@ import Layout from "../layout/background/Layout";
 import NewPost from "../pages/board/NewPost";
 import Error404 from "../pages/error/Error404";
 import MainBoardList from "../pages/board/MainBoardList";
+import Signup from "../pages/login/Signup";
 
 const BaseRoutes = () => {
     return (
         <Routes>
             <Route exact path="login" element={<Login />} />
+            <Route exact path="signup" element={<Signup />} />
             <Route path="/" element={<Layout />} >
                 {/* 메인 도메인만 입력 시 로그인으로 이동*/}
                 <Route path="" element={<Navigate to="login" replace />} />

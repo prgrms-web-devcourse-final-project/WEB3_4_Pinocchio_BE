@@ -12,18 +12,6 @@ const BoardSearch = ({ refetch, type }) => {
     const [isAdmin, setIsAdmin] = useState(false);
 
     useEffect(() => {
-        const token = localStorage.getItem('token');
-        if (token) {
-            const decodedToken = jwtDecode(token);
-            const roles = decodedToken?.roles || [];
-            if (roles.includes("BOARD_ADMIN")) {
-                setIsAdmin(true);
-            }
-        }
-
-    }, []);
-
-    useEffect(() => {
         setQueryParam({ keyword }); // keyword 변경 시 쿼리 파라미터 업데이트
     }, [keyword]);
 

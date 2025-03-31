@@ -69,6 +69,7 @@ public class AuthServiceTest {
     assertThat(user).isNotNull();
     assertThat(user.getName()).isEqualTo("name");
     assertThat(user.getNickname()).isEqualTo("nickname1");
+    assertThat(user.getTsid()).isNotNull();
   }
 
   @Test

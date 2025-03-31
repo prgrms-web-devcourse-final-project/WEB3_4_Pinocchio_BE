@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import sns.pinocchio.application.auth.AuthService;
 import sns.pinocchio.application.member.MemberService;
@@ -119,7 +120,9 @@ public class MemberController {
   // 계정 차단
   @PostMapping("/block")
   public ResponseEntity<String> blockMember() {
-
+      MemberInfoDto memberInfoDto = (MemberInfoDto) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+      Long id = memberInfoDto.id();
+            
     return ResponseEntity.ok("해당 회원의 계정이 차단되었습니다.");
   }
 

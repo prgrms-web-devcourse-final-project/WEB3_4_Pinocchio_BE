@@ -21,6 +21,13 @@ public class PostService {
 
     // 게시물 생성
     public String createPost(PostCreateRequest request, String tsid) {
+        List<String> imageUrls = request.getImageUrls();
+
+        // 이미지가 반드시 1장이어야 함
+        if (imageUrls == null || imageUrls.size() != 1) {
+            throw new IllegalArgumentException("이미지는 정확히 1장만 등록해야 합니다.");
+        }
+
         Post post = Post.builder()
                 .tsid(tsid)  // 작성자 TSID (JWT에서 추출한 고유 식별자)
                 .content(request.getContent())  // 게시글 본문

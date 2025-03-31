@@ -22,51 +22,56 @@ import sns.pinocchio.domain.member.Member;
 @RestController
 public class AuthController {
 
-    private final MemberService memberService;
-    private final AuthService authService;
+  private final MemberService memberService;
+  private final AuthService authService;
 
-    // 회원가입
-    @PostMapping("/signup")
-    public ResponseEntity<SignupResponseDto> signup(@RequestBody @Valid SignupRequestDto signupRequestDto) {
-        // 계정 생성
-        Member member = memberService.createMember(signupRequestDto);
+  // 회원가입
+  @PostMapping("/signup")
+  public ResponseEntity<SignupResponseDto> signup(
+      @RequestBody @Valid SignupRequestDto signupRequestDto) {
+    // 계정 생성
+    Member member = memberService.createMember(signupRequestDto);
 
-        // 응답 DTO 변환
-        SignupResponseDto signupResponseDto = new SignupResponseDto(
-                "success",
-                HttpStatus.CREATED.value(),
-                "회원가입에 성공했습니다.",
-                SignupResponseDto.UserData.of(member));
+    // 응답 DTO 변환
+    SignupResponseDto signupResponseDto =
+        new SignupResponseDto(
+            "success",
+            HttpStatus.CREATED.value(),
+            "회원가입에 성공했습니다.",
+            SignupResponseDto.UserData.of(member));
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(signupResponseDto);
-    }
+    return ResponseEntity.status(HttpStatus.CREATED).body(signupResponseDto);
+  }
 
+  // 로그인
+  @PostMapping("/login")
+  public ResponseEntity<SignupResponseDto> login(
+      @RequestBody @Valid LoginRequestDto loginRequestDto, HttpServletResponse response) {
+    // 이메일 검증
+    Member member = memberService.findByEmail(loginRequestDto.email());
 
-    // 로그인
-    @PostMapping("/login")
-    public ResponseEntity<SignupResponseDto> login(@RequestBody @Valid LoginRequestDto loginRequestDto, HttpServletResponse response) {
-        // 이메일 검증
-        Member member = memberService.findByEmail(loginRequestDto.email());
+    // 패스워드 검증
+    authService.validatePassword(loginRequestDto.password(), member);
 
-        // 패스워드 검증
-        authService.validatePassword(loginRequestDto.password(), member);
+    // 토콘 생성
+    String accessToken = authService.generateAndSaveToken(member);
 
-        // 토콘 생성
-        String accessToken = authService.generateAndSaveToken(member);
+    // 응답 DTO 변환
+    SignupResponseDto signupResponseDto =
+        new SignupResponseDto(
+            "success",
+            HttpStatus.OK.value(),
+            "로그인에 성공했습니다.",
+            SignupResponseDto.UserData.of(member));
 
-        // 응답 DTO 변환
-        SignupResponseDto signupResponseDto = new SignupResponseDto(
-                "success",
-                HttpStatus.OK.value(),
-                "로그인에 성공했습니다.",
-                SignupResponseDto.UserData.of(member));
+    return ResponseEntity.status(HttpStatus.OK)
+        .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken)
+        .body(signupResponseDto);
+  }
 
-        return ResponseEntity.status(HttpStatus.OK).header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken).body(signupResponseDto);
-    }
-
-    // 로그아웃
-    @PostMapping("/logout")
-    public ResponseEntity<String> logout() {
-        return ResponseEntity.ok("로그아웃에 성공했습니다.");
-    }
+  // 로그아웃
+  @PostMapping("/logout")
+  public ResponseEntity<String> logout() {
+    return ResponseEntity.ok("로그아웃에 성공했습니다.");
+  }
 }

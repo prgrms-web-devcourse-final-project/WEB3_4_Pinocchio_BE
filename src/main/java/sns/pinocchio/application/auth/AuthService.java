@@ -13,20 +13,20 @@ import sns.pinocchio.presentation.member.exception.MemberException;
 @Service
 public class AuthService {
 
-    private final PasswordEncoder passwordEncoder;
-    private final TokenProvider tokenProvider;
-    private final JwtUtil jwtUtil;
+  private final PasswordEncoder passwordEncoder;
+  private final TokenProvider tokenProvider;
+  private final JwtUtil jwtUtil;
 
-    // 패스워드 검증
-    public void validatePassword(String password, Member member) {
-        if (!passwordEncoder.matches(password, member.getPassword())) {
-            throw new MemberException(MemberErrorCode.INVALID_PASSWORD);
-        }
+  // 패스워드 검증
+  public void validatePassword(String password, Member member) {
+    if (!passwordEncoder.matches(password, member.getPassword())) {
+      throw new MemberException(MemberErrorCode.INVALID_PASSWORD);
     }
+  }
 
-    // 엑세스토큰 생성
-    public String generateAndSaveToken(Member member) {
-        String accessToken = tokenProvider.generateAccessToken(member);
-        return accessToken;
-    }
+  // 엑세스토큰 생성
+  public String generateAndSaveToken(Member member) {
+    String accessToken = tokenProvider.generateAccessToken(member);
+    return accessToken;
+  }
 }

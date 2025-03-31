@@ -18,61 +18,54 @@ import java.security.Key;
 @Component
 public class JwtUtil {
 
-    @Value("${spring.security.jwt.secret-key}")
-    private String SECRET_KEY;
+  @Value("${spring.security.jwt.secret-key}")
+  private String SECRET_KEY;
 
-    @Value("${spring.security.jwt.access-token.expiration}")
-    private long ACCESS_TOKEN_EXPIRATION_TIME; // 6시간 (단위: ms)
+  @Value("${spring.security.jwt.access-token.expiration}")
+  private long ACCESS_TOKEN_EXPIRATION_TIME; // 6시간 (단위: ms)
 
-    public Long getAccessTokenExpirationTime() {
-        return ACCESS_TOKEN_EXPIRATION_TIME;
+  public Long getAccessTokenExpirationTime() {
+    return ACCESS_TOKEN_EXPIRATION_TIME;
+  }
+
+  private Key key;
+
+  @PostConstruct
+  public void init() {
+    this.key = Keys.hmacShaKeyFor(SECRET_KEY.getBytes()); // `@Value` 주입된 후 실행됨
+  }
+
+  public Key getKey() {
+    return key;
+  }
+
+  // 토큰 검증 메서드
+  public TokenStatus validateToken(String token) {
+    try {
+      Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
+      return TokenStatus.VALID; // 유효한 토큰
+    } catch (ExpiredJwtException e) { // 토큰이 만료됨
+      return TokenStatus.EXPIRED;
+    } catch (MalformedJwtException e) { // 토큰이 올바르지 않음
+      return TokenStatus.MALFORMED;
+    } catch (IllegalArgumentException e) { // 토큰이 비었거나 올바르지 않음
+      return TokenStatus.INVALID;
     }
+  }
 
-    private Key key;
+  // 토큰으로 유저 정보 가져오기
+  public MemberInfoDto getMemberInfoDto(String token) {
+    Claims claims = parseToken(token);
+    return MemberInfoDto.builder()
+        .id(claims.get("id", Long.class))
+        .nickname(claims.getSubject())
+        .email(claims.get("email", String.class))
+        .tsid(claims.get("tsid", String.class))
+        .build();
+  }
 
-    @PostConstruct
-    public void init() {
-        this.key = Keys.hmacShaKeyFor(SECRET_KEY.getBytes());  // `@Value` 주입된 후 실행됨
-    }
-
-    public Key getKey() {
-        return key;
-    }
-
-    // 토큰 검증 메서드
-    public TokenStatus validateToken(String token) {
-        try {
-            Jwts.parserBuilder()
-                    .setSigningKey(key)
-                    .build()
-                    .parseClaimsJws(token);
-            return TokenStatus.VALID;               // 유효한 토큰
-        } catch (ExpiredJwtException e) {           // 토큰이 만료됨
-            return TokenStatus.EXPIRED;
-        } catch (MalformedJwtException e) {         //토큰이 올바르지 않음
-            return TokenStatus.MALFORMED;
-        } catch (IllegalArgumentException e) {      //토큰이 비었거나 올바르지 않음
-            return TokenStatus.INVALID;
-        }
-    }
-
-    // 토큰으로 유저 정보 가져오기
-    public MemberInfoDto getMemberInfoDto(String token) {
-        Claims claims = parseToken(token);
-        return MemberInfoDto.builder()
-                .id(claims.get("id", Long.class))
-                .nickname(claims.getSubject())
-                .email(claims.get("email", String.class))
-                .tsid(claims.get("tsid", String.class))
-                .build();
-    }
-
-    // JWT 검증 및 정보 추출
-    public Claims parseToken(String token) {
-        return Jwts.parserBuilder()
-                .setSigningKey(key)
-                .build()
-                .parseClaimsJws(token)
-                .getBody();
-    }
+  // JWT 검증 및 정보 추출
+  public Claims parseToken(String token) {
+    return Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody();
+  }
 }

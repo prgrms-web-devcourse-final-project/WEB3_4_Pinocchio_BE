@@ -5,5 +5,4 @@ import org.springframework.stereotype.Repository;
 import sns.pinocchio.domain.blockedUser.BlockedUser;
 
 @Repository
-public interface BlockedUserRepository extends JpaRepository<BlockedUser, Integer> {
-}
+public interface BlockedUserRepository extends JpaRepository<BlockedUser, Integer> {}

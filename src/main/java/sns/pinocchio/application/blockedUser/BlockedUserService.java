@@ -8,6 +8,5 @@ import sns.pinocchio.infrastructure.blockedUser.BlockedUserRepository;
 @Service
 public class BlockedUserService {
 
-    private final BlockedUserRepository blockedUserRepository;
-
+  private final BlockedUserRepository blockedUserRepository;
 }

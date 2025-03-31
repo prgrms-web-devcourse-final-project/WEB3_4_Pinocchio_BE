@@ -1,15 +1,22 @@
 package sns.pinocchio.application.member;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import sns.pinocchio.application.member.memberDto.SignupRequestDto;
 import sns.pinocchio.application.member.memberDto.UpdateRequestDto;
+import sns.pinocchio.config.global.auth.service.cookieService.CookieService;
 import sns.pinocchio.config.global.auth.util.EmailUtil;
+import sns.pinocchio.config.global.auth.util.JwtUtil;
 import sns.pinocchio.config.global.auth.util.PasswordUtil;
+import sns.pinocchio.config.global.redis.redisService.RedisService;
 import sns.pinocchio.domain.member.Member;
 import sns.pinocchio.infrastructure.member.MemberRepository;
+import sns.pinocchio.presentation.auth.exception.AuthErrorCode;
+import sns.pinocchio.presentation.auth.exception.AuthException;
 import sns.pinocchio.presentation.member.exception.MemberErrorCode;
 import sns.pinocchio.presentation.member.exception.MemberException;
 
@@ -19,6 +26,9 @@ public class MemberService {
 
   private final MemberRepository memberRepository;
   private final PasswordEncoder passwordEncoder;
+  private final CookieService cookieService;
+  private final RedisService redisService;
+  private final JwtUtil jwtUtil;
 
   // 계정 생성
   @Transactional
@@ -119,5 +129,24 @@ public class MemberService {
   // 사용자 삭제
   public void deleteMember(Member member) {
     memberRepository.deleteById(member.getId());
+  }
+
+  // 리프레시 토큰 쿠키, 레디스 저장
+  public void saveRefreshToken(String refreshToken, Member member, HttpServletResponse response) {
+    cookieService.addRefreshTokenToCookie(
+        refreshToken, jwtUtil.getRefreshTokenExpirationTime(), response);
+    redisService.save(
+        refreshToken, String.valueOf(member.getId()), jwtUtil.getRefreshTokenExpirationTime());
+  }
+
+  public void tokenClear(HttpServletRequest request, HttpServletResponse response) {
+    String refreshToken = cookieService.getRefreshTokenFromCookie(request);
+
+    if (refreshToken != null) {
+      cookieService.clearTokenFromCookie(response);
+      redisService.addBlackList(refreshToken, jwtUtil.getRefreshTokenExpirationTime());
+    } else {
+      throw new AuthException(AuthErrorCode.INVALID_TOKEN);
+    }
   }
 }

@@ -12,22 +12,25 @@ import sns.pinocchio.presentation.report.exception.ReportException;
 @Service
 public class ReportService {
 
-    private final ReportRepository reportRepository;
+  private final ReportRepository reportRepository;
 
-    // 신고 내역 저장
-    public void createReport(Long reporterId, Long reportedId, ReportedType reportedType, String reason) {
-        Report report = Report.builder()
-                .reporterId(reporterId)
-                .reportedId(reportedId)
-                .reportedType(reportedType)
-                .reason(reason)
-                .build();
+  // 신고 내역 저장
+  public void createReport(
+      Long reporterId, Long reportedId, ReportedType reportedType, String reason) {
+    Report report =
+        Report.builder()
+            .reporterId(reporterId)
+            .reportedId(reportedId)
+            .reportedType(reportedType)
+            .reason(reason)
+            .build();
 
-        reportRepository.save(report);
-    }
+    reportRepository.save(report);
+  }
 
-    public Report findByReporter(long id) {
-        return reportRepository.findByReporterId(id)
-                .orElseThrow(() -> new ReportException(ReportErrorCode.REPORT_NOT_FOUND));
-    }
+  public Report findByReporter(long id) {
+    return reportRepository
+        .findByReporterId(id)
+        .orElseThrow(() -> new ReportException(ReportErrorCode.REPORT_NOT_FOUND));
+  }
 }

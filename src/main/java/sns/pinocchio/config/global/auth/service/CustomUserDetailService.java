@@ -15,18 +15,18 @@ import sns.pinocchio.domain.member.Member;
 @RequiredArgsConstructor
 public class CustomUserDetailService implements UserDetailsService {
 
-    private final MemberService memberService;
-    private final JwtUtil jwtUtil;
+  private final MemberService memberService;
+  private final JwtUtil jwtUtil;
 
-    @Override
-    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+  @Override
+  public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
 
-        Member member = memberService.findByEmail(email);
-        return new CustomUserDetails(MemberInfoDto.of(member));
-    }
+    Member member = memberService.findByEmail(email);
+    return new CustomUserDetails(MemberInfoDto.of(member));
+  }
 
-    // UserDetails 생성
-    public CustomUserDetails loadUserByAccessToken(String accessToken) {
-        return new CustomUserDetails(jwtUtil.getMemberInfoDto(accessToken));
-    }
+  // UserDetails 생성
+  public CustomUserDetails loadUserByAccessToken(String accessToken) {
+    return new CustomUserDetails(jwtUtil.getMemberInfoDto(accessToken));
+  }
 }

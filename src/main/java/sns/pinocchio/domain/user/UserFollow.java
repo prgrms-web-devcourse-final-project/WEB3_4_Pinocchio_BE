@@ -33,4 +33,6 @@ public class UserFollow {
 
 	private LocalDateTime createdAt;
 
+	private LocalDateTime updatedAt;
+
 }

@@ -11,7 +11,6 @@ import sns.pinocchio.domain.comment.CommentLikeStatus;
 
 public interface CommentLikeRepository extends MongoRepository<CommentLike, String> {
 	Optional<CommentLike> findByUserIdAndCommentId(String userId, String postId);
-	long countByCommentIdAndStatus(String postId,CommentLikeStatus status);
 	List<CommentLike> findAllByUserIdAndStatus(String userId, CommentLikeStatus status);
 	void deleteByCommentId(String commentId);
 

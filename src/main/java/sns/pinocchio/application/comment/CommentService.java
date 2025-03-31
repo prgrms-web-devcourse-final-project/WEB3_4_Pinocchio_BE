@@ -9,6 +9,9 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import lombok.RequiredArgsConstructor;
@@ -21,7 +24,6 @@ import sns.pinocchio.infrastructure.persistence.mongodb.CommentRepository;
 public class CommentService {
 	private final CommentRepository commentRepository;
 	private final CommentLikeService commentLikeService;
-
 
 	//댓글 생성 메서드
 	public Map<String, Object> createComment(CommentCreateRequest request, String authorId, String postId) {
@@ -42,7 +44,7 @@ public class CommentService {
 
 	//댓글 삭제 메서드 SOFT_DELETED:실제로 삭제 X 안보이게만 HARD_DELETED:실제로 삭제
 	public Map<String, Object> deleteComment(CommentDeleteRequest request) {
-		Comment comment = commentRepository.findByIdAndPostId(request.commentId, request.postId)
+		Comment comment = commentRepository.findByIdAndPostIdAndStatus(request.commentId, request.postId,CommentStatus.ACTIVE)
 			.orElseThrow(() -> new NoSuchElementException("등록된 댓글을 찾을 수 없습니다."));
 
 		LocalDateTime updatedAt = LocalDateTime.now();
@@ -72,7 +74,7 @@ public class CommentService {
 
 	//댓글 수정 메서드
 	public Map<String, Object> modifyComment(CommentModifyRequest request) {
-		Comment comment = commentRepository.findByIdAndPostId(request.commentId, request.postId)
+		Comment comment = commentRepository.findByIdAndPostIdAndStatus(request.commentId, request.postId,CommentStatus.ACTIVE)
 			.orElseThrow(() -> new NoSuchElementException("등록된 댓글을 찾을 수 없습니다."));
 		LocalDateTime updatedAt = LocalDateTime.now();
 		comment.setContent(request.content);
@@ -84,7 +86,7 @@ public class CommentService {
 
 	//댓글 좋아요 업데이트 메서드, 댓글_좋아요 테이블에 등록 이후 댓글 좋아요 카운트 증가 or 댓글_좋아요 테이블에 삭제 이후 댓글 좋아요 카운트 감소
 	public Map<String, Object> toggleCommentLike(CommentLikeRequest request, String commentId, String authorId) {
-		Comment comment = commentRepository.findByIdAndPostId(commentId, request.postId)
+		Comment comment = commentRepository.findByIdAndPostIdAndStatus(commentId, request.postId,CommentStatus.ACTIVE)
 			.orElseThrow(() -> new NoSuchElementException("등록된 댓글을 찾을 수 없습니다."));
 
 		Optional<String> optCommentLikeId = commentLikeService.toggleCommentLike(commentId, authorId);

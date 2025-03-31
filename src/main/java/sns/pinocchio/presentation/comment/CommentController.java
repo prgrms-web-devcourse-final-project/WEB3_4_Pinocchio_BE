@@ -108,7 +108,7 @@ public class CommentController {
 		return ResponseEntity.status(HttpStatus.OK).body(response);
 	}
 
-	@Operation(summary = "댓글 조회", description = "댓글을 조회합니다.")
+	@Operation(summary = "게시글로 댓글 조회", description = "댓글을 조회합니다.")
 	@ApiResponses({@ApiResponse(responseCode = "200", description = "댓글 조회 성공"),
 		@ApiResponse(responseCode = "404", description = "댓글 조회 실패")
 	})

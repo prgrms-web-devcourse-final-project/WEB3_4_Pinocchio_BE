@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -61,12 +62,13 @@ public class UserFollowController {
 		@ApiResponse(responseCode = "404", description = "유저 조회 실패"),
 		@ApiResponse(responseCode = "500", description = "서버 내부 오류")})
 	@PostMapping("/{userId}/followers")
-	public ResponseEntity<Map<String, Object>> findFollowers(@PathVariable String userId) {
+	public ResponseEntity<Map<String, Object>> findFollowers(@PathVariable String userId,
+		@RequestParam(value = "page", defaultValue = "0") int page) {
 		if (false/*유저 확인*/) {
 			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("message", "등록된 유저를 찾을 수 없습니다."));
 		}
 
-		Map<String, Object> response = userFollowService.findFollowers(userId);
+		Map<String, Object> response = userFollowService.findFollowers(userId, page);
 
 		return ResponseEntity.status(HttpStatus.OK).body(response);
 	}
@@ -76,12 +78,13 @@ public class UserFollowController {
 		@ApiResponse(responseCode = "404", description = "유저 조회 실패"),
 		@ApiResponse(responseCode = "500", description = "서버 내부 오류")})
 	@PostMapping("/{userId}/followings")
-	public ResponseEntity<Map<String, Object>> findFollowings(@PathVariable String userId) {
+	public ResponseEntity<Map<String, Object>> findFollowings(@PathVariable String userId,
+		@RequestParam(value = "page", defaultValue = "0") int page) {
 		if (false/*유저 확인*/) {
 			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("message", "등록된 유저를 찾을 수 없습니다."));
 		}
 
-		Map<String, Object> response = userFollowService.findFollowings(userId);
+		Map<String, Object> response = userFollowService.findFollowings(userId, page);
 
 		return ResponseEntity.status(HttpStatus.OK).body(response);
 	}

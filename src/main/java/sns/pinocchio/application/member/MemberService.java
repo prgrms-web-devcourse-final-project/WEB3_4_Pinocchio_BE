@@ -1,19 +1,15 @@
 package sns.pinocchio.application.member;
 
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import sns.pinocchio.application.member.memberDto.MemberInfoDto;
-import sns.pinocchio.application.member.memberDto.MemberRequestDto;
-import sns.pinocchio.config.global.auth.service.CookieService;
-import sns.pinocchio.config.global.auth.util.JwtUtil;
-import sns.pinocchio.config.global.auth.util.TokenProvider;
+import sns.pinocchio.application.member.memberDto.SignupRequestDto;
+import sns.pinocchio.application.member.memberDto.UpdateRequestDto;
+import sns.pinocchio.config.global.auth.util.EmailUtil;
+import sns.pinocchio.config.global.auth.util.PasswordUtil;
 import sns.pinocchio.domain.member.Member;
 import sns.pinocchio.infrastructure.member.MemberRepository;
-import sns.pinocchio.infrastructure.persistence.redis.redisService.RedisService;
 import sns.pinocchio.presentation.member.exception.MemberErrorCode;
 import sns.pinocchio.presentation.member.exception.MemberException;
 
@@ -23,76 +19,97 @@ public class MemberService {
 
     private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
-    private final CookieService cookieService;
-    private final RedisService redisService;
-    private final TokenProvider tokenProvider;
-    private final JwtUtil jwtUtil;
 
     // 계정 생성
     @Transactional
-    public void createMember(MemberRequestDto memberRequestDto) {
-
+    public Member createMember(SignupRequestDto signupRequestDto) {
         // 이메일 중복 체크
-        if (memberRepository.existsByEmail(memberRequestDto.email())) {
-            throw new MemberException(MemberErrorCode.EMAIL_DUPLICATED);
-        }
+        checkEmailDuplicate(signupRequestDto.email());
+
+        // 닉네임 중복 체크
+        checkNicknameDuplicate(signupRequestDto.nickname());
 
         Member member = Member.builder()
-                .email(memberRequestDto.email())
-                .name(memberRequestDto.name())
-                .nickname(memberRequestDto.nickname())
-                .password(passwordEncoder.encode(memberRequestDto.password()))
+                .email(signupRequestDto.email())
+                .name(signupRequestDto.name())
+                .nickname(signupRequestDto.nickname())
+                .password(passwordEncoder.encode(signupRequestDto.password()))
                 .build();
 
         this.memberRepository.save(member);
+
+        return member;
     }
 
-    // 이메일 검증
-    public void validateEmail(String email) {
-        if(memberRepository.existsByEmail(email)) {
-            return;
-        }
-        throw new MemberException(MemberErrorCode.EMAIL_NOT_FOUND);
+    // 사용자 프로필 수정
+    @Transactional
+    public Member updateProfile(Long memberId, UpdateRequestDto updateRequestDto) {
+        // 유저 확인
+        Member member = findById(memberId);
+
+        // 닉네임 중복 체크
+        checkNicknameDuplicate(updateRequestDto.nickname());
+
+        member.updateProfile(updateRequestDto);
+        return member;
     }
 
-    // 패스워드 검증
-    public void validatePassword(String password, String email) {
+    // 임시 비밀번호 발송
+    @Transactional
+    public void sendTemporaryPassword(String email) {
+        // 회원 조회
         Member member = findByEmail(email);
 
-        if(passwordEncoder.matches(password, member.getPassword())) {
-            return;
-        }
-        throw new MemberException(MemberErrorCode.INVALID_PASSWORD);
+        // 임시 비밀번호 생성 / 패스워드 암호화 / 비밀번호 변경
+        String temporaryPassword = PasswordUtil.generateTemporaryPassword();
+        member.updatePassword(passwordEncoder.encode(temporaryPassword));
+
+        // 이메일 발송
+        EmailUtil.sendEmail(member.getEmail(),temporaryPassword);
     }
 
-    // 엑세스토큰, 리프래시토큰 생성 및 저장
-    public void generateAndSaveToken(String email, HttpServletResponse response) {
-        Member member = findByEmail(email);
-
-        String accessToken = tokenProvider.generateAccessToken(member);
-        String refreshToken = tokenProvider.generateRefreshToken();
-
-        cookieService.addAccessTokenToCookie(accessToken, response);
-        cookieService.addRefreshTokenToCookie(refreshToken, response);
-        redisService.save(refreshToken, String.valueOf(member.getId()), jwtUtil.getRefreshTokenExpirationTime());
+    // 패스워드 수정
+    @Transactional
+    public void changePassword(Member member, String password) {
+        member.updatePassword(passwordEncoder.encode(password));
     }
 
-    // 토큰 제거
-    public void logout(HttpServletRequest request, HttpServletResponse response) {
-        String accessToken = cookieService.getAccessTokenFromCookie(request);
-        MemberInfoDto member = jwtUtil.getMemberInfoDto(accessToken);
-
-        redisService.addBlackList(String.valueOf(member.id()), jwtUtil.getRefreshTokenExpirationTime());
-        cookieService.clearTokenFromCookie(response);
+    // 사용자 email 조회
+    public Member findByEmail(String email) {
+        return memberRepository.findByEmail(email)
+                .orElseThrow(() -> new MemberException(MemberErrorCode.USER_NOT_FOUND));
     }
 
-    public Member findByUserId(Long memberId) {
+    // 사용자 nickname 조회
+    public Member findByNickname(String nickname) {
+        return memberRepository.findByNickname(nickname)
+                .orElseThrow(() -> new MemberException(MemberErrorCode.NICKNAME_DUPLICATED));
+    }
+
+    // 사용자 ID 조회
+    public Member findById(Long memberId) {
         return memberRepository.findById(memberId)
                 .orElseThrow(() -> new MemberException(MemberErrorCode.USER_NOT_FOUND));
     }
 
-    public Member findByEmail(String email) {
-        return memberRepository.findByEmail(email)
-                .orElseThrow(() -> new MemberException(MemberErrorCode.USER_NOT_FOUND));
+    // 사용자 email 중복 확인
+    public void checkEmailDuplicate(String email) {
+        memberRepository.findByEmail(email)
+                .ifPresent(member -> {
+                    throw new MemberException(MemberErrorCode.EMAIL_DUPLICATED);
+                });
+    }
+
+    // 사용자 nickname 중복 확인
+    public void checkNicknameDuplicate(String nickname) {
+        memberRepository.findByNickname(nickname)
+                .ifPresent(member -> {
+                    throw new MemberException(MemberErrorCode.NICKNAME_DUPLICATED);
+                });
+    }
+
+    // 사용자 삭제
+    public void deleteMember(Member member) {
+        memberRepository.deleteById(member.getId());
     }
 }

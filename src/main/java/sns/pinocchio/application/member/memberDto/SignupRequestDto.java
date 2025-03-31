@@ -5,8 +5,8 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
-// 회원가입 DTO
-public record MemberRequestDto(
+// 회원가입 요청 Dto
+public record SignupRequestDto(
         @NotBlank(message = "이름은 필수 항목입니다.")
         String name,
 

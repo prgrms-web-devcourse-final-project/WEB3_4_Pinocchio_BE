@@ -103,14 +103,19 @@ public class CommentService {
 		return response;
 	}
 
-	public Map<String,Object> findCommentsByPost(String postId){
-		List<Comment> commentList = commentRepository.findAllByPostId(postId);
-		return Map.of("message","댓글요청에 성공하였습니다."
-			,"comments",commentList);
+	public Map<String, Object> findCommentsByPost(String postId) {
+		List<Comment> commentList = commentRepository.findAllByPostIdAndStatus(postId,CommentStatus.ACTIVE);
+		return Map.of("message", "댓글요청에 성공하였습니다.", "comments", commentList);
+	}
+
+	public Map<String, Object> findCommentsByUser(String authorId, int page) {
+		Pageable pageable = PageRequest.of(page, 10);
+		Page<Comment> pagingComment = commentRepository.findAllByUserIdAndStatus(authorId, pageable,CommentStatus.ACTIVE);
+		return Map.of("message", "댓글요청에 성공하였습니다.", "comments", pagingComment.getContent());
 	}
 
 	//댓글 유효성 검사 댓글과 게시글로 검색결과가 없을시 true반환
 	public boolean isInvalidComment(String commentId, String postId) {
-		return commentRepository.findByIdAndPostId(commentId, postId).isEmpty();
+		return commentRepository.findByIdAndPostIdAndStatus(commentId, postId,CommentStatus.ACTIVE).isEmpty();
 	}
 }

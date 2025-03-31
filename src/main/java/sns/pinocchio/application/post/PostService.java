@@ -20,9 +20,16 @@ public class PostService {
     private final HashtagRepository hashtagRepository;
 
     // 게시물 생성
-    public String createPost(PostCreateRequest request, String userTsid) {
+    public String createPost(PostCreateRequest request, String tsid) {
+        List<String> imageUrls = request.getImageUrls();
+
+        // 이미지가 반드시 1장이어야 함
+        if (imageUrls == null || imageUrls.size() != 1) {
+            throw new IllegalArgumentException("이미지는 정확히 1장만 등록해야 합니다.");
+        }
+
         Post post = Post.builder()
-                .userTsid(userTsid)  // 작성자 TSID (JWT에서 추출한 고유 식별자)
+                .tsid(tsid)  // 작성자 TSID (JWT에서 추출한 고유 식별자)
                 .content(request.getContent())  // 게시글 본문
                 .imageUrls(request.getImageUrls())  // 이미지 URL 목록
                 .hashtags(request.getHashtags())  // 해시태그 목록
@@ -68,10 +75,10 @@ public class PostService {
 
 
     @Transactional
-    public void modifyPost(PostModifyRequest request, String loginUserTsid) {
+    public void modifyPost(PostModifyRequest request, String logintsid) {
         // 작성자 본인의 게시물인지 확인하고 조회 (소프트 삭제 제외)
-        Post post = postRepository.findByIdAndUserTsidAndStatus(
-                request.getPostId(), loginUserTsid, "active"
+        Post post = postRepository.findByIdAndTsidAndStatus(
+                request.getPostId(), logintsid, "active"
         ).orElseThrow(() -> new IllegalArgumentException("게시물을 찾을 수 없습니다."));
 
         // 수정 가능한 항목만 업데이트
@@ -81,6 +88,19 @@ public class PostService {
         post.setUpdatedAt(LocalDateTime.now());  // 수정 시간 갱신
 
         postRepository.save(post);  // 수정 내용 저장
+    }
+
+    @Transactional
+    public void deletePost(String postId, String loginTsid) {
+        // 작성자 본인의 게시물인지 확인하고 조회 (status: active)
+        Post post = postRepository.findByIdAndTsidAndStatus(postId, loginTsid, "active")
+                .orElseThrow(() -> new IllegalArgumentException("게시물을 찾을 수 없습니다."));
+
+        // 상태만 'deleted'로 변경
+        post.setStatus("deleted");
+        post.setUpdatedAt(LocalDateTime.now());
+
+        postRepository.save(post);
     }
 
 }

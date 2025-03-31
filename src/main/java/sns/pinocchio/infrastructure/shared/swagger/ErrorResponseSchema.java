@@ -1,7 +1,6 @@
 package sns.pinocchio.infrastructure.shared.swagger;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-
 import java.util.List;
 
 /** Swagger 문서 내 에러 포맷 관련 클래스 (실제 구현과 관련 X) */

@@ -1,14 +1,13 @@
 package sns.pinocchio.infrastructure.shared.exception;
 
 import io.swagger.v3.oas.annotations.Hidden;
+import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import sns.pinocchio.infrastructure.shared.response.GlobalApiResponse;
-
-import java.util.List;
 
 @Hidden
 @RestControllerAdvice(

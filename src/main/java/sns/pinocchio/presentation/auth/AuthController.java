@@ -1,5 +1,6 @@
 package sns.pinocchio.presentation.auth;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +16,7 @@ import sns.pinocchio.application.member.MemberService;
 import sns.pinocchio.application.member.memberDto.LoginRequestDto;
 import sns.pinocchio.application.member.memberDto.SignupRequestDto;
 import sns.pinocchio.application.member.memberDto.SignupResponseDto;
+import sns.pinocchio.config.global.auth.util.TokenProvider;
 import sns.pinocchio.domain.member.Member;
 
 @RequestMapping("/auth")
@@ -24,6 +26,7 @@ public class AuthController {
 
   private final MemberService memberService;
   private final AuthService authService;
+  private final TokenProvider tokenProvider;
 
   // 회원가입
   @PostMapping("/signup")
@@ -55,6 +58,10 @@ public class AuthController {
 
     // 토콘 생성
     String accessToken = authService.generateAndSaveToken(member);
+    String refreshToken = tokenProvider.generateRefreshToken();
+
+    // 리프레시 토큰 쿠키 및 레디스 저장
+    memberService.saveRefreshToken(refreshToken, member, response);
 
     // 응답 DTO 변환
     SignupResponseDto signupResponseDto =
@@ -71,7 +78,8 @@ public class AuthController {
 
   // 로그아웃
   @PostMapping("/logout")
-  public ResponseEntity<String> logout() {
+  public ResponseEntity<String> logout(HttpServletRequest request, HttpServletResponse response) {
+    memberService.tokenClear(request, response);
     return ResponseEntity.ok("로그아웃에 성공했습니다.");
   }
 }

@@ -2,7 +2,7 @@ name: Gemini Code Review
 
 on:
     push:
-        branches: [main, dev-main, feat-post, feat-comment]
+        branches: [main, dev-main, feat-post, dev-feat, feat-auth, feat-comment, feat-notification, feat-user-setting]
         paths:
             - 'src/**'
     pull_request:
@@ -81,11 +81,12 @@ jobs:
             - name: Add Pull Request Comments
               if: env.EVENT_TYPE == 'pull_request'
               run: |
-                  if grep -q '^\[' review_result.txt; then
-                      comments=$(jq -c . review_result.txt)
+                  jq '.' review_result.txt > formatted_review.json || true
+                  if jq -e . >/dev/null 2>&1 < formatted_review.json; then
+                      comments=$(cat formatted_review.json)
                       echo "comments=$comments" >> $GITHUB_ENV
                   else
-                      echo "No valid JSON found in review_result.txt"
+                      echo "Invalid JSON, setting empty array"
                       echo "comments=[]" >> $GITHUB_ENV
                   fi
 
@@ -108,4 +109,4 @@ jobs:
               uses: actions/upload-artifact@v4
               with:
                   name: gemini-code-review
-                  path: review_result.txtq1
+                  path: review_result.txt

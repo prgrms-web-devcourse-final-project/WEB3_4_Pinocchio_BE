@@ -6,6 +6,9 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
@@ -16,12 +19,13 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import sns.pinocchio.application.member.MemberService;
 import sns.pinocchio.config.global.auth.model.CustomUserDetails;
 import sns.pinocchio.config.global.auth.service.CustomUserDetailService;
+import sns.pinocchio.config.global.auth.service.cookieService.CookieService;
 import sns.pinocchio.config.global.auth.util.JwtUtil;
+import sns.pinocchio.config.global.auth.util.TokenProvider;
+import sns.pinocchio.config.global.redis.redisService.RedisService;
+import sns.pinocchio.domain.member.Member;
 import sns.pinocchio.presentation.auth.exception.AuthErrorCode;
-
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
+import sns.pinocchio.presentation.member.exception.MemberException;
 
 @Component
 @RequiredArgsConstructor
@@ -30,7 +34,10 @@ public class MemberAuthFilter extends OncePerRequestFilter {
 
   private final MemberService memberService;
   private final CustomUserDetailService customUserDetailService;
+  private final CookieService cookieService;
+  private final TokenProvider tokenProvider;
   private final JwtUtil jwtUtil;
+  private final RedisService redisService;
 
   ObjectCodec objectMapper;
 
@@ -40,12 +47,12 @@ public class MemberAuthFilter extends OncePerRequestFilter {
       throws ServletException, IOException {
 
     final String accessToken = getTokenFromHeader(request, HttpHeaders.AUTHORIZATION);
+    final String refreshToken = cookieService.getRefreshTokenFromCookie(request);
 
     // 토큰이 없는 경우 바로 다음 필터로 진행
     if (accessToken == null) {
       log.debug("인증 토큰이 없습니다.");
-      filterChain.doFilter(request, response);
-      return;
+      handleAuthError(response, AuthErrorCode.INVALID_TOKEN);
     }
 
     try {
@@ -58,7 +65,8 @@ public class MemberAuthFilter extends OncePerRequestFilter {
 
         case EXPIRED:
           log.info("만료된 토큰입니다.");
-          handleAuthError(response, AuthErrorCode.TOKEN_EXPIRED);
+          String newAccessToken = reissueToken(refreshToken, request, response);
+          setAuthenticationInContext(newAccessToken);
           break;
 
         case MALFORMED, INVALID:
@@ -134,5 +142,30 @@ public class MemberAuthFilter extends OncePerRequestFilter {
       return token.substring(7);
     }
     return null;
+  }
+
+  private String reissueToken(
+      String refreshToken, HttpServletRequest request, HttpServletResponse response)
+      throws IOException {
+    try {
+      // 리프레시토큰 유효성 검사
+      jwtUtil.isRefreshTokenValid(refreshToken);
+      // 엑세스 토큰 재발급
+      Long memberId = Long.valueOf(redisService.get(refreshToken));
+      Member member = memberService.findById(memberId);
+      String newAccessToken = tokenProvider.generateAccessToken(member);
+
+      // 응답에 엑세스 토큰 추가 (헤더에 Authorization: Bearer {newAccessToken} 추가)
+      response.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + newAccessToken);
+      return newAccessToken;
+    } catch (MemberException e) {
+      log.error("유효하지 않은 인증정보입니다.");
+      handleAuthError(response, AuthErrorCode.INVALID_TOKEN);
+      throw e;
+    } catch (Exception e) {
+      log.error("토큰 갱신 중 오류 발생: {}", e.getMessage());
+      handleAuthError(response, AuthErrorCode.TOKEN_REISSUE_FAILED);
+      throw e;
+    }
   }
 }

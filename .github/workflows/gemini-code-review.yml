@@ -2,7 +2,7 @@ name: Gemini Code Review
 
 on:
     push:
-        branches: [main, dev-main, feat-post, dev-feat, feat-auth, feat-comment, feat-notification, feat-user-setting]
+        branches: [main, dev-main, feat-post, dev-feat, feat-auth, feat-comment, feat-notification, feat-user-setting, feat-merge]
         paths:
             - 'src/**'
     pull_request:

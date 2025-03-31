@@ -34,13 +34,14 @@ class UserFollowFIndControllerTest {
 	void 유저_팔로워_조회_테스트() throws Exception {
 		String followingId = "user_002";
 		String followingNickname = "홍길동";
+		int page = 0;
 
 
 		Map<String,String> info = Map.of("userId", followingId, "nickname", followingNickname);
 		List<Map<String, String>> followings = List.of(info,info,info,info,info);
 
 		Map<String, Object> response = Map.of("message", "팔로워 조회에 성공하였습니다.", "followers", followings);
-		when(userFollowService.findFollowers(followingId) ).thenReturn(response);
+		when(userFollowService.findFollowers(followingId,page) ).thenReturn(response);
 
 		mockMvc.perform(post("/users/"+followingId+"/followers").contentType(MediaType.APPLICATION_JSON))
 			.andExpect(status().isOk())
@@ -55,13 +56,13 @@ class UserFollowFIndControllerTest {
 	void 유저_팔로잉_조회_테스트() throws Exception {
 		String followerId = "user_002";
 		String followerNickname = "홍길동";
-
+		int page = 0;
 
 		Map<String,String> info = Map.of("userId", followerId, "nickname", followerNickname);
 		List<Map<String, String>> followers = List.of(info,info,info,info,info);
 
 		Map<String, Object> response = Map.of("message", "팔로잉 조회에 성공하였습니다.", "followings", followers);
-		when(userFollowService.findFollowings(followerId) ).thenReturn(response);
+		when(userFollowService.findFollowings(followerId,page) ).thenReturn(response);
 
 		mockMvc.perform(post("/users/"+followerId+"/followings").contentType(MediaType.APPLICATION_JSON))
 			.andExpect(status().isOk())

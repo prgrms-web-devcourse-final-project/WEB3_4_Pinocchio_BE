@@ -55,7 +55,7 @@ public class CommentLikeServiceTest {
 		when(commentLikeService.toggleCommentLike(commentId, loginUserId)).thenReturn(
 			Optional.of(commentLikeId)); // 좋아요 추가됨
 
-		when(commentRepository.findByIdAndPostId(commentId, postId)).thenReturn(Optional.of(mockComment));
+		when(commentRepository.findByIdAndPostIdAndStatus(commentId, postId,CommentStatus.ACTIVE)).thenReturn(Optional.of(mockComment));
 
 		when(commentRepository.save(any())).thenAnswer(invocation -> {
 			Comment savedComment = invocation.getArgument(0);
@@ -71,7 +71,7 @@ public class CommentLikeServiceTest {
 		assertEquals(1, response.get("likes"));
 
 		verify(commentRepository, times(1)).save(any());
-		verify(commentRepository, times(1)).findByIdAndPostId(commentId, postId);
+		verify(commentRepository, times(1)).findByIdAndPostIdAndStatus(commentId, postId,CommentStatus.ACTIVE);
 
 		System.out.println("✅ 댓글 좋아요 테스트 성공");
 	}
@@ -94,7 +94,7 @@ public class CommentLikeServiceTest {
 
 		when(commentLikeService.toggleCommentLike(commentId, loginUserId)).thenReturn(Optional.empty());
 
-		when(commentRepository.findByIdAndPostId(commentId, postId)).thenReturn(Optional.of(mockComment));
+		when(commentRepository.findByIdAndPostIdAndStatus(commentId, postId,CommentStatus.ACTIVE)).thenReturn(Optional.of(mockComment));
 
 		when(commentRepository.save(any())).thenAnswer(invocation -> {
 			Comment savedComment = invocation.getArgument(0);
@@ -110,7 +110,7 @@ public class CommentLikeServiceTest {
 		assertEquals(0, response.get("likes"));
 
 		verify(commentRepository, times(1)).save(any());
-		verify(commentRepository, times(1)).findByIdAndPostId(commentId, postId);
+		verify(commentRepository, times(1)).findByIdAndPostIdAndStatus(commentId, postId,CommentStatus.ACTIVE);
 
 		System.out.println("✅ 댓글 좋아요 취소 성공");
 	}
@@ -124,14 +124,14 @@ public class CommentLikeServiceTest {
 		String commentId = "comment_001";
 		CommentLikeRequest likeRequest = CommentLikeRequest.builder().postId(postId).build();
 
-		when(commentRepository.findByIdAndPostId(commentId, postId)).thenReturn(Optional.empty());
+		when(commentRepository.findByIdAndPostIdAndStatus(commentId, postId,CommentStatus.ACTIVE)).thenReturn(Optional.empty());
 
 		// When & Then
 		assertThrows(NoSuchElementException.class, () -> {
 			commentService.toggleCommentLike(likeRequest, commentId, loginUserId);
 		});
 
-		verify(commentRepository, times(1)).findByIdAndPostId(commentId, postId);
+		verify(commentRepository, times(1)).findByIdAndPostIdAndStatus(commentId, postId,CommentStatus.ACTIVE);
 
 		System.out.println("✅ 댓글 좋아요 실패 (없는댓글)");
 	}

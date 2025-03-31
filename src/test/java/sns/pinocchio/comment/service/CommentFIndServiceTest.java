@@ -34,14 +34,14 @@ public class CommentFIndServiceTest {
 	public void 게시글_댓글_조회_테스트_댓글없음() {
 		// Given
 		String postId = "post_001";
-		when(commentRepository.findAllByPostId(postId)).thenReturn(List.of());
+		when(commentRepository.findAllByPostIdAndStatus(postId, CommentStatus.ACTIVE)).thenReturn(List.of());
 
 		Map<String, Object> response = commentService.findCommentsByPost(postId);
 		List<Comment> commentList = (List<Comment>)response.get("comments");
 		assertEquals("댓글요청에 성공하였습니다.", response.get("message"));
 		assertEquals(0, commentList.size());
 
-		verify(commentRepository, times(1)).findAllByPostId(postId);
+		verify(commentRepository, times(1)).findAllByPostIdAndStatus(postId, CommentStatus.ACTIVE);
 
 		System.out.println("✅ 댓글요청에 성공");
 
@@ -52,16 +52,17 @@ public class CommentFIndServiceTest {
 	public void 게시글_댓글_조회_테스트_댓글있음() {
 		// Given
 		String postId = "post_001";
-		Comment comment =  Comment.builder().postId("post_001").build();
+		Comment comment = Comment.builder().postId("post_001").build();
 
-		when(commentRepository.findAllByPostId(postId)).thenReturn(List.of(comment,comment,comment));
+		when(commentRepository.findAllByPostIdAndStatus(postId, CommentStatus.ACTIVE)).thenReturn(
+			List.of(comment, comment, comment));
 
 		Map<String, Object> response = commentService.findCommentsByPost(postId);
 		List<Comment> commentList = (List<Comment>)response.get("comments");
 		assertEquals("댓글요청에 성공하였습니다.", response.get("message"));
 		assertEquals(3, commentList.size());
 
-		verify(commentRepository, times(1)).findAllByPostId(postId);
+		verify(commentRepository, times(1)).findAllByPostIdAndStatus(postId, CommentStatus.ACTIVE);
 
 		System.out.println("✅ 댓글요청에 성공");
 

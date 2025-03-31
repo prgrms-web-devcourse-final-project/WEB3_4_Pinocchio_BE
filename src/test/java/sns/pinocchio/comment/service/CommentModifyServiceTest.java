@@ -15,6 +15,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import sns.pinocchio.application.comment.CommentModifyRequest;
 import sns.pinocchio.application.comment.CommentService;
 import sns.pinocchio.domain.comment.Comment;
+import sns.pinocchio.domain.comment.CommentStatus;
 import sns.pinocchio.infrastructure.persistence.mongodb.CommentRepository;
 
 @SpringBootTest
@@ -42,7 +43,8 @@ public class CommentModifyServiceTest {
 			.createdAt(createdAt)
 			.build();
 
-		when(commentRepository.findByIdAndPostId(commentId, postId)).thenReturn(Optional.of(mockComment));
+		when(commentRepository.findByIdAndPostIdAndStatus(commentId, postId, CommentStatus.ACTIVE)).thenReturn(
+			Optional.of(mockComment));
 
 		when(commentRepository.save(any(Comment.class))).thenAnswer(invocation -> {
 			Comment savedComment = invocation.getArgument(0);
@@ -61,7 +63,7 @@ public class CommentModifyServiceTest {
 		assertEquals(updatedContent, mockComment.getContent());
 		assertNotNull(mockComment.getUpdatedAt());
 
-		verify(commentRepository, times(1)).findByIdAndPostId(commentId, postId);
+		verify(commentRepository, times(1)).findByIdAndPostIdAndStatus(commentId, postId, CommentStatus.ACTIVE);
 		verify(commentRepository, times(1)).save(mockComment);
 
 		System.out.println("✅ 댓글이 MongoDB에서 수정되었습니다.");
@@ -75,7 +77,8 @@ public class CommentModifyServiceTest {
 		String postId = "post_001";
 		String updatedContent = "수정할 댓글";
 
-		when(commentRepository.findByIdAndPostId(nonExistentCommentId, postId)).thenReturn(Optional.empty());
+		when(commentRepository.findByIdAndPostIdAndStatus(nonExistentCommentId, postId,
+			CommentStatus.ACTIVE)).thenReturn(Optional.empty());
 
 		CommentModifyRequest modifyRequest = CommentModifyRequest.builder()
 			.commentId(nonExistentCommentId)
@@ -88,7 +91,8 @@ public class CommentModifyServiceTest {
 
 		assertEquals("등록된 댓글을 찾을 수 없습니다.", thrownException.getMessage());
 
-		verify(commentRepository, times(1)).findByIdAndPostId(nonExistentCommentId, postId);
+		verify(commentRepository, times(1)).findByIdAndPostIdAndStatus(nonExistentCommentId, postId,
+			CommentStatus.ACTIVE);
 		verify(commentRepository, times(0)).save(any());
 
 		System.out.println("✅ 댓글 수정 실패(없는댓글) 성공");

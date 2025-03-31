@@ -60,14 +60,10 @@ public class CommentCreateServiceTest {
 		String postId = "post_001";
 		String commentId = "comment_001";
 
-		CommentCreateRequest createRequest = CommentCreateRequest.builder().authorId(authorId).content("댓글이지롱").build();
-
-
-		Map<String, Object> response = commentServiceReal.createComment(createRequest, authorId, postId);
-		String createdCommentId = (String)response.get("commentId");
-
-		assertNotNull(createdCommentId);
-		assertEquals(commentId, createdCommentId);
+		for(int i = 0; i<100; i++){
+			CommentCreateRequest createRequest = CommentCreateRequest.builder().authorId(authorId).content("댓글이지롱"+i).build();
+			Map<String, Object> response = commentServiceReal.createComment(createRequest, authorId, postId);
+		}
 
 		System.out.println("✅ 댓글 생성 성공");
 

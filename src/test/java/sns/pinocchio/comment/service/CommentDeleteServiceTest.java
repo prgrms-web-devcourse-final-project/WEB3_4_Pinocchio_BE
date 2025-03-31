@@ -44,14 +44,14 @@ public class CommentDeleteServiceTest {
 			.action(DeleteType.SOFT_DELETED)
 			.build();
 
-		when(commentRepository.findByIdAndPostId(commentId, postId)).thenReturn(Optional.of(comment));
+		when(commentRepository.findByIdAndPostIdAndStatus(commentId, postId,CommentStatus.ACTIVE)).thenReturn(Optional.of(comment));
 
 		Map<String, Object> response = commentService.deleteComment(deleteRequest);
 
 		assertEquals("댓글이 삭제되었습니다.", response.get("message"));
 		assertEquals(CommentStatus.DELETE, comment.getStatus());
 
-		verify(commentRepository, times(1)).findByIdAndPostId(commentId, postId);
+		verify(commentRepository, times(1)).findByIdAndPostIdAndStatus(commentId, postId,CommentStatus.ACTIVE);
 		verify(commentRepository, times(1)).save(comment);
 		verify(commentRepository, never()).delete(any(Comment.class));
 
@@ -73,14 +73,14 @@ public class CommentDeleteServiceTest {
 			.action(DeleteType.HARD_DELETED)
 			.build();
 
-		when(commentRepository.findByIdAndPostId(commentId, postId)).thenReturn(Optional.of(comment));
-		when(commentRepository.findByIdAndPostId(commentId, postId)).thenReturn(Optional.of(comment));
+		when(commentRepository.findByIdAndPostIdAndStatus(commentId, postId,CommentStatus.ACTIVE)).thenReturn(Optional.of(comment));
+		when(commentRepository.findByIdAndPostIdAndStatus(commentId, postId,CommentStatus.ACTIVE)).thenReturn(Optional.of(comment));
 
 		Map<String, Object> response = commentService.deleteComment(deleteRequest);
 
 		assertEquals("댓글이 삭제되었습니다.", response.get("message"));
 
-		verify(commentRepository, times(1)).findByIdAndPostId(commentId, postId);
+		verify(commentRepository, times(1)).findByIdAndPostIdAndStatus(commentId, postId,CommentStatus.ACTIVE);
 		verify(commentRepository, times(1)).delete(comment);
 
 		System.out.println("✅ 댓글 하드 삭제 성공");
@@ -99,14 +99,14 @@ public class CommentDeleteServiceTest {
 			.action(DeleteType.HARD_DELETED)
 			.build();
 
-		when(commentRepository.findByIdAndPostId(commentId, postId)).thenReturn(Optional.empty());
+		when(commentRepository.findByIdAndPostIdAndStatus(commentId, postId,CommentStatus.ACTIVE)).thenReturn(Optional.empty());
 
 		// When & Then
 		assertThrows(NoSuchElementException.class, () -> {
 			commentService.deleteComment(deleteRequest);
 		});
 
-		verify(commentRepository, times(1)).findByIdAndPostId(commentId, postId);
+		verify(commentRepository, times(1)).findByIdAndPostIdAndStatus(commentId, postId,CommentStatus.ACTIVE);
 		verify(commentRepository, never()).delete(any(Comment.class));
 		System.out.println("✅ 댓글 삭제 실패 (없는 댓글) 성공");
 
@@ -122,13 +122,13 @@ public class CommentDeleteServiceTest {
 
 		Comment comment = Comment.builder().id(commentId).postId(postId).status(CommentStatus.ACTIVE).build();
 
-		when(commentRepository.findByIdAndPostId(commentId, postId)).thenReturn(Optional.of(comment));
+		when(commentRepository.findByIdAndPostIdAndStatus(commentId, postId,CommentStatus.ACTIVE)).thenReturn(Optional.of(comment));
 		// When & Then
 		assertThrows(IllegalArgumentException.class, () -> {
 			commentService.deleteComment(deleteRequest);
 		});
 
-		verify(commentRepository, times(1)).findByIdAndPostId(commentId, postId);
+		verify(commentRepository, times(1)).findByIdAndPostIdAndStatus(commentId, postId,CommentStatus.ACTIVE);
 		verify(commentRepository, never()).save(any(Comment.class));
 		System.out.println("✅ 댓글 삭제 실패(잘못된 액션값) 성공");
 

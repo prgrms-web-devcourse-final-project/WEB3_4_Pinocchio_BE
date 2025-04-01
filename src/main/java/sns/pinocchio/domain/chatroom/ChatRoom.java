@@ -57,6 +57,7 @@ public class ChatRoom {
    *
    * @implNote ID 형식 "chatroom:user_123-user_455"
    * @return 유효하면 true, 그렇지 않으면 false
+   * @throws IllegalStateException Id 또는 참여자가 없을 경우
    */
   public boolean validateChatRoomId() {
 
@@ -74,6 +75,7 @@ public class ChatRoom {
    * 채팅방의 마지막 메시지 정보 변경
    *
    * @param lastMessage 마지막 메시지 정보
+   * @throws IllegalArgumentException 마지막 메시지 정보가 존재하지 않을 경우
    */
   public void updateLastMsg(LastMessage lastMessage) {
     if (lastMessage == null) {

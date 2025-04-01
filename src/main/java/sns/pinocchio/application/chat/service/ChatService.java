@@ -40,6 +40,10 @@ public class ChatService {
    *
    * @param senderTsid 발신자 TSID
    * @param sendMessage 메시지 전송 정보
+   * @return SendMessageInfo 전송된 메시지 정보
+   *
+   * @throws ChatBadRequestException 입력 값이 유효하지 않을 경우
+   * @throws ChatInternalServerErrorException 메시지 전송 또는 메시지 알림 전송이 실패했을 경우
    */
   @Transactional
   public SendMessageInfo sendMessageToChatroom(String senderTsid, SendMessage sendMessage) {
@@ -144,14 +148,8 @@ public class ChatService {
     newChatRoom.generateChatRoomId();
 
     ChatRoom savedChatRoom = chatRoomRepository.save(newChatRoom);
-
-    // DB에 저장하는 도중 에러가 발생했을 경우, 500에러 반환
-    if (savedChatRoom == null) {
-      log.error("Failed to save ChatRoom for sender: {}, receiver: {}", senderTsid, receiverTsid);
-      throw new ChatInternalServerErrorException("서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.");
-    }
-
     log.info("New ChatRoom Created: {}", savedChatRoom);
+
     return savedChatRoom;
   }
 

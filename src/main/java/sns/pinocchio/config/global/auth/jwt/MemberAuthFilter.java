@@ -89,9 +89,7 @@ public class MemberAuthFilter extends OncePerRequestFilter {
 
     boolean shouldSkip =
         ((method.equals("GET") && path.equals("/api/posts/search"))
-            || (method.equals("POST") && path.equals("/api/auth/signup"))
-            || (method.equals("POST") && path.equals("/api/auth/login"))
-            || (method.equals("POST") && path.equals("/api/auth/logout"))
+            || (method.equals("POST") && (path.startsWith("/auth") || path.startsWith("/api/auth")))
             || path.startsWith("/swagger")
             || path.startsWith("/v3/api-docs")
             || path.startsWith("/swagger-ui")
@@ -148,6 +146,7 @@ public class MemberAuthFilter extends OncePerRequestFilter {
       Long memberId = redisService.get(refreshToken);
       Member member = memberService.findById(memberId);
       String newAccessToken = tokenProvider.generateAccessToken(member);
+      log.info("재발급된 토큰 : " + newAccessToken);
 
       // 응답에 엑세스 토큰 추가 (헤더에 Authorization: Bearer {newAccessToken} 추가)
       response.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + newAccessToken);

@@ -5,14 +5,12 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import sns.pinocchio.config.global.auth.util.CookieUtil;
-import sns.pinocchio.config.global.auth.util.JwtUtil;
 
 @Service
 @RequiredArgsConstructor
 public class CookieService {
 
   private final CookieUtil cookieUtil;
-  private final JwtUtil jwtUtil;
 
   public void addRefreshTokenToCookie(String refreshToken, Long ExpirationTime, HttpServletResponse response) {
     cookieUtil.addTokenToCookie(

@@ -1,19 +1,18 @@
 package sns.pinocchio.config.global.auth.model;
 
+import java.util.Collection;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-import sns.pinocchio.application.member.memberDto.MemberInfoDto;
-
-import java.util.Collection;
-import java.util.List;
+import sns.pinocchio.domain.member.Member;
 
 @RequiredArgsConstructor
 public class CustomUserDetails implements UserDetails {
 
   // 로그인한 사용자의 정보를 담는 DTO
-  private final MemberInfoDto memberInfoDto;
+  private final Member member;
 
   @Override
   public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -21,8 +20,8 @@ public class CustomUserDetails implements UserDetails {
     return List.of(new SimpleGrantedAuthority("USER"));
   }
 
-  public MemberInfoDto getMemberInfoDto() {
-    return memberInfoDto;
+  public Member getMember() {
+    return member;
   }
 
   @Override
@@ -32,15 +31,19 @@ public class CustomUserDetails implements UserDetails {
 
   @Override
   public String getUsername() {
-    return memberInfoDto.nickname(); // 닉네임 반환
+    return member.getName(); // 닉네임 반환
   }
 
   public Long getUserId() {
-    return memberInfoDto.id(); // 유저 ID 반환
+    return member.getId(); // 유저 ID 반환
+  }
+
+  public String getUserTsid() {
+    return member.getTsid();
   }
 
   public String getEmail() {
-    return memberInfoDto.email(); // 이메일 반환
+    return member.getEmail(); // 이메일 반환
   }
 
   @Override

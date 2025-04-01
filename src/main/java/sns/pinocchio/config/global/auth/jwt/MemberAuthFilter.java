@@ -1,6 +1,6 @@
 package sns.pinocchio.config.global.auth.jwt;
 
-import com.fasterxml.jackson.core.ObjectCodec;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -32,14 +32,11 @@ import sns.pinocchio.presentation.member.exception.MemberException;
 @Slf4j
 public class MemberAuthFilter extends OncePerRequestFilter {
 
-  private final MemberService memberService;
   private final CustomUserDetailService customUserDetailService;
   private final CookieService cookieService;
   private final TokenProvider tokenProvider;
-  private final JwtUtil jwtUtil;
   private final RedisService redisService;
-
-  ObjectCodec objectMapper;
+  private final MemberService memberService;
 
   @Override
   protected void doFilterInternal(
@@ -56,7 +53,7 @@ public class MemberAuthFilter extends OncePerRequestFilter {
     }
 
     try {
-      TokenStatus tokenStatus = jwtUtil.validateToken(accessToken);
+      TokenStatus tokenStatus = JwtUtil.validateToken(accessToken);
 
       switch (tokenStatus) {
         case VALID:
@@ -111,7 +108,6 @@ public class MemberAuthFilter extends OncePerRequestFilter {
     UsernamePasswordAuthenticationToken authenticationToken =
         new UsernamePasswordAuthenticationToken(
             customUserDetails, null, customUserDetails.getAuthorities());
-
     SecurityContextHolder.getContext().setAuthentication(authenticationToken);
   }
 
@@ -144,14 +140,12 @@ public class MemberAuthFilter extends OncePerRequestFilter {
     return null;
   }
 
+  // 엑세스 토큰 재발급
   private String reissueToken(
       String refreshToken, HttpServletRequest request, HttpServletResponse response)
       throws IOException {
     try {
-      // 리프레시토큰 유효성 검사
-      jwtUtil.isRefreshTokenValid(refreshToken);
-      // 엑세스 토큰 재발급
-      Long memberId = Long.valueOf(redisService.get(refreshToken));
+      Long memberId = redisService.get(refreshToken);
       Member member = memberService.findById(memberId);
       String newAccessToken = tokenProvider.generateAccessToken(member);
 

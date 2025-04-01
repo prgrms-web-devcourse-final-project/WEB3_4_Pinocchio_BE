@@ -39,6 +39,12 @@ public class ChatResponseDto {
 
     private String roomId;
 
+    private String roomIdForSearch;
+
+    private String createdAt;
+
+    private String createdAtForSearch;
+
     private String targetUserId;
 
     private String lastMessage;
@@ -79,6 +85,9 @@ public class ChatResponseDto {
 
       return ChatRoomsDetail.builder()
           .roomId(chatRoom.getId())
+          .roomIdForSearch(chatRoom.getTsid())
+          .createdAt(chatRoom.getCreatedAt().toString())
+          .createdAtForSearch(chatRoom.getCreatedAtTsid())
           .targetUserId(targetUserTsid)
           .lastMessage(lastMessage)
           .lastMessageTime(lastMessageTime)

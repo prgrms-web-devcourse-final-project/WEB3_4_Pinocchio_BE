@@ -113,7 +113,8 @@ public class ChatController {
       @RequestParam(name = "sortBy", defaultValue = "latest", required = false) String sortBy,
       @RequestParam(name = "cursor", required = false) String cursor) {
 
-    // todo: JWT 토큰 인증 기능 완료 시, 추가 필요
+    // TODO: 코드 병합 시, 해당 메서드는 UserController로 이동 필요
+    // TODO: JWT 토큰 인증 기능 완료 시, 추가 필요
 
     ChatRoomsInfo chatRoomsInfo = chatService.getChatRooms("mockUser", limit, sortBy, cursor);
 

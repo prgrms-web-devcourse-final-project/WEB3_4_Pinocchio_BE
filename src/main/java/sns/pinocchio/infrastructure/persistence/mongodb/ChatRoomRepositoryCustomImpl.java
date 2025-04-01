@@ -1,6 +1,5 @@
 package sns.pinocchio.infrastructure.persistence.mongodb;
 
-import java.time.Instant;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
@@ -19,7 +18,7 @@ public class ChatRoomRepositoryCustomImpl implements ChatRoomRepositoryCustom {
 
   @Override
   public List<ChatRoom> findChatRoomsByUserWithCursor(
-      String userTsid, Instant cursor, int limit, ChatRoomSortType sortType) {
+      String userTsid, String cursor, int limit, ChatRoomSortType sortType) {
 
     Query query = new Query();
 
@@ -28,15 +27,15 @@ public class ChatRoomRepositoryCustomImpl implements ChatRoomRepositoryCustom {
 
     // 커서가 있을 경우, 생성 시간 기준으로 이전 것만 가져오기
     if (cursor != null) {
-      query.addCriteria(Criteria.where("createdAt").lt(cursor));
+      query.addCriteria(Criteria.where("createdAtTsid").lt(cursor));
     }
 
     // 정렬 타입에 맞게, 생성 시간 기준으로 정렬
     if (sortType == ChatRoomSortType.LATEST) {
-      query.with(Sort.by(Sort.Direction.DESC, "createdAt"));
+      query.with(Sort.by(Sort.Direction.DESC, "createdAtTsid"));
 
     } else {
-      query.with(Sort.by(Sort.Direction.ASC, "createdAt"));
+      query.with(Sort.by(Sort.Direction.ASC, "createdAtTsid"));
     }
 
     // 제한 개수 설정

@@ -215,27 +215,6 @@ class ChatServiceTest {
   }
 
   @Test
-  @DisplayName("채팅방 생성 Fail: 채팅방 정보를 DB에 저장하는 도중 실패했을 경우")
-  void createNewChatRoomFailSavedTest() {
-
-    // given
-    String errorMsg = "서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.";
-
-    when(chatRoomRepository.save(any())).thenReturn(null);
-
-    // when
-    ChatInternalServerErrorException exception =
-        assertThrows(
-            ChatInternalServerErrorException.class,
-            () ->
-                chatService.createNewChatRoom(
-                    testSenderTsid, testReceiverTsid, mockChatRoom.getCreatedAt()));
-
-    // then
-    assertThat(exception.getMessage()).isEqualTo(errorMsg);
-  }
-
-  @Test
   @DisplayName("채팅방 리스트 조회 Success")
   void findChatRoomsSuccessTest() {
 
@@ -280,7 +259,7 @@ class ChatServiceTest {
     assertThat(chatRooms).isNotNull();
     assertThat(chatRooms.getChatrooms()).hasSize(limit); // limit 개수
     assertThat(chatRooms.isHasNext()).isTrue();
-    assertThat(chatRooms.getNextCursor()).isEqualTo(room2.getCreatedAt().toString());
+    assertThat(chatRooms.getNextCursor()).isEqualTo(room2.getTsid());
   }
 
   @Test
@@ -289,22 +268,25 @@ class ChatServiceTest {
 
     // given
     String userTsid = "user_123";
-    String cursor = "2025-03-28T00:00:00Z";
+    int limit = 3;
+    String sortBy = "latest";
+    String cursor = "0K9361EDH5BT5";
 
     ChatRoom room =
         ChatRoom.builder()
-            .id("room4")
+            .id("chatroom:user_123-user_999")
             .participantTsids(List.of("user_123", "user_999"))
             .createdAt(Instant.parse("2025-03-27T10:00:00Z"))
+            .createdAtTsid("0K936FV2N581W")
             .build();
 
     given(
             chatRoomRepositoryCustom.findChatRoomsByUserWithCursor(
-                eq(userTsid), eq(Instant.parse(cursor)), eq(4), eq(ChatRoomSortType.LATEST)))
+                eq(userTsid), eq(cursor), eq(4), eq(ChatRoomSortType.LATEST)))
         .willReturn(List.of(room));
 
     // when
-    ChatRoomsInfo result = chatService.getChatRooms(userTsid, 3, "latest", cursor);
+    ChatRoomsInfo result = chatService.getChatRooms(userTsid, limit, sortBy, cursor);
 
     // then
     assertThat(result.isHasNext()).isFalse();

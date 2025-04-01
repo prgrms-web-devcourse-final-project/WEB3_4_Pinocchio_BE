@@ -5,7 +5,6 @@ import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 import lombok.*;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -20,9 +19,13 @@ public class ChatRoom {
 
   @Id private String id; // 채팅방 ID
 
+  @Indexed private String tsid; // 채팅방 TSID
+
   @Indexed private List<String> participantTsids; // 채팅방 참여자 리스트 (참가자 TSID)
 
   private Instant createdAt; // 채팅방 생성 날짜
+
+  @Indexed private String createdAtTsid; // 채팅방 생성 날짜 TSID
 
   private LastMessage lastMessage; // 마지막 메시지 정보
 
@@ -39,17 +42,14 @@ public class ChatRoom {
    *
    * @implNote ID 형식: "chatroom:user1-user2"
    */
-  public String generateChatRoomId() {
+  public static String generateChatRoomId(String senderTsid, String receiverTsid) {
 
     // 참여자가 없을 경우, 에러 반환
-    if (participantTsids.isEmpty()) {
+    if (senderTsid == null || receiverTsid == null) {
       throw new IllegalStateException("참여자가 없으면 ID를 생성할 수 없습니다.");
     }
 
-    // 오름차순 정렬하여 참여자 조합
-    String joined = participantTsids.stream().sorted().collect(Collectors.joining("-"));
-
-    return "chatroom:" + joined;
+    return "chatroom:" + senderTsid + "-" + receiverTsid;
   }
 
   /**

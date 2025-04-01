@@ -85,7 +85,7 @@ public class ChatService {
         chatRepository.save(
             Chat.builder()
                 .roomId(chatRoom.getId())
-                .roomTsid(TsidUtil.createTsid())
+                .roomTsid(chatRoom.getTsid())
                 .senderId(senderTsid)
                 .receiverId(sendMessage.receiverId())
                 .content(sendMessage.messageText())
@@ -138,13 +138,13 @@ public class ChatService {
   public ChatRoom createNewChatRoom(String senderTsid, String receiverTsid, Instant createdAt) {
     ChatRoom newChatRoom =
         ChatRoom.builder()
+            .id(ChatRoom.generateChatRoomId(senderTsid, receiverTsid))
+            .tsid(TsidUtil.createTsid())
             .participantTsids(List.of(senderTsid, receiverTsid))
             .status(ChatRoomStatus.PENDING)
             .createdAt(createdAt)
+            .createdAtTsid(TsidUtil.createTsid())
             .build();
-
-    // 채팅방 ID 생성
-    newChatRoom.generateChatRoomId();
 
     ChatRoom savedChatRoom = chatRoomRepository.save(newChatRoom);
     log.info("New ChatRoom Created: {}", savedChatRoom);
@@ -160,6 +160,7 @@ public class ChatService {
    * @param sortBy 정렬 기준 (latest / oldest)
    * @param cursor 페이징 커서 (생성 날짜 기준)
    * @return ChatRoomsInfo 유저가 포함된 채팅방 정보
+   * @throws ChatNotFoundException 등록된 사용자를 찾을 수 없을 경우
    */
   @Transactional
   public ChatRoomsInfo getChatRooms(String userTsid, int limit, String sortBy, String cursor) {
@@ -169,31 +170,24 @@ public class ChatService {
       throw new ChatNotFoundException("등록된 사용자를 찾을 수 없습니다.");
     }
 
-    Instant parsedCursor = null;
-
-    // 커서가 존재하면 Instant 포맷으로 변경
-    if (cursor != null) {
-      parsedCursor = Instant.parse(cursor);
-    }
-
     // 정렬 방식 설정
     ChatRoomSortType sortType = ChatRoomSortType.from(sortBy);
 
     // 채팅방 조회 (다음 데이터 판단을 위해 limit + 1)
-    List<ChatRoom> chatrooms =
+    List<ChatRoom> chatRooms =
         chatRoomRepositoryCustom.findChatRoomsByUserWithCursor(
-            userTsid, parsedCursor, limit + 1, sortType);
+            userTsid, cursor, limit + 1, sortType);
 
-    log.info("Found ChatRooms: count {}, data {}", chatrooms.size(), chatrooms);
+    log.info("Found ChatRooms: count {}, data {}", chatRooms.size(), chatRooms);
 
     // hasNext 판단: 이후 데이터가 존재하지 않으면 false
-    boolean hasNext = chatrooms.size() > limit;
+    boolean hasNext = chatRooms.size() > limit;
 
     // 실제 응답에 보낼 데이터는 limit 까지만 저장
-    List<ChatRoom> sliced = hasNext ? chatrooms.subList(0, limit) : chatrooms;
+    List<ChatRoom> sliced = hasNext ? chatRooms.subList(0, limit) : chatRooms;
 
     // nextCursor 판단: 이후 데이터가 존재하지 않으면 null
-    String nextCursor = hasNext ? sliced.getLast().getCreatedAt().toString() : null;
+    String nextCursor = hasNext ? sliced.getLast().getCreatedAtTsid() : null;
 
     // 응답 데이터 생성: ChatRoom Entity -> ChatRoomDetail Dto
     List<ChatRoomsDetail> chatroomDetails =

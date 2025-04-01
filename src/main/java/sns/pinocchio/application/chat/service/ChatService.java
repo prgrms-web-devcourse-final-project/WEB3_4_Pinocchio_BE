@@ -203,7 +203,7 @@ public class ChatService {
    * @param sortBy 정렬 기준 (latest / oldest)
    * @param cursor 페이징 커서 (생성 날짜 기준)
    * @return ChatMessagesInfo 채팅방 내 메시지 정보들
-   * @throws ChatNotFoundException 등록된 사용자를 찾을 수 없을 경우
+   * @throws ChatNotFoundException 등록된 채팅방을 찾을 수 없을 경우
    */
   @Transactional
   public ChatMessagesInfo getMessages(String chatId, int limit, String sortBy, String cursor) {

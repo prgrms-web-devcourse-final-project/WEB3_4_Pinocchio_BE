@@ -10,16 +10,12 @@ public class RedisService {
 
   private final RedisDao redisDao;
 
-  public void save(String key, String value) {
-    redisDao.save(key, value);
-  }
-
   public void save(String key, String value, long expirationTime) {
     redisDao.save(key, value, expirationTime);
   }
 
-  public String get(String key) {
-    return redisDao.get(key);
+  public Long get(String key) {
+    return Long.valueOf(redisDao.get(key));
   }
 
   public boolean exists(String key) {

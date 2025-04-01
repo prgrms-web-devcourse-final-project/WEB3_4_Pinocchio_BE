@@ -6,22 +6,13 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
-import lombok.RequiredArgsConstructor;
+import java.security.Key;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import sns.pinocchio.application.member.memberDto.MemberInfoDto;
 import sns.pinocchio.config.global.auth.jwt.TokenStatus;
-import sns.pinocchio.config.global.redis.redisService.RedisService;
-import sns.pinocchio.presentation.auth.exception.AuthErrorCode;
-import sns.pinocchio.presentation.auth.exception.AuthException;
 
-import java.security.Key;
-
-@RequiredArgsConstructor
 @Component
 public class JwtUtil {
-
-  private final RedisService redisService;
 
   @Value("${spring.security.jwt.secret-key}")
   private String SECRET_KEY;
@@ -32,6 +23,10 @@ public class JwtUtil {
   @Value("${spring.security.jwt.refresh-token.expiration}")
   private long REFRESH_TOKEN_EXPIRATION_TIME; // 60일(약 2달) (단위: ms)
 
+  private static Key key;
+
+  private static JwtUtil instance;
+
   public Long getAccessTokenExpirationTime() {
     return ACCESS_TOKEN_EXPIRATION_TIME;
   }
@@ -40,11 +35,9 @@ public class JwtUtil {
     return REFRESH_TOKEN_EXPIRATION_TIME;
   }
 
-  private Key key;
-
   @PostConstruct
   public void init() {
-    this.key = Keys.hmacShaKeyFor(SECRET_KEY.getBytes()); // `@Value` 주입된 후 실행됨
+    this.key = Keys.hmacShaKeyFor(SECRET_KEY.getBytes());
   }
 
   public Key getKey() {
@@ -52,7 +45,7 @@ public class JwtUtil {
   }
 
   // 토큰 검증 메서드
-  public TokenStatus validateToken(String token) {
+  public static TokenStatus validateToken(String token) {
     try {
       Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
       return TokenStatus.VALID; // 유효한 토큰
@@ -66,26 +59,13 @@ public class JwtUtil {
   }
 
   // 토큰으로 유저 정보 가져오기
-  public MemberInfoDto getMemberInfoDto(String token) {
+  public static Long getMember(String token) {
     Claims claims = parseToken(token);
-    return MemberInfoDto.builder()
-        .id(claims.get("id", Long.class))
-        .nickname(claims.getSubject())
-        .email(claims.get("email", String.class))
-        .tsid(claims.get("tsid", String.class))
-        .build();
+    return claims.get("id", Long.class);
   }
 
   // JWT 검증 및 정보 추출
-  public Claims parseToken(String token) {
+  public static Claims parseToken(String token) {
     return Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody();
-  }
-
-  // 리프레시 토큰 검증
-  public void isRefreshTokenValid(String refreshToken) {
-    if (redisService.isValidRefreshToken(refreshToken)) {
-      return;
-    }
-    throw new AuthException(AuthErrorCode.TOKEN_EXPIRED);
   }
 }

@@ -96,4 +96,29 @@ public class PostController {
 
         return ResponseEntity.ok("게시글이 삭제되었습니다.");
     }
+
+    @Operation(
+            summary = "게시글 상세 조회",
+            description = "특정 게시글의 상세 정보를 조회합니다. 공개글은 누구나 볼 수 있고, 비공개 게시물은 작성자만 볼 수 있습니다."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "게시글 조회 성공"),
+            @ApiResponse(responseCode = "403", description = "비공개 게시물 접근 (작성자가 아님)"),
+            @ApiResponse(responseCode = "404", description = "게시글이 존재하지 않음 or 삭제됨"),
+            @ApiResponse(responseCode = "500", description = "서버 내부 오류")
+    })
+    @GetMapping("/{postId}")
+    public ResponseEntity<?> getPostDetail(@PathVariable String postId) {
+        String tsid = null;
+
+        // 인증 정보가 있다면 tsid 추출
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.isAuthenticated()
+                && authentication.getPrincipal() instanceof CustomUserDetails userDetails) {
+            tsid = userDetails.getTsid();
+        }
+
+        return ResponseEntity.ok(postService.getPostDetail(postId, tsid));
+    }
+
 }

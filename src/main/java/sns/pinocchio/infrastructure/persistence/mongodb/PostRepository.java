@@ -15,4 +15,7 @@ public interface PostRepository extends MongoRepository<Post, String> {
     // 테스트 코드를 위해서 추가
     List<Post> findAllByTsid(String tsid);
 
+    // 게시물 조회 (status가 active인 것만)
+    Optional<Post> findByIdAndStatus(String id, String status);
+
 }

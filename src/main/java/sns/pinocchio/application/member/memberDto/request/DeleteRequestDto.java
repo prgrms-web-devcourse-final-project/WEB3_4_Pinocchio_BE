@@ -1,4 +1,4 @@
-package sns.pinocchio.application.member.memberDto;
+package sns.pinocchio.application.member.memberDto.request;
 
 import jakarta.validation.constraints.NotBlank;
 

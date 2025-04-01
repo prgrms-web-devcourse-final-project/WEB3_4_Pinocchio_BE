@@ -41,7 +41,6 @@ public class ChatService {
    * @param senderTsid 발신자 TSID
    * @param sendMessage 메시지 전송 정보
    * @return SendMessageInfo 전송된 메시지 정보
-   *
    * @throws ChatBadRequestException 입력 값이 유효하지 않을 경우
    * @throws ChatInternalServerErrorException 메시지 전송 또는 메시지 알림 전송이 실패했을 경우
    */
@@ -190,54 +189,16 @@ public class ChatService {
     // hasNext 판단: 이후 데이터가 존재하지 않으면 false
     boolean hasNext = chatrooms.size() > limit;
 
-    // 실제 응답에 보낼 데이터는 limit까지만 저장
+    // 실제 응답에 보낼 데이터는 limit 까지만 저장
     List<ChatRoom> sliced = hasNext ? chatrooms.subList(0, limit) : chatrooms;
-
-    List<ChatRoomsDetail> chatroomDetails =
-        sliced.stream().map(chatRoom -> toDetail(userTsid, chatRoom)).toList();
 
     // nextCursor 판단: 이후 데이터가 존재하지 않으면 null
     String nextCursor = hasNext ? sliced.getLast().getCreatedAt().toString() : null;
 
+    // 응답 데이터 생성: ChatRoom Entity -> ChatRoomDetail Dto
+    List<ChatRoomsDetail> chatroomDetails =
+        sliced.stream().map(chatRoom -> ChatRoomsDetail.toDetail(userTsid, chatRoom)).toList();
+
     return new ChatRoomsInfo(nextCursor, hasNext, chatroomDetails);
-  }
-
-  /**
-   * ChatRoom entity -> ChatRoomsDetail Dto
-   *
-   * @param userTsid 유저 TSID
-   * @param chatRoom 채팅방 정보
-   * @return ChatRoomsDetail 채팅방 세부 정보
-   */
-  private ChatRoomsDetail toDetail(String userTsid, ChatRoom chatRoom) {
-
-    // 채팅 대상 확인: 없을 경우 null
-    String targetUserTsid =
-        chatRoom.getParticipantTsids().stream()
-            .filter(id -> !id.equals(userTsid))
-            .findFirst()
-            .orElse(null);
-
-    // 읽지 않은 메시지 개수 확인: 없으면 0
-    int unreadCounts = 0;
-    if (chatRoom.getUnreadCounts() != null && chatRoom.getUnreadCounts().containsKey(userTsid)) {
-      unreadCounts = chatRoom.getUnreadCounts().get(userTsid);
-    }
-
-    // 마지막 메시지 정보 확인: 없으면 null
-    String lastMessage = null;
-    Instant lastMessageTime = null;
-    if (chatRoom.getLastMessage() != null) {
-      lastMessage = chatRoom.getLastMessage().getContent();
-      lastMessageTime = chatRoom.getLastMessage().getCreatedAt();
-    }
-
-    return ChatRoomsDetail.builder()
-        .roomId(chatRoom.getId())
-        .targetUserId(targetUserTsid)
-        .lastMessage(lastMessage)
-        .lastMessageTime(lastMessageTime)
-        .unreadCounts(unreadCounts)
-        .build();
   }
 }

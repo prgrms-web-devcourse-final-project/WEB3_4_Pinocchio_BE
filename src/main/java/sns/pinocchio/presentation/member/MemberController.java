@@ -1,5 +1,7 @@
 package sns.pinocchio.presentation.member;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -28,9 +30,10 @@ public class MemberController {
   private final ReportService reportService;
 
   // 유저 프로필 조회
-  @GetMapping("/{memberId}")
-  public ResponseEntity<ProfileResponseDto> getMemberInfo(@PathVariable Long memberId) {
-    Member member = memberService.findById(memberId);
+  @GetMapping
+  public ResponseEntity<ProfileResponseDto> getProfile(
+      @AuthenticationPrincipal CustomUserDetails userDetails) {
+    Member member = userDetails.getMember();
 
     // 응답 DTO 변환
     ProfileResponseDto profileResponseDto =
@@ -71,12 +74,12 @@ public class MemberController {
   }
 
   // 비밀번호 변경
-  @PutMapping("/{memberId}/password")
+  @PutMapping("/password")
   public ResponseEntity<String> changePassword(
-      @PathVariable Long memberId,
+      @AuthenticationPrincipal CustomUserDetails customUserDetails,
       @Valid @RequestBody ChangePasswordRequestDto changePasswordRequestDto) {
     // 유저 조회
-    Member member = memberService.findById(memberId);
+    Member member = customUserDetails.getMember();
 
     // 패스워드 검증
     authService.validatePassword(changePasswordRequestDto.currentPassword(), member);
@@ -88,11 +91,14 @@ public class MemberController {
   }
 
   // 회원 탈퇴
-  @DeleteMapping("/{memberId}")
+  @DeleteMapping
   public ResponseEntity<String> deleteMember(
-      @PathVariable Long memberId, @Valid @RequestBody DeleteRequestDto deleteRequestDto) {
+      @AuthenticationPrincipal CustomUserDetails customUserDetails,
+      HttpServletRequest request,
+      HttpServletResponse response,
+      @Valid @RequestBody DeleteRequestDto deleteRequestDto) {
     // 유저 조회
-    Member member = memberService.findById(memberId);
+    Member member = customUserDetails.getMember();
 
     // 패스워드 검증
     authService.validatePassword(deleteRequestDto.password(), member);
@@ -100,15 +106,19 @@ public class MemberController {
     // 유저 삭제
     memberService.deleteMember(member);
 
+    // 쿠키 삭제
+    memberService.tokenClear(request, response);
+
     return ResponseEntity.status(HttpStatus.OK).body("회원 탈퇴가 완료되었습니다. 그동안 이용해주셔서 감사합니다.");
   }
 
   // 계정 신고
-  @PostMapping("/{memberId}/report")
+  @PostMapping("/report")
   public ResponseEntity<String> reportMember(
-      @PathVariable Long memberId, @Valid @RequestBody ReportRequestDto reportRequestDto) {
+      @AuthenticationPrincipal CustomUserDetails customUserDetails,
+      @Valid @RequestBody ReportRequestDto reportRequestDto) {
     // 신고자 조회 (사용자 조회)
-    Member reporter = memberService.findById(memberId);
+    Member reporter = customUserDetails.getMember();
 
     // 신고 대상 조회 (닉네임 유니크)
     Member reported = memberService.findByNickname(reportRequestDto.reportedNickname());
@@ -121,25 +131,5 @@ public class MemberController {
         reportRequestDto.reason());
 
     return ResponseEntity.ok("계정 신고가 완료되었습니다. 신고 내용은 검토 후 처리됩니다.");
-  }
-
-  // 계정 차단
-  @PostMapping("/block")
-  public ResponseEntity<String> blockMember() {
-    return ResponseEntity.ok("해당 회원의 계정이 차단되었습니다.");
-  }
-
-  // 계정 차단 해제
-  @PostMapping("/unblock")
-  public ResponseEntity<String> unblockMember() {
-
-    return ResponseEntity.ok("해당 회원의 계정 차단이 해제되었습니다.");
-  }
-
-  // 차단한 유저 조회
-  @GetMapping("/block")
-  public ResponseEntity<String> getBlockedMembers() {
-
-    return ResponseEntity.ok("차단한 회원 목록을 성공적으로 조회했습니다.");
   }
 }

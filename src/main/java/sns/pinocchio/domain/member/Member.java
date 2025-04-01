@@ -6,7 +6,7 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import sns.pinocchio.application.member.memberDto.UpdateRequestDto;
+import sns.pinocchio.application.member.memberDto.request.UpdateRequestDto;
 
 import java.time.LocalDateTime;
 

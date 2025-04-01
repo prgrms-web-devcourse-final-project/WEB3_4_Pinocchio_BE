@@ -10,7 +10,7 @@ import org.springframework.test.context.TestConstructor;
 import org.springframework.transaction.annotation.Transactional;
 import sns.pinocchio.PinocchioApplication;
 import sns.pinocchio.application.member.MemberService;
-import sns.pinocchio.application.member.memberDto.UpdateRequestDto;
+import sns.pinocchio.application.member.memberDto.request.UpdateRequestDto;
 import sns.pinocchio.infrastructure.member.MemberRepository;
 
 import static org.assertj.core.api.Assertions.assertThat;

@@ -1,15 +1,22 @@
 package sns.pinocchio.application.member;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import sns.pinocchio.application.member.memberDto.SignupRequestDto;
 import sns.pinocchio.application.member.memberDto.UpdateRequestDto;
+import sns.pinocchio.config.global.auth.service.cookieService.CookieService;
 import sns.pinocchio.config.global.auth.util.EmailUtil;
+import sns.pinocchio.config.global.auth.util.JwtUtil;
 import sns.pinocchio.config.global.auth.util.PasswordUtil;
+import sns.pinocchio.config.global.redis.redisService.RedisService;
 import sns.pinocchio.domain.member.Member;
 import sns.pinocchio.infrastructure.member.MemberRepository;
+import sns.pinocchio.presentation.auth.exception.AuthErrorCode;
+import sns.pinocchio.presentation.auth.exception.AuthException;
 import sns.pinocchio.presentation.member.exception.MemberErrorCode;
 import sns.pinocchio.presentation.member.exception.MemberException;
 

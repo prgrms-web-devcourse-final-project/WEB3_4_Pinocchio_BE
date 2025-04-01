@@ -22,6 +22,6 @@ public class CookieService {
   }
 
   public void clearTokenFromCookie(HttpServletResponse response) {
-    cookieUtil.addTokenToCookie("refreshToken", null, 0, response);
+    cookieUtil.clearTokenFromCookie(response);
   }
 }

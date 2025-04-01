@@ -142,12 +142,11 @@ public class MemberService {
   public void tokenClear(HttpServletRequest request, HttpServletResponse response) {
     String refreshToken = cookieService.getRefreshTokenFromCookie(request);
 
-    if (refreshToken != null) {
-      cookieService.clearTokenFromCookie(response);
-      redisService.addBlackList(refreshToken, jwtUtil.getRefreshTokenExpirationTime());
-    } else {
+    if (refreshToken == null) {
       throw new AuthException(AuthErrorCode.INVALID_TOKEN);
     }
+    cookieService.clearTokenFromCookie(response);
+    redisService.addBlackList(refreshToken, jwtUtil.getRefreshTokenExpirationTime());
   }
 
   public Member findByTsid(String tsid) {

@@ -4,13 +4,18 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import sns.pinocchio.application.auth.AuthService;
 import sns.pinocchio.application.member.MemberService;
-import sns.pinocchio.application.member.memberDto.*;
+import sns.pinocchio.application.member.memberDto.request.ChangePasswordRequestDto;
+import sns.pinocchio.application.member.memberDto.request.DeleteRequestDto;
+import sns.pinocchio.application.member.memberDto.request.ResetPasswordRequestDto;
+import sns.pinocchio.application.member.memberDto.request.UpdateRequestDto;
+import sns.pinocchio.application.member.memberDto.response.ProfileResponseDto;
 import sns.pinocchio.application.report.ReportService;
 import sns.pinocchio.application.report.reportDto.ReportRequestDto;
+import sns.pinocchio.config.global.auth.model.CustomUserDetails;
 import sns.pinocchio.domain.member.Member;
 
 @RequestMapping("/member")
@@ -39,11 +44,12 @@ public class MemberController {
   }
 
   // 유저 프로필 수정
-  @PutMapping("/{memberId}")
+  @PutMapping
   public ResponseEntity<ProfileResponseDto> updateMemberInfo(
-      @PathVariable Long memberId, @Valid @RequestBody UpdateRequestDto updateRequestDto) {
+      @AuthenticationPrincipal CustomUserDetails customUserDetails,
+      @Valid @RequestBody UpdateRequestDto updateRequestDto) {
     // 유저 프로필 수정
-    Member member = memberService.updateProfile(memberId, updateRequestDto);
+    Member member = memberService.updateProfile(customUserDetails.getUserId(), updateRequestDto);
 
     // 응답 DTO 변환
     ProfileResponseDto profileResponseDto =
@@ -120,9 +126,6 @@ public class MemberController {
   // 계정 차단
   @PostMapping("/block")
   public ResponseEntity<String> blockMember() {
-      MemberInfoDto memberInfoDto = (MemberInfoDto) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-      Long id = memberInfoDto.id();
-            
     return ResponseEntity.ok("해당 회원의 계정이 차단되었습니다.");
   }
 

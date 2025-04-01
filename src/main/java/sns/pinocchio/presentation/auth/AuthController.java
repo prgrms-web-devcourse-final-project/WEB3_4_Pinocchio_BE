@@ -13,9 +13,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import sns.pinocchio.application.auth.AuthService;
 import sns.pinocchio.application.member.MemberService;
-import sns.pinocchio.application.member.memberDto.LoginRequestDto;
-import sns.pinocchio.application.member.memberDto.SignupRequestDto;
-import sns.pinocchio.application.member.memberDto.SignupResponseDto;
+import sns.pinocchio.application.member.memberDto.request.LoginRequestDto;
+import sns.pinocchio.application.member.memberDto.request.SignupRequestDto;
+import sns.pinocchio.application.member.memberDto.response.SignupResponseDto;
 import sns.pinocchio.config.global.auth.util.TokenProvider;
 import sns.pinocchio.domain.member.Member;
 

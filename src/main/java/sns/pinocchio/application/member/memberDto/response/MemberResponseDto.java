@@ -1,4 +1,4 @@
-package sns.pinocchio.application.member.memberDto;
+package sns.pinocchio.application.member.memberDto.response;
 
 import lombok.Builder;
 import sns.pinocchio.domain.member.Member;

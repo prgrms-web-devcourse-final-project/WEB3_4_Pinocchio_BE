@@ -4,6 +4,7 @@ import org.springframework.http.HttpStatus;
 
 // auth 관련 예외 처리
 public class AuthException extends RuntimeException {
+
   private final AuthErrorCode authErrorCode;
 
   public AuthException(AuthErrorCode authErrorCode) {
@@ -11,6 +12,10 @@ public class AuthException extends RuntimeException {
     this.authErrorCode = authErrorCode;
   }
 
+  public AuthErrorCode getAuthErrorCode() {
+    return authErrorCode;
+  }
+  
   public HttpStatus getStatus() {
     return authErrorCode.getHttpStatus();
   }

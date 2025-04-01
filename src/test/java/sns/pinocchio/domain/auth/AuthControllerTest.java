@@ -38,7 +38,7 @@ public class AuthControllerTest {
   @Autowired private MemberService memberService;
 
   @Autowired private PasswordEncoder passwordEncoder;
-  
+
   @Autowired private JwtUtil jwtUtil;
 
   private ResultActions loginAndGetResponse() throws Exception {
@@ -183,8 +183,8 @@ public class AuthControllerTest {
                 .contentType(MediaType.APPLICATION_JSON));
 
     logoutResponse
-            .andExpect(status().isOk()) // 로그아웃 성공 상태 코드 확인
-            .andExpect(cookie().value("refreshToken", ""));
+        .andExpect(status().isOk()) // 로그아웃 성공 상태 코드 확인
+        .andExpect(cookie().value("refreshToken", ""));
   }
 
   @Test
@@ -195,26 +195,27 @@ public class AuthControllerTest {
     String refreshTokenValue = refreshTokenCookie.getValue();
 
     Member member = memberService.findByEmail("example@naver.com");
-    
-    String expiredAccessToken = Jwts.builder()
-            .setSubject(member.getName())  // 사용자 이름
-            .claim("id", member.getId())   // 사용자 ID
-            .claim("email", member.getEmail())  // 사용자 이메일
-            .claim("tsid", member.getTsid())
-            .setIssuedAt(new Date())  // 발급 시간 (현재 시간)
-            .setExpiration(new Date(System.currentTimeMillis() - 1000))  // 만료 시간을 과거로 설정
-            .signWith(jwtUtil.getKey())  // 시크릿 키
-            .compact();
-  
-            
-    ResultActions memberSearchResponse =
-            mockMvc.perform(
-                    post("/member/1")
-                            .header("Authorization", "Bearer " + expiredAccessToken)
-                            .cookie(new Cookie("refreshToken", refreshTokenValue))
-                            .contentType(MediaType.APPLICATION_JSON));
 
-    String newAccessToken = memberSearchResponse .andReturn().getResponse().getHeader("Authorization");
+    String expiredAccessToken =
+        Jwts.builder()
+            .setSubject(member.getName()) // 사용자 이름
+            .claim("id", member.getId()) // 사용자 ID
+            .claim("email", member.getEmail()) // 사용자 이메일
+            .claim("tsid", member.getTsid())
+            .setIssuedAt(new Date()) // 발급 시간 (현재 시간)
+            .setExpiration(new Date(System.currentTimeMillis() - 1000)) // 만료 시간을 과거로 설정
+            .signWith(jwtUtil.getKey()) // 시크릿 키
+            .compact();
+
+    ResultActions memberSearchResponse =
+        mockMvc.perform(
+            post("/member/1")
+                .header("Authorization", "Bearer " + expiredAccessToken)
+                .cookie(new Cookie("refreshToken", refreshTokenValue))
+                .contentType(MediaType.APPLICATION_JSON));
+
+    String newAccessToken =
+        memberSearchResponse.andReturn().getResponse().getHeader("Authorization");
 
     assertThat(newAccessToken).isNotNull();
   }

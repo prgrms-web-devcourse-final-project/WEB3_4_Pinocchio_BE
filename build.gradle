@@ -55,6 +55,17 @@ dependencies {
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.security:spring-security-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+    // Bill of Materials (BOM) to manage Java library versions
+    implementation platform('dev.langchain4j:langchain4j-bom:0.36.2')
+    // MongoDB Java Sync Driver v5.2.0 or later
+    implementation 'org.mongodb:mongodb-driver-sync:5.2.0'
+    // Java library for Hugging Face models
+    implementation 'dev.langchain4j:langchain4j-hugging-face'
+    // Java library for URL Document Loader
+    implementation 'dev.langchain4j:langchain4j'
+    // Java library for Apache PDFBox Document Parser
+    implementation 'dev.langchain4j:langchain4j-document-parser-apache-pdfbox'
 }
 
 def querydslDir = "src/main/generated"

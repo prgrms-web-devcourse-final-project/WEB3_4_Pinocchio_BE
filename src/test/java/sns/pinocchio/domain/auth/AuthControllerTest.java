@@ -209,7 +209,7 @@ public class AuthControllerTest {
 
     ResultActions memberSearchResponse =
         mockMvc.perform(
-            post("/member/1")
+            post("/member")
                 .header("Authorization", "Bearer " + expiredAccessToken)
                 .cookie(new Cookie("refreshToken", refreshTokenValue))
                 .contentType(MediaType.APPLICATION_JSON));

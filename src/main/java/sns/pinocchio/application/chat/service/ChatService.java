@@ -7,9 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import sns.pinocchio.application.chat.dto.ChatRequestDto.SendMessage;
-import sns.pinocchio.application.chat.dto.ChatResponseDto.ChatRoomsDetail;
-import sns.pinocchio.application.chat.dto.ChatResponseDto.ChatRoomsInfo;
-import sns.pinocchio.application.chat.dto.ChatResponseDto.SendMessageInfo;
+import sns.pinocchio.application.chat.dto.ChatResponseDto.*;
 import sns.pinocchio.domain.chat.Chat;
 import sns.pinocchio.domain.chat.ChatException.ChatBadRequestException;
 import sns.pinocchio.domain.chat.ChatException.ChatInternalServerErrorException;
@@ -94,6 +92,7 @@ public class ChatService {
                 .likeStatus(false)
                 .createdAt(sendMessage.sentAt())
                 .createdAtForTsid(TsidUtil.createTsid())
+                .modifiedAt(sendMessage.sentAt())
                 .build());
 
     log.debug("Saved Chat: {}", savedChat);
@@ -194,5 +193,48 @@ public class ChatService {
         sliced.stream().map(chatRoom -> ChatRoomsDetail.toDetail(userTsid, chatRoom)).toList();
 
     return new ChatRoomsInfo(nextCursor, hasNext, chatroomDetails);
+  }
+
+  /**
+   * 채팅방 내 메시지 조회
+   *
+   * @param chatId 채팅방 TSID
+   * @param limit 최대 결과 개수
+   * @param sortBy 정렬 기준 (latest / oldest)
+   * @param cursor 페이징 커서 (생성 날짜 기준)
+   * @return ChatMessagesInfo 채팅방 내 메시지 정보들
+   * @throws ChatNotFoundException 등록된 사용자를 찾을 수 없을 경우
+   */
+  @Transactional
+  public ChatMessagesInfo getMessages(String chatId, int limit, String sortBy, String cursor) {
+
+    if (chatId == null) {
+      log.error("chatId is null. Fail to get Chat Messages in ChatRoom.");
+      throw new ChatNotFoundException("등록된 채팅방을 찾을 수 없습니다.");
+    }
+
+    // 정렬 방식 설정
+    ChatRoomSortType sortType = ChatRoomSortType.from(sortBy);
+
+    // 채팅방 조회 (다음 데이터 판단을 위해 limit + 1)
+    List<Chat> chats =
+        chatRoomRepositoryCustom.findChatsByChatRoomWithCursor(chatId, cursor, limit + 1, sortType);
+
+    log.info("Found Chats: count {}, data {}", chats.size(), chats);
+
+    // hasNext 판단: 이후 데이터가 존재하지 않으면 false
+    boolean hasNext = chats.size() > limit;
+
+    // 실제 응답에 보낼 데이터는 limit 까지만 저장
+    List<Chat> sliced = hasNext ? chats.subList(0, limit) : chats;
+
+    // nextCursor 판단: 이후 데이터가 존재하지 않으면 null
+    String nextCursor = hasNext ? sliced.getLast().getCreatedAtForTsid() : null;
+
+    // 응답 데이터 생성: Chat Entity -> ChatMessageDetail Dto
+    List<ChatMessageDetail> chatMessageDetail =
+        sliced.stream().map(ChatMessageDetail::toDetail).toList();
+
+    return new ChatMessagesInfo(nextCursor, hasNext, chatId, chatMessageDetail);
   }
 }

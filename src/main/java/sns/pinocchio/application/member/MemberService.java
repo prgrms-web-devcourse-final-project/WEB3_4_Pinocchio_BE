@@ -96,7 +96,7 @@ public class MemberService {
   public Member findByNickname(String nickname) {
     return memberRepository
         .findByNickname(nickname)
-        .orElseThrow(() -> new MemberException(MemberErrorCode.NICKNAME_DUPLICATED));
+        .orElseThrow(() -> new MemberException(MemberErrorCode.USER_NOT_FOUND));
   }
 
   // 사용자 ID 조회

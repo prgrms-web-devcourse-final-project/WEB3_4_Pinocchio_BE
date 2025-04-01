@@ -18,6 +18,8 @@ import sns.pinocchio.domain.report.Report;
 import sns.pinocchio.infrastructure.member.MemberRepository;
 import sns.pinocchio.presentation.member.exception.MemberException;
 
+import java.util.List;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatCode;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
@@ -36,29 +38,32 @@ public class MemberServiceTest {
 
   @BeforeEach
   public void init() {
+    memberRepository.deleteAll();
     Member member =
         Member.builder()
-            .email("example1@naver.com")
+            .email("example@naver.com")
             .password("memberPassword123!")
-            .nickname("nickname1")
+            .nickname("nickname")
             .name("member")
             .build();
 
     memberRepository.save(member);
+    List<Member> members = memberRepository.findAll();
+    members.forEach(System.out::println);
   }
 
   @Test
   @DisplayName("계정 생성 테스트")
   public void createMemberTest() {
     SignupRequestDto member =
-        new SignupRequestDto("name", "example1@naver.com", "nickname1", "memberPassword123!@");
+        new SignupRequestDto("name", "exampletest@naver.com", "testNickname", "memberPassword123@");
     memberService.createMember(member);
 
-    Member user = memberService.findByEmail("example1@naver.com");
+    Member user = memberService.findByEmail("exampletest@naver.com");
 
     assertThat(user).isNotNull();
     assertThat(user.getName()).isEqualTo("name");
-    assertThat(user.getNickname()).isEqualTo("nickname1");
+    assertThat(user.getNickname()).isEqualTo("testNickname");
     assertThat(user.getTsid()).isNotNull();
   }
 
@@ -81,10 +86,10 @@ public class MemberServiceTest {
   public void updateProfileTest() {
     UpdateRequestDto updateRequestDto =
         new UpdateRequestDto("nana", "Nick", "안녕하세요", "youtube", "", false);
-    Member member = memberService.findByEmail("example1@naver.com");
+    Member member = memberService.findByEmail("example@naver.com");
     member.updateProfile(updateRequestDto);
 
-    Member result = memberService.findByEmail("example1@naver.com");
+    Member result = memberService.findByEmail("example@naver.com");
 
     assertThat(result.getName()).isEqualTo("nana");
     assertThat(result.getNickname()).isEqualTo("Nick");
@@ -108,11 +113,11 @@ public class MemberServiceTest {
   @Test
   @DisplayName("신고 내역 저장 테스트")
   public void createReportTest() {
-    reportService.createReport(1L, 2L, POST, "욕햇어용");
+    reportService.createReport(1L, 2L, POST, "욕설");
     Report report = reportService.findByReporter(1L);
 
     assertThat(report.getReportedId()).isEqualTo(2L);
     assertThat(report.getReportedType()).isEqualTo(POST);
-    assertThat(report.getReason()).isEqualTo("욕햇어용");
+    assertThat(report.getReason()).isEqualTo("욕설");
   }
 }

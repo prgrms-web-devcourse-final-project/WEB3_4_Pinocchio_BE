@@ -7,6 +7,7 @@ import ChangePassword from "./ChangePassword";
 import axios from "axios";
 import {useToast} from "../../hooks/useToast";
 import {useEffect, useState} from "react";
+import Spinner from "../../shared/Spinner";
 
 
 const Header = () => {
@@ -42,24 +43,41 @@ const Header = () => {
         }
     };
 
+    const handleLogoutClick = async () => {
+        try {
+            setIsLoading(true);
+            await axios.post("/auth/logout", {});
+            navigate("/login");
+        } catch (error) {
+            console.log("error login api: ", error);
+            openConfirm({
+                title: '데이터를 불러오는 중 오류가 발생했습니다.',
+                html: error.response?.data?.message || "에러: 관리자에게 문의바랍니다."
+            });
+        } finally {
+            setIsLoading(false);
+        }
+    }
+
     return (
         <header className="kw-header">
             <div className="kw-inner">
                 <div className="kw-header-gnb">
                     <div className="kw-header-gnb-brand">
-                        <Link to={"/dashboard/dashboard"}>
+                        <Link to={"/board/list"}>
                             <img src={logo} style={{ width: "120px" }} alt="pinocchio"/>
                         </Link>
                     </div>
                     <BoardSearch type={'notice'} />
-                    <Button size={"md"}>LOGOUT</Button>
-                    <Button size={"md"}>MYPAGE</Button>
+                    <Button size={"md"} onClick={handleLogoutClick}>LOGOUT</Button>
+                    <Button size={"md"} onClick={() => navigate("/board/mypage")}>MYPAGE</Button>
                     <ChangePassword isOpen={isChangePasswordModalOpen}
                                     onHide={() => setChangePasswordModalOpen(false)}
                                     onSave={handlePasswordChangeSave}
                     />
                 </div>
             </div>
+            <Spinner show={isLoading}/>
         </header>
     );
 }

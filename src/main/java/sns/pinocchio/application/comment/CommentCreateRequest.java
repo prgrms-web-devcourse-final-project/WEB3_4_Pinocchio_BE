@@ -8,8 +8,6 @@ import lombok.Data;
 @Data
 @Builder
 public class CommentCreateRequest {
-	@Schema(description = "댓글 userID")
-	String authorId;
 	@Schema(description = "댓글의 게시글 postID")
 	String postId;
 	@Schema(description = "댓글 내용")

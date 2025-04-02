@@ -25,10 +25,10 @@ public class UserFollowService {
 
 		if (optUserFollow.isEmpty()) {
 			UserFollow newUserFollow = UserFollow.builder()
-				.followingId(authorId)
-				.followingNickname(authorNickname)
-				.followerId(followingId)
-				.followerNickname(request.followingNickname)
+				.followingId(followingId)
+				.followingNickname(request.followingNickname)
+				.followerId(authorId)
+				.followerNickname(authorNickname)
 				.status(UserFollowStatus.ACTIVE)
 				.createdAt(LocalDateTime.now())
 				.updatedAt(LocalDateTime.now())

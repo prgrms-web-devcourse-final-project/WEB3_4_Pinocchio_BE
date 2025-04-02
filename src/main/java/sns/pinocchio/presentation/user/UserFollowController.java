@@ -2,6 +2,8 @@ package sns.pinocchio.presentation.user;
 
 import java.security.Principal;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +21,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import sns.pinocchio.application.user.UserFollowRequest;
 import sns.pinocchio.application.user.UserFollowService;
+import sns.pinocchio.domain.member.Member;
+import sns.pinocchio.infrastructure.member.MemberRepository;
 
 @Tag(name = "유저 팔로우", description = "유저 팔로우 관련 API")
 @RestController
@@ -26,6 +30,7 @@ import sns.pinocchio.application.user.UserFollowService;
 @RequiredArgsConstructor
 public class UserFollowController {
 	private final UserFollowService userFollowService;
+	private final MemberRepository memberRepository;
 
 	@Operation(summary = "유저 팔로우", description = "유저 팔로우 토글")
 	@ApiResponses({@ApiResponse(responseCode = "200", description = "팔로우 성공"),
@@ -36,23 +41,21 @@ public class UserFollowController {
 	@PostMapping("/{userId}/follow")
 	public ResponseEntity<Map<String, Object>> toggleUserFollow(Principal principal, @PathVariable String userId,
 		@RequestBody UserFollowRequest request) {
-		if (false/*JWT인증*/) {
-			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", "유효하지 않은 인증 정보입니다."));
-		}
-
-		if (false/*본인인지 확인해서 400에러 발생 자기 스스로 팔로잉은 불가능*/) {
-			return ResponseEntity.status(HttpStatus.FORBIDDEN)
-				.body(Map.of("message", "이 댓글을 수정할 권한이 없습니다. 작성자만 수정할 수 있습니다."));
-
-		}
-// 테스트용 주석
-		if (false/*유저 확인*/) {
+		Optional<Member> optMember = memberRepository.findByName(principal.getName());
+		if (optMember.isEmpty()) {
 			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("message", "등록된 유저를 찾을 수 없습니다."));
 		}
 
-		String authorId = "user_001";//jwt구현시 제거
-		String authorNickname = "고길동";//jwt구현시 제거
-		Map<String, Object> response = userFollowService.followingUser(request, userId, authorId, authorNickname);
+		Member authorMember = optMember.get();
+
+		if (Objects.equals(authorMember.getTsid(), userId)) {
+			return ResponseEntity.status(HttpStatus.FORBIDDEN)
+				.body(Map.of("message", "스스로 팔로잉 불가능"));
+
+		}
+
+		Map<String, Object> response = userFollowService.followingUser(request, userId, authorMember.getTsid(),
+			authorMember.getNickname());
 
 		return ResponseEntity.status(HttpStatus.OK).body(response);
 	}
@@ -80,7 +83,8 @@ public class UserFollowController {
 	@PostMapping("/{userId}/followings")
 	public ResponseEntity<Map<String, Object>> findFollowings(@PathVariable String userId,
 		@RequestParam(value = "page", defaultValue = "0") int page) {
-		if (false/*유저 확인*/) {
+		Optional<Member> optMember = memberRepository.findByTsid(userId);
+		if (optMember.isEmpty()) {
 			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("message", "등록된 유저를 찾을 수 없습니다."));
 		}
 

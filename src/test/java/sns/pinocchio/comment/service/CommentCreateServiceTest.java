@@ -35,7 +35,7 @@ public class CommentCreateServiceTest {
 		String postId = "post_001";
 		String commentId = "comment_001";
 
-		CommentCreateRequest createRequest = CommentCreateRequest.builder().postId(postId).authorId(authorId).content("댓글이지롱").build();
+		CommentCreateRequest createRequest = CommentCreateRequest.builder().postId(postId).content("댓글이지롱").build();
 
 		Comment mockComment = Comment.builder().id(commentId).userId(authorId).postId(postId).content("댓글이지롱").build();
 
@@ -61,7 +61,7 @@ public class CommentCreateServiceTest {
 		String commentId = "comment_001";
 
 		for(int i = 0; i<100; i++){
-			CommentCreateRequest createRequest = CommentCreateRequest.builder().postId(postId).authorId(authorId).content("댓글이지롱"+i).build();
+			CommentCreateRequest createRequest = CommentCreateRequest.builder().postId(postId).content("댓글이지롱"+i).build();
 			Map<String, Object> response = commentServiceReal.createComment(createRequest, authorId);
 		}
 

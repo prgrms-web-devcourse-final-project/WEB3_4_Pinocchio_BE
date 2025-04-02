@@ -1,8 +1,9 @@
-package sns.pinocchio.application.comment;
+package sns.pinocchio.application.comment.commentDto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 import lombok.Data;
+import sns.pinocchio.application.comment.DeleteType;
 
 //댓글 삭제 요청 DTO
 @Data

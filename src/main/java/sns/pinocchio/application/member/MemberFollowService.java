@@ -1,4 +1,4 @@
-package sns.pinocchio.application.user;
+package sns.pinocchio.application.member;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -10,23 +10,24 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import lombok.RequiredArgsConstructor;
+import sns.pinocchio.application.member.memberDto.MemberFollowRequest;
 import sns.pinocchio.domain.user.UserFollow;
 import sns.pinocchio.domain.user.UserFollowStatus;
 import sns.pinocchio.infrastructure.persistence.mongodb.UserFollowRepository;
 
 @Service
 @RequiredArgsConstructor
-public class UserFollowService {
+public class MemberFollowService {
 	private final UserFollowRepository userFollowRepository;
 
-	public Map<String, Object> followingUser(UserFollowRequest request, String followingId, String authorId,
+	public Map<String, Object> followingUser(MemberFollowRequest request, String followingId, String authorId,
 		String authorNickname) {
 		Optional<UserFollow> optUserFollow = userFollowRepository.findByFollowerIdAndFollowingId(authorId, followingId);
 
 		if (optUserFollow.isEmpty()) {
 			UserFollow newUserFollow = UserFollow.builder()
 				.followingId(followingId)
-				.followingNickname(request.followingNickname)
+				.followingNickname(request.getFollowingNickname())
 				.followerId(authorId)
 				.followerNickname(authorNickname)
 				.status(UserFollowStatus.ACTIVE)

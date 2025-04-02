@@ -16,6 +16,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import lombok.RequiredArgsConstructor;
+import sns.pinocchio.application.comment.commentDto.CommentCreateRequest;
+import sns.pinocchio.application.comment.commentDto.CommentDeleteRequest;
+import sns.pinocchio.application.comment.commentDto.CommentLikeRequest;
+import sns.pinocchio.application.comment.commentDto.CommentModifyRequest;
 import sns.pinocchio.domain.comment.Comment;
 import sns.pinocchio.domain.comment.CommentStatus;
 import sns.pinocchio.infrastructure.persistence.mongodb.CommentRepository;
@@ -45,30 +49,30 @@ public class CommentService {
 
 	//댓글 삭제 메서드 SOFT_DELETED:실제로 삭제 X 안보이게만 HARD_DELETED:실제로 삭제
 	public Map<String, Object> deleteComment(CommentDeleteRequest request) {
-		Comment comment = commentRepository.findByIdAndPostIdAndStatus(request.commentId, request.postId,
+		Comment comment = commentRepository.findByIdAndPostIdAndStatus(request.getCommentId(), request.getPostId(),
 				CommentStatus.ACTIVE)
 			.orElseThrow(() -> new NoSuchElementException("등록된 댓글을 찾을 수 없습니다."));
 
 		LocalDateTime updatedAt = LocalDateTime.now();
 
-		if (request.action == SOFT_DELETED) {
+		if (request.getAction() == SOFT_DELETED) {
 			comment.setStatus(CommentStatus.DELETE);
 			comment.setUpdatedAt(updatedAt);
 			commentRepository.save(comment);
-		} else if (request.action == HARD_DELETED) {
-			commentLikeService.deleteAllCommentlikes(request.commentId);
+		} else if (request.getAction() == HARD_DELETED) {
+			commentLikeService.deleteAllCommentlikes(request.getCommentId());
 			commentRepository.delete(comment);
 		} else {
 			throw new IllegalArgumentException("잘못된 요청입니다.");
 		}
 
 		Map<String, Object> response = new HashMap<>();
-		response.put("postId", request.postId);
-		response.put("commentId", request.commentId);
+		response.put("postId", request.getPostId());
+		response.put("commentId", request.getCommentId());
 		response.put("message", "댓글이 삭제되었습니다.");
 		response.put("updatedAt", updatedAt.toString());
 
-		if (request.action == SOFT_DELETED) {
+		if (request.getAction() == SOFT_DELETED) {
 			response.put("visibility", "deleted");
 		}
 		return response;
@@ -76,20 +80,22 @@ public class CommentService {
 
 	//댓글 수정 메서드
 	public Map<String, Object> modifyComment(CommentModifyRequest request) {
-		Comment comment = commentRepository.findByIdAndPostIdAndStatus(request.commentId, request.postId,
+		Comment comment = commentRepository.findByIdAndPostIdAndStatus(request.getCommentId(), request.getPostId(),
 				CommentStatus.ACTIVE)
 			.orElseThrow(() -> new NoSuchElementException("등록된 댓글을 찾을 수 없습니다."));
 		LocalDateTime updatedAt = LocalDateTime.now();
-		comment.setContent(request.content);
+		comment.setContent(request.getContent());
 		comment.setUpdatedAt(updatedAt);
 		commentRepository.save(comment);
-		return Map.of("message", "댓글이 성공적으로 수정되었습니다.", "postId", request.postId, "commentId", request.commentId,
+		return Map.of("message", "댓글이 성공적으로 수정되었습니다.", "postId", request.getPostId(), "commentId",
+			request.getCommentId(),
 			"updatedAt", updatedAt.toString());
 	}
 
 	//댓글 좋아요 업데이트 메서드, 댓글_좋아요 테이블에 등록 이후 댓글 좋아요 카운트 증가 or 댓글_좋아요 테이블에 삭제 이후 댓글 좋아요 카운트 감소
 	public Map<String, Object> toggleCommentLike(CommentLikeRequest request, String commentId, String authorId) {
-		Comment comment = commentRepository.findByIdAndPostIdAndStatus(commentId, request.postId, CommentStatus.ACTIVE)
+		Comment comment = commentRepository.findByIdAndPostIdAndStatus(commentId, request.getPostId(),
+				CommentStatus.ACTIVE)
 			.orElseThrow(() -> new NoSuchElementException("등록된 댓글을 찾을 수 없습니다."));
 
 		Optional<String> optCommentLikeId = commentLikeService.toggleCommentLike(commentId, authorId);
@@ -131,10 +137,9 @@ public class CommentService {
 	public boolean isMyComment(String authorId, String commentId) {
 		Comment comment = commentRepository.findById(commentId)
 			.orElseThrow(() -> new NoSuchElementException("등록된 댓글을 찾을 수 없습니다."));
-		if(Objects.equals(comment.getUserId(), authorId)){
+		if (Objects.equals(comment.getUserId(), authorId)) {
 			return true;
-		}
-		else{
+		} else {
 			return false;
 		}
 	}
@@ -143,10 +148,9 @@ public class CommentService {
 	public boolean isNotMyComment(String authorId, String commentId) {
 		Comment comment = commentRepository.findById(commentId)
 			.orElseThrow(() -> new NoSuchElementException("등록된 댓글을 찾을 수 없습니다."));
-		if(Objects.equals(comment.getUserId(), authorId)){
+		if (Objects.equals(comment.getUserId(), authorId)) {
 			return false;
-		}
-		else{
+		} else {
 			return true;
 		}
 	}

@@ -15,19 +15,16 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import sns.pinocchio.application.member.MemberFollowService;
+import sns.pinocchio.presentation.member.MemberFollowController;
 
-import sns.pinocchio.application.user.UserFollowRequest;
-import sns.pinocchio.application.user.UserFollowService;
-import sns.pinocchio.presentation.user.UserFollowController;
-
-@WebMvcTest(UserFollowController.class)
+@WebMvcTest(MemberFollowController.class)
 class UserFollowFIndControllerTest {
 	@Autowired
 	private MockMvc mockMvc;
 
 	@MockBean
-	private UserFollowService userFollowService;
+	private MemberFollowService memberFollowService;
 
 	//유저 팔로워 조회 테스트
 	@Test
@@ -41,7 +38,7 @@ class UserFollowFIndControllerTest {
 		List<Map<String, String>> followings = List.of(info,info,info,info,info);
 
 		Map<String, Object> response = Map.of("message", "팔로워 조회에 성공하였습니다.", "followers", followings);
-		when(userFollowService.findFollowers(followingId,page) ).thenReturn(response);
+		when(memberFollowService.findFollowers(followingId,page) ).thenReturn(response);
 
 		mockMvc.perform(post("/users/"+followingId+"/followers").contentType(MediaType.APPLICATION_JSON))
 			.andExpect(status().isOk())
@@ -62,7 +59,7 @@ class UserFollowFIndControllerTest {
 		List<Map<String, String>> followers = List.of(info,info,info,info,info);
 
 		Map<String, Object> response = Map.of("message", "팔로잉 조회에 성공하였습니다.", "followings", followers);
-		when(userFollowService.findFollowings(followerId,page) ).thenReturn(response);
+		when(memberFollowService.findFollowings(followerId,page) ).thenReturn(response);
 
 		mockMvc.perform(post("/users/"+followerId+"/followings").contentType(MediaType.APPLICATION_JSON))
 			.andExpect(status().isOk())

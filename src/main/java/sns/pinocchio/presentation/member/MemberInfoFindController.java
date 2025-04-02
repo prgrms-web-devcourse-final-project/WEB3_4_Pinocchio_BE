@@ -1,4 +1,4 @@
-package sns.pinocchio.presentation.user;
+package sns.pinocchio.presentation.member;
 
 import java.security.Principal;
 import java.util.HashMap;
@@ -21,7 +21,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import sns.pinocchio.application.comment.CommentService;
 import sns.pinocchio.application.post.PostLikeSearchService;
-import sns.pinocchio.application.post.PostService;
 import sns.pinocchio.domain.member.Member;
 import sns.pinocchio.domain.post.PostLike;
 import sns.pinocchio.infrastructure.member.MemberRepository;
@@ -30,7 +29,7 @@ import sns.pinocchio.infrastructure.member.MemberRepository;
 @RestController
 @RequestMapping("/users")
 @RequiredArgsConstructor
-public class UserInfoFindController {
+public class MemberInfoFindController {
 	private final CommentService commentService;
 	private final MemberRepository memberRepository;
 	private final PostLikeSearchService postLikeSearchService;

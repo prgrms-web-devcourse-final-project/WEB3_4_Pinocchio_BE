@@ -20,11 +20,12 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import sns.pinocchio.application.comment.CommentCreateRequest;
-import sns.pinocchio.application.comment.CommentDeleteRequest;
-import sns.pinocchio.application.comment.CommentLikeRequest;
-import sns.pinocchio.application.comment.CommentModifyRequest;
+import sns.pinocchio.application.comment.commentDto.CommentCreateRequest;
+import sns.pinocchio.application.comment.commentDto.CommentDeleteRequest;
+import sns.pinocchio.application.comment.commentDto.CommentLikeRequest;
+import sns.pinocchio.application.comment.commentDto.CommentModifyRequest;
 import sns.pinocchio.application.comment.CommentService;
+import sns.pinocchio.application.member.MemberService;
 import sns.pinocchio.domain.member.Member;
 import sns.pinocchio.domain.post.Post;
 import sns.pinocchio.infrastructure.member.MemberRepository;
@@ -38,6 +39,7 @@ public class CommentController {
 	private final CommentService commentService;
 	private final MemberRepository memberRepository;
 	private final PostRepository postRepository;
+	private final MemberService memberService;
 
 		@Operation(summary = "댓글 등록", description = "댓글을 등록합니다.")
 		@ApiResponses({@ApiResponse(responseCode = "200", description = "댓글 등록 성공"),

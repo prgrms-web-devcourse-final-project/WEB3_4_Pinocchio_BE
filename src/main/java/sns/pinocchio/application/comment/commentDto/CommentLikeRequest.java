@@ -1,4 +1,4 @@
-package sns.pinocchio.application.comment;
+package sns.pinocchio.application.comment.commentDto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;

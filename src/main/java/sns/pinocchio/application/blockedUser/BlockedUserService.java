@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import sns.pinocchio.application.blockedUser.response.BlockedUserResponse;
 import sns.pinocchio.domain.blockedUser.BlockedUser;
 import sns.pinocchio.domain.member.Member;
@@ -19,6 +20,7 @@ public class BlockedUserService {
   private final BlockedUserRepository blockedUserRepository;
   private final MemberRepository memberRepository;
 
+  @Transactional
   public void saveBlock(Long blockerId, Long blockedId) {
     if (blockerId.equals(blockedId)) {
       throw new BlockException(BlockErrorCode.CANNOT_BLOCK_SELF);
@@ -63,5 +65,4 @@ public class BlockedUserService {
         .map(BlockedUserResponse.UserData::of)
         .collect(Collectors.toList());
   }
-
 }

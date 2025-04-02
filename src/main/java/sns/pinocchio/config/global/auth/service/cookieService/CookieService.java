@@ -12,9 +12,9 @@ public class CookieService {
 
   private final CookieUtil cookieUtil;
 
-  public void addRefreshTokenToCookie(String refreshToken, Long ExpirationTime, HttpServletResponse response) {
-    cookieUtil.addTokenToCookie(
-        "refreshToken", refreshToken, ExpirationTime, response);
+  public void addRefreshTokenToCookie(
+      String refreshToken, Long ExpirationTime, HttpServletResponse response) {
+    cookieUtil.addTokenToCookie("refreshToken", refreshToken, ExpirationTime, response);
   }
 
   public String getRefreshTokenFromCookie(HttpServletRequest request) {

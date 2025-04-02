@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.Objects;
 import java.util.Optional;
 
 import org.springframework.data.domain.Page;
@@ -44,7 +45,8 @@ public class CommentService {
 
 	//댓글 삭제 메서드 SOFT_DELETED:실제로 삭제 X 안보이게만 HARD_DELETED:실제로 삭제
 	public Map<String, Object> deleteComment(CommentDeleteRequest request) {
-		Comment comment = commentRepository.findByIdAndPostIdAndStatus(request.commentId, request.postId,CommentStatus.ACTIVE)
+		Comment comment = commentRepository.findByIdAndPostIdAndStatus(request.commentId, request.postId,
+				CommentStatus.ACTIVE)
 			.orElseThrow(() -> new NoSuchElementException("등록된 댓글을 찾을 수 없습니다."));
 
 		LocalDateTime updatedAt = LocalDateTime.now();
@@ -74,7 +76,8 @@ public class CommentService {
 
 	//댓글 수정 메서드
 	public Map<String, Object> modifyComment(CommentModifyRequest request) {
-		Comment comment = commentRepository.findByIdAndPostIdAndStatus(request.commentId, request.postId,CommentStatus.ACTIVE)
+		Comment comment = commentRepository.findByIdAndPostIdAndStatus(request.commentId, request.postId,
+				CommentStatus.ACTIVE)
 			.orElseThrow(() -> new NoSuchElementException("등록된 댓글을 찾을 수 없습니다."));
 		LocalDateTime updatedAt = LocalDateTime.now();
 		comment.setContent(request.content);
@@ -86,7 +89,7 @@ public class CommentService {
 
 	//댓글 좋아요 업데이트 메서드, 댓글_좋아요 테이블에 등록 이후 댓글 좋아요 카운트 증가 or 댓글_좋아요 테이블에 삭제 이후 댓글 좋아요 카운트 감소
 	public Map<String, Object> toggleCommentLike(CommentLikeRequest request, String commentId, String authorId) {
-		Comment comment = commentRepository.findByIdAndPostIdAndStatus(commentId, request.postId,CommentStatus.ACTIVE)
+		Comment comment = commentRepository.findByIdAndPostIdAndStatus(commentId, request.postId, CommentStatus.ACTIVE)
 			.orElseThrow(() -> new NoSuchElementException("등록된 댓글을 찾을 수 없습니다."));
 
 		Optional<String> optCommentLikeId = commentLikeService.toggleCommentLike(commentId, authorId);
@@ -105,19 +108,46 @@ public class CommentService {
 		return response;
 	}
 
+	//게시글로 댓글 가져오기
 	public Map<String, Object> findCommentsByPost(String postId) {
-		List<Comment> commentList = commentRepository.findAllByPostIdAndStatus(postId,CommentStatus.ACTIVE);
+		List<Comment> commentList = commentRepository.findAllByPostIdAndStatus(postId, CommentStatus.ACTIVE);
 		return Map.of("message", "댓글요청에 성공하였습니다.", "comments", commentList);
 	}
 
+	//유저로 댓글 가져오기
 	public Map<String, Object> findCommentsByUser(String authorId, int page) {
 		Pageable pageable = PageRequest.of(page, 10);
-		Page<Comment> pagingComment = commentRepository.findAllByUserIdAndStatus(authorId, pageable,CommentStatus.ACTIVE);
+		Page<Comment> pagingComment = commentRepository.findAllByUserIdAndStatus(authorId, pageable,
+			CommentStatus.ACTIVE);
 		return Map.of("message", "댓글요청에 성공하였습니다.", "comments", pagingComment.getContent());
 	}
 
 	//댓글 유효성 검사 댓글과 게시글로 검색결과가 없을시 true반환
 	public boolean isInvalidComment(String commentId, String postId) {
-		return commentRepository.findByIdAndPostIdAndStatus(commentId, postId,CommentStatus.ACTIVE).isEmpty();
+		return commentRepository.findByIdAndPostIdAndStatus(commentId, postId, CommentStatus.ACTIVE).isEmpty();
+	}
+
+	//자기 댓글인지 확인
+	public boolean isMyComment(String authorId, String commentId) {
+		Comment comment = commentRepository.findById(commentId)
+			.orElseThrow(() -> new NoSuchElementException("등록된 댓글을 찾을 수 없습니다."));
+		if(Objects.equals(comment.getUserId(), authorId)){
+			return true;
+		}
+		else{
+			return false;
+		}
+	}
+
+	//자기 댓글아닌거 확인
+	public boolean isNotMyComment(String authorId, String commentId) {
+		Comment comment = commentRepository.findById(commentId)
+			.orElseThrow(() -> new NoSuchElementException("등록된 댓글을 찾을 수 없습니다."));
+		if(Objects.equals(comment.getUserId(), authorId)){
+			return false;
+		}
+		else{
+			return true;
+		}
 	}
 }

@@ -61,12 +61,12 @@ public class CustomUserDetails implements UserDetails {
     return UserDetails.super.isCredentialsNonExpired(); // 자격 증명(비밀번호) 만료 여부 설정
   }
 
-    @Override
-    public boolean isEnabled() {
-        return UserDetails.super.isEnabled(); // 계정 활성화 여부 설정
-    }
+  @Override
+  public boolean isEnabled() {
+    return UserDetails.super.isEnabled(); // 계정 활성화 여부 설정
+  }
 
-    public String getTsid() {
-        return memberInfoDto.tsid();  // TSID 가져오기
-    }
+  public String getTsid() {
+    return member.getTsid(); // TSID 가져오기
+  }
 }

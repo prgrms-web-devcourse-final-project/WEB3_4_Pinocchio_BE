@@ -31,7 +31,7 @@ public class UserFindCommentsControllerTest {
 	void 유저_댓글_목록_조회() throws Exception {
 		String authorId = "user_001";
 		int page = 0;
-
+//  테스트 용 주석
 		Map<String,String> info = Map.of("id", "1");
 		List<Map<String, String>> comments = List.of(info,info,info,info,info);
 		Map<String, Object> response = Map.of("message","댓글요청에 성공하였습니다.","comments", comments);

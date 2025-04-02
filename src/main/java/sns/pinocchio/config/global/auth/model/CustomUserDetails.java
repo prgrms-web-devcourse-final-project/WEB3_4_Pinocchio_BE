@@ -60,4 +60,8 @@ public class CustomUserDetails implements UserDetails {
     public boolean isEnabled() {
         return UserDetails.super.isEnabled(); // 계정 활성화 여부 설정
     }
+
+    public String getTsid() {
+        return memberInfoDto.tsid();  // TSID 가져오기
+    }
 }

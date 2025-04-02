@@ -112,4 +112,9 @@ public class MemberService {
     public void deleteMember(Member member) {
         memberRepository.deleteById(member.getId());
     }
+
+    public Member findByTsid(String tsid) {
+        return memberRepository.findByTsid(tsid)
+                .orElseThrow(() -> new IllegalArgumentException("해당 사용자를 찾을 수 없습니다."));
+    }
 }

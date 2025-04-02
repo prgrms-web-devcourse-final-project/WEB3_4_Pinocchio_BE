@@ -10,6 +10,7 @@ import sns.pinocchio.presentation.member.exception.MemberException;
 import java.util.HashMap;
 import java.util.Map;
 
+/*
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
@@ -40,3 +41,4 @@ public class GlobalExceptionHandler {
                 .body(errorResponse);
     }
 }
+*/

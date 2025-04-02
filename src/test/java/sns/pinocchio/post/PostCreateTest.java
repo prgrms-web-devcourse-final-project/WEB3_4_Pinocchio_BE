@@ -19,7 +19,7 @@ public class PostCreateTest {
     @Test
     public void 게시글_저장_테스트() {
         Post post = Post.builder()
-                .userTsid("user_123")
+                .tsid("user_123")
                 .content("테스트 게시글입니다.")
                 .imageUrls(List.of("https://example.com/image1.jpg"))
                 .hashtags(List.of("#테스트", "#몽고"))
@@ -41,7 +41,7 @@ public class PostCreateTest {
     @Test
     public void 게시글_저장_테스트2() {
         Post post = Post.builder()
-                .userTsid("user_456")
+                .tsid("user_456")
                 .content("테스트 게시글입니다2.")
                 .imageUrls(List.of("https://example.com/image1.jpg"))
                 .hashtags(List.of("#테스트2", "#몽고2"))

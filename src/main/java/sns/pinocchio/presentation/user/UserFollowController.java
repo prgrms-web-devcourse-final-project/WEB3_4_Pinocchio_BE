@@ -45,7 +45,7 @@ public class UserFollowController {
 				.body(Map.of("message", "이 댓글을 수정할 권한이 없습니다. 작성자만 수정할 수 있습니다."));
 
 		}
-
+// 테스트용 주석
 		if (false/*유저 확인*/) {
 			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("message", "등록된 유저를 찾을 수 없습니다."));
 		}

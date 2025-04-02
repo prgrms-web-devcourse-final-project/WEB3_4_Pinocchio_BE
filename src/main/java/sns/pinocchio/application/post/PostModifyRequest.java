@@ -16,7 +16,7 @@ public class PostModifyRequest {
     private String postId;
 
     @Schema(hidden = true)
-    private String userId;
+    private String tsid;
 
     @Schema(description = "수정할 본문 내용", example = "수정된 게시글입니다.")
     private String content;

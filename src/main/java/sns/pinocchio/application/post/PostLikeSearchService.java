@@ -21,7 +21,7 @@ public class PostLikeSearchService {
 
     // 특정 사용자가 누른 좋아요 목록
     public List<PostLike> findLikesByUser(String userTsid) {
-        return postLikeRepository.findAllByUserTsidAndStatus(userTsid, LikeStatus.ACTIVE);
+        return postLikeRepository.findAllByTsidAndStatus(userTsid, LikeStatus.ACTIVE);
     }
 
     // 특정 게시글에 좋아요 누른 사용자 목록

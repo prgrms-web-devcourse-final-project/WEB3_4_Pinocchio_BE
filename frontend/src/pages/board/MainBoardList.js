@@ -41,7 +41,6 @@ const MainBoardList = () => {
                             <Stack direction={"horizontal"} gap={3} >
                                 <h4>Jake Sully</h4>
                                 <Button className={"ms-auto"} size={"md"} onClick={() => navigate("/board/new")}>UPLOAD</Button>
-                                <Button size={"md"}>MYPAGE</Button>
                             </Stack>
                             <Row>
                                 <Col className={"mt-4"}>안녕하세요.피노키오에 오신것을 환영합니다!</Col>

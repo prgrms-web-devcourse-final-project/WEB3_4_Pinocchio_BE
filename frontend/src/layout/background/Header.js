@@ -70,7 +70,7 @@ const Header = () => {
                     </div>
                     <BoardSearch type={'notice'} />
                     <Button size={"md"} onClick={handleLogoutClick}>LOGOUT</Button>
-                    <Button size={"md"}>MYPAGE</Button>
+                    <Button size={"md"} onClick={() => navigate("/board/mypage")}>MYPAGE</Button>
                     <ChangePassword isOpen={isChangePasswordModalOpen}
                                     onHide={() => setChangePasswordModalOpen(false)}
                                     onSave={handlePasswordChangeSave}

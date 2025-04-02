@@ -8,7 +8,6 @@ import sns.pinocchio.application.notification.dto.NotificationRequestDto.UpdateN
 import sns.pinocchio.application.notification.dto.NotificationResponseDto.NotificationInfo;
 import sns.pinocchio.domain.notification.Notification;
 import sns.pinocchio.domain.notification.NotificationException.NotificationBadRequestException;
-import sns.pinocchio.domain.notification.NotificationException.NotificationInternalServerErrorException;
 import sns.pinocchio.infrastructure.persistence.mysql.NotificationRepository;
 
 @Service
@@ -24,6 +23,7 @@ public class NotificationService {
    * @implNote 현재는 임시로 userId를 하드코딩하고 있으며, 실제 서비스 적용 시 JWT 인증을 통해 사용자 ID를 추출하도록 변경 필요
    * @param updateNotifications 변경할 알림 설정 값들을 담은 DTO
    * @return NotificationInfo 변경된 알림 설정 정보를 담은 응답 DTO
+   * @throws NotificationBadRequestException 입력값이 유효하지 않을 경우
    */
   @Transactional
   public NotificationInfo updateNotifications(
@@ -55,12 +55,6 @@ public class NotificationService {
     // 수정된 알림 설정을 기반으로 DB 수정
     Notification updated = notificationRepository.save(notification);
 
-    // DB에 수정하는 도중 에러가 발생했을 경우, 500에러 반환
-    if (updated == null) {
-      log.error("Failed to save notification: {}", notification);
-      throw new NotificationInternalServerErrorException("서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.");
-    }
-
     log.info("Notification settings updated: {}", updated);
 
     return NotificationInfo.builder()
@@ -80,6 +74,7 @@ public class NotificationService {
    *     알림 설정 시, 모든 알림 설정은 false로 반환
    * @param userId 알림 설정을 확인할 사용자 ID
    * @return NotificationInfo 변경된 알림 설정 정보를 담은 응답 DTO
+   * @throws NotificationBadRequestException userId 정보가 존재하지 않을 경우
    */
   @Transactional(readOnly = true)
   public NotificationInfo getNotifications(String userId) {

@@ -2,6 +2,7 @@ package sns.pinocchio.presentation.comment;
 
 import java.security.Principal;
 import java.util.Map;
+import java.util.Optional;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,10 +20,15 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import sns.pinocchio.application.comment.CommentCreateRequest;
 import sns.pinocchio.application.comment.CommentDeleteRequest;
 import sns.pinocchio.application.comment.CommentLikeRequest;
 import sns.pinocchio.application.comment.CommentModifyRequest;
 import sns.pinocchio.application.comment.CommentService;
+import sns.pinocchio.domain.member.Member;
+import sns.pinocchio.domain.post.Post;
+import sns.pinocchio.infrastructure.member.MemberRepository;
+import sns.pinocchio.infrastructure.persistence.mongodb.PostRepository;
 
 @Tag(name = "댓글", description = "댓글 관련 API")
 @RestController
@@ -30,6 +36,31 @@ import sns.pinocchio.application.comment.CommentService;
 @RequiredArgsConstructor
 public class CommentController {
 	private final CommentService commentService;
+	private final MemberRepository memberRepository;
+	private final PostRepository postRepository;
+
+		@Operation(summary = "댓글 등록", description = "댓글을 등록합니다.")
+		@ApiResponses({@ApiResponse(responseCode = "200", description = "댓글 등록 성공"),
+			@ApiResponse(responseCode = "401", description = "JWT 토큰 누락 또는 인증 실패"),
+			@ApiResponse(responseCode = "404", description = "댓글 조회 실패"),
+			@ApiResponse(responseCode = "500", description = "서버 내부 오류")})
+		@PutMapping("/modify")
+		public ResponseEntity<Map<String, Object>> updateComment(Principal principal,
+			@RequestBody CommentCreateRequest request) {
+			Optional<Member> optMember = memberRepository.findByName(principal.getName());
+			Optional<Post> optPost =  postRepository.findById(request.getPostId());
+			if (false/*본인 댓글인지 확인해서 403에러 발생 자기 댓글 좋아요는 불가능*/) {
+				return ResponseEntity.status(HttpStatus.FORBIDDEN)
+					.body(Map.of("message", "이 댓글을 수정할 권한이 없습니다. 작성자만 수정할 수 있습니다."));
+			}
+
+			if (optPost.isEmpty()) {
+				return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("message", "등록된 게시글을 찾을 수 없습니다."));
+			}
+
+			Map<String, Object> response = commentService.createComment(request,optMember.get().getTsid());
+			return ResponseEntity.status(HttpStatus.OK).body(response);
+		}
 
 	@Operation(summary = "댓글 수정", description = "댓글을 수정합니다.")
 	@ApiResponses({@ApiResponse(responseCode = "200", description = "댓글 수정 성공"),

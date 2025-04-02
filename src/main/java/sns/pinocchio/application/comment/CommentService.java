@@ -26,10 +26,10 @@ public class CommentService {
 	private final CommentLikeService commentLikeService;
 
 	//댓글 생성 메서드
-	public Map<String, Object> createComment(CommentCreateRequest request, String authorId, String postId) {
+	public Map<String, Object> createComment(CommentCreateRequest request, String authorId) {
 		Comment comment = Comment.builder()
 			.userId(authorId)
-			.postId(postId)
+			.postId(request.getPostId())
 			.content(request.getContent())
 			.parentCommentId(request.getParentCommentId())
 			.likes(0)

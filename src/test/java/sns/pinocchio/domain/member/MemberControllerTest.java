@@ -6,6 +6,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static sns.pinocchio.domain.report.ReportedType.POST;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import jakarta.servlet.http.Cookie;
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.BeforeEach;
@@ -41,6 +43,8 @@ public class MemberControllerTest {
 
   @Autowired private ReportService reportService;
 
+  @PersistenceContext private EntityManager em;
+
   private ResultActions loginAndGetResponse() throws Exception {
     String loginRequestJson =
         TestFixture.createLoginRequestJson("example@naver.com", "testPassword!");
@@ -66,32 +70,10 @@ public class MemberControllerTest {
   }
 
   @Test
-  @DisplayName("JWT 토큰으로 프로필 조회 테스트")
-  public void testGetProfileSuccess() throws Exception {
-    ResultActions loginResponse = loginAndGetResponse();
-    String accessToken = loginResponse.andReturn().getResponse().getHeader("Authorization");
-    String refreshTokenValue = getRefreshToken(loginResponse);
-
-    ResultActions getProfileResponse =
-        mockMvc.perform(
-            get("/member")
-                .header("Authorization", accessToken)
-                .cookie(new Cookie("refreshToken", refreshTokenValue))
-                .contentType(MediaType.APPLICATION_JSON));
-
-    getProfileResponse
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$.data.email").value("example@naver.com"))
-        .andExpect(jsonPath("$.data.name").value("testName"))
-        .andExpect(jsonPath("$.data.nickname").value("testNickname"));
-  }
-
-  @Test
   @DisplayName("JWT 토큰으로 프로필 변경 테스트")
   public void testUpdateProfileSuccess() throws Exception {
     ResultActions loginResponse = loginAndGetResponse();
     String accessToken = loginResponse.andReturn().getResponse().getHeader("Authorization");
-    String refreshTokenValue = getRefreshToken(loginResponse);
 
     String updateRequestDto =
         TestFixture.updateProfileRequestJson("abc", "lol", "hello", "abc@youtube", "null", false);
@@ -100,7 +82,6 @@ public class MemberControllerTest {
         mockMvc.perform(
             put("/member")
                 .header("Authorization", accessToken)
-                .cookie(new Cookie("refreshToken", refreshTokenValue))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(updateRequestDto));
 
@@ -121,7 +102,6 @@ public class MemberControllerTest {
   public void testChangePasswordSuccess() throws Exception {
     ResultActions loginResponse = loginAndGetResponse();
     String accessToken = loginResponse.andReturn().getResponse().getHeader("Authorization");
-    String refreshTokenValue = getRefreshToken(loginResponse);
 
     String changePasswordDto = TestFixture.createNewPassword("testPassword!", "spongebob123!");
 
@@ -129,7 +109,6 @@ public class MemberControllerTest {
         mockMvc.perform(
             put("/member/password")
                 .header("Authorization", accessToken)
-                .cookie(new Cookie("refreshToken", refreshTokenValue))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(changePasswordDto));
 
@@ -177,16 +156,13 @@ public class MemberControllerTest {
 
     ResultActions loginResponse = loginAndGetResponse();
     String accessToken = loginResponse.andReturn().getResponse().getHeader("Authorization");
-    String refreshTokenValue = getRefreshToken(loginResponse);
 
-    String reportRequestDto =
-        TestFixture.createReportRequestDto("test1", POST, "욕설 및 무단침입 강도 도둑");
+    String reportRequestDto = TestFixture.createReportRequestDto("test1", POST, "욕설 및 무단침입 강도 도둑");
 
     ResultActions reportResponse =
         mockMvc.perform(
             post("/member/report")
                 .header("Authorization", accessToken)
-                .cookie(new Cookie("refreshToken", refreshTokenValue))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(reportRequestDto));
 

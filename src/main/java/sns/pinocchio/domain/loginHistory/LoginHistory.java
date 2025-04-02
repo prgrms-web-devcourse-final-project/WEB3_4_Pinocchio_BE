@@ -16,26 +16,27 @@ import java.time.LocalDateTime;
 @Entity
 public class LoginHistory {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long loginHistoryId;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long loginHistoryId;
 
-    private Long userId;
+  private Long userId;
 
-    private String loginIp;
+  private String loginIp;
 
-    private String loginDevice;
+  private String loginDevice;
 
-    private String userAgent;
+  private String userAgent;
 
-    private LocalDateTime loginTime;
+  private LocalDateTime loginTime;
 
-    @Builder
-    public LoginHistory(Long userId, String loginIp, String loginDevice, String userAgent, LocalDateTime loginTime) {
-        this.userId = userId;
-        this.loginIp = loginIp;
-        this.loginDevice = loginDevice;
-        this.userAgent = userAgent;
-        this.loginTime = loginTime;
-    }
+  @Builder
+  public LoginHistory(
+      Long userId, String loginIp, String loginDevice, String userAgent, LocalDateTime loginTime) {
+    this.userId = userId;
+    this.loginIp = loginIp;
+    this.loginDevice = loginDevice;
+    this.userAgent = userAgent;
+    this.loginTime = loginTime;
+  }
 }

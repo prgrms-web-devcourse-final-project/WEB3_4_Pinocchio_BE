@@ -18,42 +18,42 @@ import sns.pinocchio.config.global.auth.jwt.MemberAuthFilter;
 @EnableWebSecurity
 public class SecurityConfig {
 
-    @Autowired
-    @Lazy
-    private MemberAuthFilter memberAuthFilter;
+  @Autowired @Lazy private MemberAuthFilter memberAuthFilter;
 
-    @Bean
-    SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http
-                .csrf(AbstractHttpConfigurer::disable) // CSRF 비활성화
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // 상태 없는 세션 정책 설정
-                .httpBasic(AbstractHttpConfigurer::disable) // 기본 HTTP 인증 비활성화
-                .formLogin(AbstractHttpConfigurer::disable) // 폼 로그인 비활성화
-                .logout(AbstractHttpConfigurer::disable) // 로그아웃 비활성화
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(
-                                "/swagger-ui/**",
-                                "/swagger-ui.html",
-                                "/v3/api-docs/**",
-                                "/swagger-resources/**",
-                                "/webjars/**"
-                        ).permitAll()
-                        .requestMatchers(
-                                "/auth/signup",
-                                "/auth/login",
-                                "/auth/logout",
-                                "/posts/search"
-                        ).permitAll()
-                        .anyRequest().authenticated()
-                )
-                .addFilterBefore(memberAuthFilter, UsernamePasswordAuthenticationFilter.class);
-        ;
-        return http.build();
-    }
+  @Bean
+  SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    http.csrf(AbstractHttpConfigurer::disable) // CSRF 비활성화
+        .sessionManagement(
+            session ->
+                session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // 상태 없는 세션 정책 설정
+        .httpBasic(AbstractHttpConfigurer::disable) // 기본 HTTP 인증 비활성화
+        .formLogin(AbstractHttpConfigurer::disable) // 폼 로그인 비활성화
+        .logout(AbstractHttpConfigurer::disable) // 로그아웃 비활성화
+        .authorizeHttpRequests(
+            auth ->
+                auth.requestMatchers(
+                        "/swagger-ui/**",
+                        "/swagger-ui.html",
+                        "/v3/api-docs/**",
+                        "/swagger-resources/**",
+                        "/webjars/**")
+                    .permitAll()
+                    .requestMatchers(
+                        "/auth/signup",
+                        "/auth/login",
+                        "/auth/logout",
+                        "/posts/search",
+                        "/member/password/reset")
+                    .permitAll()
+                    .anyRequest()
+                    .authenticated())
+        .addFilterBefore(memberAuthFilter, UsernamePasswordAuthenticationFilter.class);
+    ;
+    return http.build();
+  }
 
-
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
+  @Bean
+  public PasswordEncoder passwordEncoder() {
+    return new BCryptPasswordEncoder();
+  }
 }

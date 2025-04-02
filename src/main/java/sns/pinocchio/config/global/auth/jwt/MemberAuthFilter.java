@@ -1,6 +1,5 @@
 package sns.pinocchio.config.global.auth.jwt;
 
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -90,7 +89,9 @@ public class MemberAuthFilter extends OncePerRequestFilter {
     boolean shouldSkip =
         ((method.equals("GET") && path.equals("/api/posts/search"))
             || (method.equals("POST") && (path.startsWith("/auth") || path.startsWith("/api/auth")))
-            || (method.equals("POST") && (path.startsWith("/member/password/reset") || path.startsWith("/api/member/password/reset")))
+            || (method.equals("POST")
+                && (path.startsWith("/member/password/reset")
+                    || path.startsWith("/api/member/password/reset")))
             || path.startsWith("/swagger")
             || path.startsWith("/v3/api-docs")
             || path.startsWith("/swagger-ui")

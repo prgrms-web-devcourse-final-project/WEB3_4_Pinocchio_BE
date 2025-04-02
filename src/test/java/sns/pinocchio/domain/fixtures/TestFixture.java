@@ -71,7 +71,8 @@ public class TestFixture {
         .formatted(password);
   }
 
-  public static String createReportRequestDto(String reportedNickname, ReportedType type, String reason) {
+  public static String createReportRequestDto(
+      String reportedNickname, ReportedType type, String reason) {
     return """
             {
             "reportedNickname": "%s",
@@ -79,7 +80,7 @@ public class TestFixture {
             "reason": "%s"
             }
         """
-            .formatted(reportedNickname, type, reason);
+        .formatted(reportedNickname, type, reason);
   }
 
   // 회원 객체 생성

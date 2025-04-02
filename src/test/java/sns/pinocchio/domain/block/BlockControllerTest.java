@@ -32,8 +32,7 @@ public class BlockControllerTest {
 
   @Autowired private BlockedUserService blockedUserService;
 
-
-    @Autowired private BlockedUserRepository blockedUserRepository;
+  @Autowired private BlockedUserRepository blockedUserRepository;
 
   @Autowired private MockMvc mockMvc;
 
@@ -68,59 +67,64 @@ public class BlockControllerTest {
   @Test
   @DisplayName("유저 차단 테스트")
   public void blockUserTest() throws Exception {
-      ResultActions loginResponse = loginAndGetResponse();
-      String accessToken = loginResponse.andReturn().getResponse().getHeader("Authorization");
+    ResultActions loginResponse = loginAndGetResponse();
+    String accessToken = loginResponse.andReturn().getResponse().getHeader("Authorization");
 
-      ResultActions blockUserResponse =
-      mockMvc.perform(
-          post("/block/1")
-                  .header("Authorization", accessToken)
-                  .contentType(MediaType.APPLICATION_JSON));
+    ResultActions blockUserResponse =
+        mockMvc.perform(
+            post("/block/1")
+                .header("Authorization", accessToken)
+                .contentType(MediaType.APPLICATION_JSON));
 
-          Member member = memberService.findByEmail("example@naver.com");
-          boolean result = blockedUserRepository.existsByBlockerUserIdAndBlockedUserId(member.getId(), 1L);
+    Member member = memberService.findByEmail("example@naver.com");
+    boolean result =
+        blockedUserRepository.existsByBlockerUserIdAndBlockedUserId(member.getId(), 1L);
 
-          assertThat(result).isTrue();
+    assertThat(result).isTrue();
   }
 
-    @Test
-    @DisplayName("유저 차단 해제 테스트")
-    public void unblockUserTest() throws Exception {
-      Member member = memberService.findByEmail("example@naver.com");
-        blockedUserService.saveBlock(member.getId(), 1L);
+  @Test
+  @DisplayName("유저 차단 해제 테스트")
+  public void unblockUserTest() throws Exception {
+    Member member = memberService.findByEmail("example@naver.com");
+    blockedUserService.saveBlock(member.getId(), 1L);
 
-        boolean trueResult = blockedUserRepository.existsByBlockerUserIdAndBlockedUserId(member.getId(), 1L);
-        assertThat(trueResult).isTrue();
+    boolean trueResult =
+        blockedUserRepository.existsByBlockerUserIdAndBlockedUserId(member.getId(), 1L);
+    assertThat(trueResult).isTrue();
 
-        ResultActions loginResponse = loginAndGetResponse();
-        String accessToken = loginResponse.andReturn().getResponse().getHeader("Authorization");
+    ResultActions loginResponse = loginAndGetResponse();
+    String accessToken = loginResponse.andReturn().getResponse().getHeader("Authorization");
 
+    mockMvc.perform(
+        delete("/block/1")
+            .header("Authorization", accessToken)
+            .contentType(MediaType.APPLICATION_JSON));
+
+    boolean falseResult =
+        blockedUserRepository.existsByBlockerUserIdAndBlockedUserId(member.getId(), 1L);
+    assertThat(falseResult).isFalse();
+  }
+
+  @Test
+  @DisplayName("유저 차단 조회 테스트")
+  public void getBlockUsersTest() throws Exception {
+    Member member = memberService.findByEmail("example@naver.com");
+    blockedUserService.saveBlock(member.getId(), 1L);
+
+    boolean trueResult =
+        blockedUserRepository.existsByBlockerUserIdAndBlockedUserId(member.getId(), 1L);
+    assertThat(trueResult).isTrue();
+
+    ResultActions loginResponse = loginAndGetResponse();
+    String accessToken = loginResponse.andReturn().getResponse().getHeader("Authorization");
+
+    ResultActions getBlockMemberResponse =
         mockMvc.perform(
-                delete("/block/1")
-                        .header("Authorization", accessToken)
-                        .contentType(MediaType.APPLICATION_JSON));
+            get("/block")
+                .header("Authorization", accessToken)
+                .contentType(MediaType.APPLICATION_JSON));
 
-        boolean falseResult = blockedUserRepository.existsByBlockerUserIdAndBlockedUserId(member.getId(), 1L);
-        assertThat(falseResult).isFalse();
-    }
-
-    @Test
-    @DisplayName("유저 차단 조회 테스트")
-    public void getBlockUsersTest() throws Exception {
-        Member member = memberService.findByEmail("example@naver.com");
-        blockedUserService.saveBlock(member.getId(), 1L);
-
-        boolean trueResult = blockedUserRepository.existsByBlockerUserIdAndBlockedUserId(member.getId(), 1L);
-        assertThat(trueResult).isTrue();
-
-        ResultActions loginResponse = loginAndGetResponse();
-        String accessToken = loginResponse.andReturn().getResponse().getHeader("Authorization");
-
-        ResultActions getBlockMemberResponse = mockMvc.perform(
-                get("/block")
-                        .header("Authorization", accessToken)
-                        .contentType(MediaType.APPLICATION_JSON));
-
-        getBlockMemberResponse.andExpect(status().isOk());
-    }
+    getBlockMemberResponse.andExpect(status().isOk());
+  }
 }

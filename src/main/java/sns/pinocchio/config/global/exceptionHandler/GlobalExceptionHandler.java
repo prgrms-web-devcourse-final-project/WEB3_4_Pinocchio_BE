@@ -27,8 +27,7 @@ public class GlobalExceptionHandler {
             "error",
             errorCode.getHttpStatus().value(),
             errorCode.getMessage(),
-            errorCode.getCode()
-            );
+            errorCode.getCode());
 
     // HTTP 상태 코드와 함께 응답 반환
     return new ResponseEntity<>(errorResponse, errorCode.getHttpStatus());
@@ -44,8 +43,7 @@ public class GlobalExceptionHandler {
             "error",
             errorCode.getHttpStatus().value(),
             errorCode.getMessage(),
-            errorCode.getCode()
-            );
+            errorCode.getCode());
 
     // HTTP 상태 코드와 함께 응답 반환
     return new ResponseEntity<>(errorResponse, errorCode.getHttpStatus());

@@ -4,22 +4,22 @@ import org.springframework.http.HttpStatus;
 
 public class BlockException extends RuntimeException {
 
-    private final BlockErrorCode blockErrorCode;
+  private final BlockErrorCode blockErrorCode;
 
-    public BlockException(BlockErrorCode blockErrorCode) {
-        super(blockErrorCode.getMessage());
-        this.blockErrorCode = blockErrorCode;
-    }
+  public BlockException(BlockErrorCode blockErrorCode) {
+    super(blockErrorCode.getMessage());
+    this.blockErrorCode = blockErrorCode;
+  }
 
-    public BlockErrorCode getBlockErrorCode() {
-        return blockErrorCode;
-    }
+  public BlockErrorCode getBlockErrorCode() {
+    return blockErrorCode;
+  }
 
-    public HttpStatus getStatus() {
-        return blockErrorCode.getHttpStatus();
-    }
+  public HttpStatus getStatus() {
+    return blockErrorCode.getHttpStatus();
+  }
 
-    public String getCode() {
-        return blockErrorCode.getCode();
-    }
+  public String getCode() {
+    return blockErrorCode.getCode();
+  }
 }

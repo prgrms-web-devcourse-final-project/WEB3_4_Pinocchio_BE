@@ -2,10 +2,10 @@ package sns.pinocchio.application.member;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import sns.pinocchio.application.member.memberDto.request.SignupRequestDto;
 import sns.pinocchio.application.member.memberDto.request.UpdateRequestDto;
 import sns.pinocchio.config.global.auth.service.cookieService.CookieService;
@@ -79,34 +79,32 @@ public class MemberService {
     EmailUtil.sendEmail(member.getEmail(), temporaryPassword);
   }
 
-  // 패스워드 수정
   @Transactional
   public void changePassword(Member member, String password) {
     member.updatePassword(passwordEncoder.encode(password));
   }
 
-  // 사용자 email 조회
+  @Transactional(readOnly = true)
   public Member findByEmail(String email) {
     return memberRepository
         .findByEmail(email)
         .orElseThrow(() -> new MemberException(MemberErrorCode.USER_NOT_FOUND));
   }
 
-  // 사용자 nickname 조회
+  @Transactional(readOnly = true)
   public Member findByNickname(String nickname) {
     return memberRepository
         .findByNickname(nickname)
         .orElseThrow(() -> new MemberException(MemberErrorCode.USER_NOT_FOUND));
   }
 
-  // 사용자 ID 조회
+  @Transactional(readOnly = true)
   public Member findById(Long memberId) {
     return memberRepository
         .findById(memberId)
         .orElseThrow(() -> new MemberException(MemberErrorCode.USER_NOT_FOUND));
   }
 
-  // 사용자 email 중복 확인
   public void checkEmailDuplicate(String email) {
     memberRepository
         .findByEmail(email)
@@ -116,7 +114,6 @@ public class MemberService {
             });
   }
 
-  // 사용자 nickname 중복 확인
   public void checkNicknameDuplicate(String nickname) {
     memberRepository
         .findByNickname(nickname)

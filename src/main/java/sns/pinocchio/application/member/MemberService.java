@@ -38,8 +38,8 @@ public class MemberService {
     // 이메일 중복 체크
     checkEmailDuplicate(signupRequestDto.email());
 
-    // 닉네임 중복 체크
-    checkNicknameDuplicate(signupRequestDto.nickname());
+        // 닉네임 중복 체크
+        checkNicknameDuplicate(signupRequestDto.nickname());
 
     Member member =
         Member.builder()

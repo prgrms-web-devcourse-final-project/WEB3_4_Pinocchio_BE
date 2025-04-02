@@ -90,6 +90,7 @@ public class MemberAuthFilter extends OncePerRequestFilter {
     boolean shouldSkip =
         ((method.equals("GET") && path.equals("/api/posts/search"))
             || (method.equals("POST") && (path.startsWith("/auth") || path.startsWith("/api/auth")))
+            || (method.equals("POST") && (path.startsWith("/member/password/reset") || path.startsWith("/api/member/password/reset")))
             || path.startsWith("/swagger")
             || path.startsWith("/v3/api-docs")
             || path.startsWith("/swagger-ui")

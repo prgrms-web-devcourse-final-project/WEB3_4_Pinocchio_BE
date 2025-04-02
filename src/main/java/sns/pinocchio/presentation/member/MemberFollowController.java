@@ -7,6 +7,7 @@ import java.util.Optional;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -21,6 +22,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import sns.pinocchio.application.member.memberDto.MemberFollowRequest;
 import sns.pinocchio.application.member.MemberFollowService;
+import sns.pinocchio.config.global.auth.model.CustomUserDetails;
 import sns.pinocchio.domain.member.Member;
 import sns.pinocchio.infrastructure.member.MemberRepository;
 
@@ -39,19 +41,14 @@ public class MemberFollowController {
 		@ApiResponse(responseCode = "404", description = "유저 조회 실패"),
 		@ApiResponse(responseCode = "500", description = "서버 내부 오류")})
 	@PostMapping("/{userId}/follow")
-	public ResponseEntity<Map<String, Object>> toggleUserFollow(Principal principal, @PathVariable String userId,
+	public ResponseEntity<Map<String, Object>> toggleUserFollow(@AuthenticationPrincipal CustomUserDetails userDetails,
+		@PathVariable String userId,
 		@RequestBody MemberFollowRequest request) {
-		Optional<Member> optMember = memberRepository.findByName(principal.getName());
-		if (optMember.isEmpty()) {
-			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("message", "등록된 유저를 찾을 수 없습니다."));
-		}
-
-		Member authorMember = optMember.get();
+		Member authorMember = userDetails.getMember();
 
 		if (Objects.equals(authorMember.getTsid(), userId)) {
 			return ResponseEntity.status(HttpStatus.FORBIDDEN)
 				.body(Map.of("message", "스스로 팔로잉 불가능"));
-
 		}
 
 		Map<String, Object> response = memberFollowService.followingUser(request, userId, authorMember.getTsid(),

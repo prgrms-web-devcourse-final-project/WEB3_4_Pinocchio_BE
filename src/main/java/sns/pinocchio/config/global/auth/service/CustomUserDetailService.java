@@ -6,7 +6,6 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import sns.pinocchio.application.member.MemberService;
-import sns.pinocchio.application.member.memberDto.MemberInfoDto;
 import sns.pinocchio.config.global.auth.model.CustomUserDetails;
 import sns.pinocchio.config.global.auth.util.JwtUtil;
 import sns.pinocchio.domain.member.Member;
@@ -15,18 +14,19 @@ import sns.pinocchio.domain.member.Member;
 @RequiredArgsConstructor
 public class CustomUserDetailService implements UserDetailsService {
 
-    private final MemberService memberService;
-    private final JwtUtil jwtUtil;
+  private final MemberService memberService;
 
-    @Override
-    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+  @Override
+  public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
 
-        Member member = memberService.findByEmail(email);
-        return new CustomUserDetails(MemberInfoDto.of(member));
-    }
+    Member member = memberService.findByEmail(email);
+    return new CustomUserDetails(member);
+  }
 
-    // UserDetails 생성
-    public CustomUserDetails loadUserByAccessToken(String accessToken) {
-        return new CustomUserDetails(jwtUtil.getMemberInfoDto(accessToken));
-    }
+  // UserDetails 생성
+  public CustomUserDetails loadUserByAccessToken(String accessToken) {
+    Long memberId = JwtUtil.getMember(accessToken);
+    Member member = memberService.findById(memberId);
+    return new CustomUserDetails(member);
+  }
 }

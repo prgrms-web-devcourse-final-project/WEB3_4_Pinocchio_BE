@@ -218,49 +218,69 @@ resource "aws_iam_instance_profile" "instance_profile" {
 
 # ----------------------------------------
 # EC2 User Data (인스턴스 부팅 시 실행될 스크립트)
-# 1. Docker, Git 세팅
-# 2. Swap 메모리 4GB 추가
-# 3. EBS 18GB 마운트
-# 4. docker-compose 세팅
-# 5. Git Repository에서 docker-compose.yml 복사
-# 6. docker-compose 실행
+# 1. 로그 파일 설정 (/var/log/user_data.log)
+# 2. Docker, Git, 파일시스템 도구(xfsprogs) 설치
+# 3. Swap 메모리 4GB 추가
+# 4. 추가 EBS 디스크를 /data에 마운트 및 디렉토리 생성
+# 5. devuser 사용자 생성 + docker 권한 부여 + 환경변수 설정
+# 6. /data 디렉토리 소유권을 devuser로 변경
+# 7. docker-compose 설치
+# 8. GitHub 레포지토리를 /home/devuser/app 경로에 클론
+# 9. devuser 권한으로 docker-compose 실행
 # ----------------------------------------
+
 locals {
   ec2_user_data_base = <<-END_OF_FILE
 #!/bin/bash
 
-# 1. Docker, Git 설치
-  yum install docker -y
+# 로그 설정
+  exec > /var/log/user_data.log 2>&1
+  set -x
+
+# 1. Docker, Git, xfsprogs 설치
+  yum install docker git xfsprogs -y
+
+# 2. Docker 서비스 설정
   systemctl enable docker
   systemctl start docker
 
-  yum install git -y
-
-# 2. 스왑 메모리 추가
+# 3. 스왑 메모리 추가
   dd if=/dev/zero of=/swapfile bs=128M count=32
   chmod 600 /swapfile
   mkswap /swapfile
   swapon /swapfile
   echo "/swapfile swap swap defaults 0 0" >> /etc/fstab
 
-# 3. EBS 마운트
-  yum install -y xfsprogs
+# 4. EBS 마운트
   mkfs -t xfs /dev/xvdf
   mkdir /data
   mount /dev/xvdf /data
   echo "/dev/xvdf /data xfs defaults,nofail 0 2" >> /etc/fstab
   mkdir -p /data/mysql /data/mongodb /data/redis
 
-# 4. docker-compose 설치
+# 5. devuser 계정 생성 + Docker 권한 부여 + 환경변수 설정
+  useradd -m devuser
+  echo "devuser ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
+  usermod -aG docker devuser
+  echo 'export PATH=$PATH:/usr/local/bin' >> /home/devuser/.bash_profile
+  chown devuser:devuser /home/devuser/.bash_profile
+
+# 6. /data 디렉토리 소유권 변경
+  chown -R devuser:devuser /data
+
+# 7. docker-compose 설치
   curl -L "https://github.com/docker/compose/releases/download/v2.34.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
   chmod +x /usr/local/bin/docker-compose
 
-# 5. Git Repository에서 docker-compose.yml 복사
-  git clone https://github.com/prgrms-web-devcourse-final-project/WEB3_4_Pinocchio_BE.git /app
-  cd /app
+# 8. app 다운로드 및 권한 부여
+  git clone https://github.com/prgrms-web-devcourse-final-project/WEB3_4_Pinocchio_BE.git /home/devuser/app
+  chown -R devuser:devuser /home/devuser/app
 
-# 6. docker-compose 실행
-  docker-compose up -d
+# 9. devuser로 docker-compose 실행
+  sudo -u devuser -i bash <<'EOC'
+cd /home/devuser/app
+docker-compose up -d
+EOC
 
 END_OF_FILE
 }

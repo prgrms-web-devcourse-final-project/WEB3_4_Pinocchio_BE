@@ -1,25 +1,27 @@
 package sns.pinocchio.comment.service;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.springframework.boot.test.context.SpringBootTest;
+import sns.pinocchio.application.comment.CommentLikeService;
+import sns.pinocchio.application.comment.CommentService;
+import sns.pinocchio.application.comment.DeleteType;
+import sns.pinocchio.application.comment.commentDto.CommentDeleteRequest;
+import sns.pinocchio.domain.comment.Comment;
+import sns.pinocchio.domain.comment.CommentStatus;
+import sns.pinocchio.infrastructure.persistence.mongodb.CommentRepository;
 
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
-import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.springframework.boot.test.context.SpringBootTest;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.*;
 
-import sns.pinocchio.application.comment.commentDto.CommentDeleteRequest;
-import sns.pinocchio.application.comment.CommentLikeService;
-import sns.pinocchio.application.comment.CommentService;
-import sns.pinocchio.application.comment.DeleteType;
-import sns.pinocchio.domain.comment.Comment;
-import sns.pinocchio.domain.comment.CommentStatus;
-import sns.pinocchio.infrastructure.persistence.mongodb.CommentRepository;
-
+@Tag("unit")
 @SpringBootTest
 public class CommentDeleteServiceTest {
 	@InjectMocks

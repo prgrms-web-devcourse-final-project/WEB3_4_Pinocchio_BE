@@ -1,5 +1,6 @@
 package sns.pinocchio.post;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -11,6 +12,7 @@ import sns.pinocchio.infrastructure.persistence.mongodb.PostRepository;
 import java.util.List;
 import java.util.Optional;
 
+@Tag("integration")
 @SpringBootTest
 public class PostModifyTest {
 

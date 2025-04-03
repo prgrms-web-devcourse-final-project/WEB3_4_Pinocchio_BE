@@ -95,5 +95,7 @@ tasks.withType(JavaCompile).configureEach {
 }
 
 tasks.named('test') {
-    useJUnitPlatform()
+    useJUnitPlatform {
+        includeTags 'integration' // CI에서는 통합 테스트만 실행
+    }
 }

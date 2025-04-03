@@ -24,11 +24,19 @@ jobs:
             - name: Build with Gradle (no tests)
               run: ./gradlew clean build -x test
 
+            - name: Set Docker Tag with datetime
+              id: set_tag
+              run: echo "tag_time=$(date +'%Y-%m-%d-%H%M')" >> $GITHUB_OUTPUT
+
             - name: Log in to DockerHub
               run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
 
-            - name: Build Docker Image
-              run: docker build -t ${{ secrets.DOCKER_USERNAME }}/spring-app:latest .
+            - name: Build Docker Image with datetime tag
+              run: |
+                  docker build -t ${{ secrets.DOCKER_USERNAME }}/spring-app:latest \
+                               -t ${{ secrets.DOCKER_USERNAME }}/spring-app:${{ steps.set_tag.outputs.tag_time }} .
 
-            - name: Push Docker Image
-              run: docker push ${{ secrets.DOCKER_USERNAME }}/spring-app:latest
+            - name: Push Docker Images
+              run: |
+                  docker push ${{ secrets.DOCKER_USERNAME }}/spring-app:latest
+                  docker push ${{ secrets.DOCKER_USERNAME }}/spring-app:${{ steps.set_tag.outputs.tag_time }}

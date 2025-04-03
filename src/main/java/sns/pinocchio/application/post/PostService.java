@@ -28,7 +28,7 @@ public class PostService {
 
     // 게시물 생성
     public String createPost(PostCreateRequest request, String tsid) {
-        List<String> imageUrls = request.getImageUrls();
+        List<String> imageUrls = request.getImageUrls();// 정책상 1장 추후 여러장 가능
 
         // 이미지가 반드시 1장이어야 함
         if (imageUrls == null || imageUrls.size() != 1) {

@@ -15,34 +15,34 @@ import static sns.pinocchio.domain.report.ReportStatus.PENDING;
 @Entity
 public class Report {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long reportId;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long reportId;
 
-    private Long reporterId;
+  private Long reporterId;
 
-    @Enumerated(EnumType.STRING)
-    private ReportedType reportedType;
+  @Enumerated(EnumType.STRING)
+  private ReportedType reportedType;
 
-    private Long reportedId;
+  private Long reportedId;
 
-    private String reason;
+  private String reason;
 
-    @Enumerated(EnumType.STRING)
-    private ReportStatus status;
+  @Enumerated(EnumType.STRING)
+  private ReportStatus status;
 
-    private LocalDateTime createdAt;
+  private LocalDateTime createdAt;
 
-    private LocalDateTime updatedAt;
+  private LocalDateTime updatedAt;
 
-    @Builder
-    public Report(Long reporterId, ReportedType reportedType, Long reportedId, String reason) {
-        this.reporterId = reporterId;
-        this.reportedType = reportedType;
-        this.reportedId = reportedId;
-        this.reason = reason;
-        this.status = PENDING;
-        this.createdAt = LocalDateTime.now();
-        this.updatedAt = LocalDateTime.now();
-    }
+  @Builder
+  public Report(Long reporterId, ReportedType reportedType, Long reportedId, String reason) {
+    this.reporterId = reporterId;
+    this.reportedType = reportedType;
+    this.reportedId = reportedId;
+    this.reason = reason;
+    this.status = PENDING;
+    this.createdAt = LocalDateTime.now();
+    this.updatedAt = LocalDateTime.now();
+  }
 }

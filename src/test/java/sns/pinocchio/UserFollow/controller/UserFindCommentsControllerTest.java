@@ -16,9 +16,9 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 import sns.pinocchio.application.comment.CommentService;
-import sns.pinocchio.presentation.user.UserInfoFindController;
+import sns.pinocchio.presentation.member.MemberInfoFindController;
 
-@WebMvcTest(UserInfoFindController.class)
+@WebMvcTest(MemberInfoFindController.class)
 public class UserFindCommentsControllerTest {
 	@Autowired
 	private MockMvc mockMvc;

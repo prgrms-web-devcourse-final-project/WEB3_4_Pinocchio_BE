@@ -16,7 +16,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import sns.pinocchio.application.comment.CommentDeleteRequest;
+import sns.pinocchio.application.comment.commentDto.CommentDeleteRequest;
 import sns.pinocchio.application.comment.CommentService;
 import sns.pinocchio.presentation.comment.CommentController;
 

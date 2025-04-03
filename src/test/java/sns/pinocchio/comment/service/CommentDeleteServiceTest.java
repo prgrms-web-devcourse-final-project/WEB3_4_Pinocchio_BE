@@ -12,7 +12,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import sns.pinocchio.application.comment.CommentDeleteRequest;
+import sns.pinocchio.application.comment.commentDto.CommentDeleteRequest;
 import sns.pinocchio.application.comment.CommentLikeService;
 import sns.pinocchio.application.comment.CommentService;
 import sns.pinocchio.application.comment.DeleteType;

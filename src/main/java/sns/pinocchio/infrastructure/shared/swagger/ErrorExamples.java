@@ -70,4 +70,14 @@ public class ErrorExamples {
             "data": []
           }
         """;
+
+  public static final String FIND_CHAT_MESSAGE_NOT_FOUND_EXAMPLE =
+      """
+          {
+            "status": "error",
+            "statusCode": 404,
+            "message": "등록된 채팅방을 찾을 수 없습니다.",
+            "data": []
+          }
+        """;
 }

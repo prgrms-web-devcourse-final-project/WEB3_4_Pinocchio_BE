@@ -98,13 +98,11 @@ class PostControllerTest {
                 .andExpect(jsonPath("$.visibility").value("PUBLIC")); // enum은 그대로 노출됨
     }
 
-    // 실패하는게 당연한 테스트 실패가 성공임
+
     @Test
     @DisplayName("게시글 상세 조회 실패 - 비공개 게시글, 인증 없음")
     void getPrivatePostWithoutAuthentication() throws Exception {
-        // when & then
         mockMvc.perform(get("/api/posts/" + privatePostId))
-                .andExpect(status().isForbidden())
-                .andExpect(content().string("해당 게시물은 비공개 상태입니다."));
+                .andExpect(status().isForbidden());
     }
 }

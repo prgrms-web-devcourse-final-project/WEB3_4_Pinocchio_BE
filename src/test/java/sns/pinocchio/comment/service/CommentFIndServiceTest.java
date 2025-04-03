@@ -10,6 +10,7 @@ import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -28,7 +29,7 @@ public class CommentFIndServiceTest {
 
 	@Mock
 	private CommentRepository commentRepository;
-
+	
 	//댓글 조회 테스트 게시글에서 조회했는데 댓글이 하나도 안달린 상황
 	@Test
 	public void 게시글_댓글_조회_테스트_댓글없음() {
@@ -75,7 +76,7 @@ public class CommentFIndServiceTest {
 		String postId = "post_001";
 		String content = "댓글";
 		int page = 0;
-		Pageable pageable = PageRequest.of(page, 10);
+		Pageable pageable = PageRequest.of(page, 15);
 
 		Comment comment = Comment.builder().userId(authorId).postId(postId).content(content).build();
 

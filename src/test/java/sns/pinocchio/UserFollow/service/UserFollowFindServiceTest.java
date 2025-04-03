@@ -9,6 +9,7 @@ import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -27,6 +28,7 @@ public class UserFollowFindServiceTest {
 
 	@InjectMocks
 	private MemberFollowService memberFollowService;
+	
 
 	//유저 팔로워 조회 테스트
 	@Test
@@ -36,7 +38,7 @@ public class UserFollowFindServiceTest {
 		String followerId = "user321";
 		String followerNickname = "고길동";
 		int page = 0;
-		Pageable pageable = PageRequest.of(page, 10);
+		Pageable pageable = PageRequest.of(page, 15);
 
 		UserFollow userFollow = UserFollow.builder()
 			.followerNickname(followerNickname)
@@ -70,7 +72,7 @@ public class UserFollowFindServiceTest {
 		String followerId = "user321";
 		String followerNickname = "고길동";
 		int page = 0;
-		Pageable pageable = PageRequest.of(page, 10);
+		Pageable pageable = PageRequest.of(page, 15);
 
 		UserFollow userFollow = UserFollow.builder()
 			.followerNickname(followerNickname)

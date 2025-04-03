@@ -10,6 +10,7 @@ import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Optional;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -122,10 +123,15 @@ public class CommentService {
 
 	//유저로 댓글 가져오기
 	public Map<String, Object> findCommentsByUser(String authorId, int page) {
-		Pageable pageable = PageRequest.of(page, 10);
+		Pageable pageable = PageRequest.of(page, 15);
 		Page<Comment> pagingComment = commentRepository.findAllByUserIdAndStatus(authorId, pageable,
 			CommentStatus.ACTIVE);
-		return Map.of("message", "댓글요청에 성공하였습니다.", "comments", pagingComment.getContent());
+		long totalElements = pagingComment.getTotalElements();
+		long totalpages = pagingComment.getTotalPages();
+
+		return Map.of("message", "댓글요청에 성공하였습니다.", "page", page, "totalElements", totalElements, "totalpages",
+			totalpages, "comments",
+			pagingComment.getContent());
 	}
 
 	//댓글 유효성 검사 댓글과 게시글로 검색결과가 없을시 true반환

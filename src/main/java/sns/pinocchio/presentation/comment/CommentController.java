@@ -38,7 +38,6 @@ import sns.pinocchio.infrastructure.persistence.mongodb.PostRepository;
 public class CommentController {
 	private final CommentService commentService;
 	private final PostRepository postRepository;
-	private final PostService postService;
 
 	@Operation(summary = "댓글 등록", description = "댓글을 등록합니다.")
 	@ApiResponses({@ApiResponse(responseCode = "200", description = "댓글 등록 성공"),

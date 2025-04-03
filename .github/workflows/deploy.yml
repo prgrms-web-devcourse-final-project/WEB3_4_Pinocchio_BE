@@ -24,9 +24,9 @@ jobs:
             - name: Build with Gradle (no tests)
               run: ./gradlew clean build -x test
 
-            - name: Set Docker Tag with datetime
+            - name: Set Docker Tag with Korea Time (KST)
               id: set_tag
-              run: echo "tag_time=$(date +'%Y-%m-%d-%H%M')" >> $GITHUB_OUTPUT
+              run: echo "tag_time=$(TZ=Asia/Seoul date +'%Y-%m-%d-%H%M')" >> $GITHUB_OUTPUT
 
             - name: Log in to DockerHub
               run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin

@@ -3,6 +3,8 @@ package sns.pinocchio.application.post;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import sns.pinocchio.application.member.MemberService;
+import sns.pinocchio.domain.member.Member;
 import sns.pinocchio.domain.post.Hashtag;
 import sns.pinocchio.domain.post.Post;
 import sns.pinocchio.domain.post.Visibility;
@@ -18,10 +20,11 @@ public class PostService {
 
     private final PostRepository postRepository;
     private final HashtagRepository hashtagRepository;
+    private final MemberService memberService;
 
     // 게시물 생성
     public String createPost(PostCreateRequest request, String tsid) {
-        List<String> imageUrls = request.getImageUrls();
+        List<String> imageUrls = request.getImageUrls();// 정책상 1장 추후 여러장 가능
 
         // 이미지가 반드시 1장이어야 함
         if (imageUrls == null || imageUrls.size() != 1) {
@@ -73,7 +76,7 @@ public class PostService {
         }
     }
 
-
+    // 게시물 수정
     @Transactional
     public void modifyPost(PostModifyRequest request, String logintsid) {
         // 작성자 본인의 게시물인지 확인하고 조회 (소프트 삭제 제외)
@@ -90,6 +93,7 @@ public class PostService {
         postRepository.save(post);  // 수정 내용 저장
     }
 
+    // 게시물 삭제
     @Transactional
     public void deletePost(String postId, String loginTsid) {
         // 작성자 본인의 게시물인지 확인하고 조회 (status: active)
@@ -101,6 +105,45 @@ public class PostService {
         post.setUpdatedAt(LocalDateTime.now());
 
         postRepository.save(post);
+    }
+
+    // 게시물 상세 조회
+    @Transactional
+    public PostDetailResponse getPostDetail(String postId, String loginTsid) {
+        // 1. 게시글 조회 (status = active)
+        Post post = postRepository.findByIdAndStatus(postId, "active")
+                .orElseThrow(() -> new IllegalArgumentException("게시물을 찾을 수 없습니다."));
+
+        // 2. 비공개 게시글이면 작성자 본인만 볼 수 있음
+        if (post.getVisibility() == Visibility.PRIVATE && !post.getTsid().equals(loginTsid)) {
+            throw new IllegalAccessError("해당 게시물은 비공개 상태입니다.");
+        }
+
+        // 3. 조회수 +1 처리
+        post.setViews(post.getViews() + 1);
+        postRepository.save(post);
+
+        // 4. 작성자 정보 (MySQL에서 조회)
+        Member member = memberService.findByTsid(post.getTsid()); //  TSID 기반 조회
+
+        // 5. DTO로 응답
+        return PostDetailResponse.builder()
+                .postId(post.getId())
+                .tsid(post.getTsid())
+                .nickname(member.getNickname())
+                .profileImage(member.getProfileImageUrl()) // null 가능성 있음
+                .content(post.getContent())
+                .imageUrls(post.getImageUrls())
+                .hashtags(post.getHashtags())
+                .likes(post.getLikes())
+                .commentsCount(post.getCommentsCount())
+                .views(post.getViews())
+                .visibility(post.getVisibility().name())
+                .mentions(post.getMentions())
+                .status(post.getStatus())
+                .createdAt(post.getCreatedAt())
+                .updatedAt(post.getUpdatedAt())
+                .build();
     }
 
 }

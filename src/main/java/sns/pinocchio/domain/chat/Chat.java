@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-@Document(value = "chat")
+@Document(value = "chats")
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor

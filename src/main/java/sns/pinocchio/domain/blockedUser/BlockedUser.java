@@ -1,5 +1,6 @@
 package sns.pinocchio.domain.blockedUser;
 
+import org.springframework.data.redis.core.RedisHash;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -12,19 +13,19 @@ import lombok.NoArgsConstructor;
 @Entity
 public class BlockedUser {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Integer id;
 
-    @Column(nullable = false)
-    private Long blockerUserId;
+  @Column(nullable = false)
+  private Long blockerUserId;
 
-    @Column(nullable = false)
-    private Long blockedUserId;
+  @Column(nullable = false)
+  private Long blockedUserId;
 
-    @Builder
-    public BlockedUser(Long blockerUserId, Long blockedUserId) {
-        this.blockerUserId = blockerUserId;
-        this.blockedUserId = blockedUserId;
-    }
+  @Builder
+  public BlockedUser(Long blockerUserId, Long blockedUserId) {
+    this.blockerUserId = blockerUserId;
+    this.blockedUserId = blockedUserId;
+  }
 }

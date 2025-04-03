@@ -7,9 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import sns.pinocchio.application.chat.dto.ChatRequestDto.SendMessage;
-import sns.pinocchio.application.chat.dto.ChatResponseDto.ChatRoomsDetail;
-import sns.pinocchio.application.chat.dto.ChatResponseDto.ChatRoomsInfo;
-import sns.pinocchio.application.chat.dto.ChatResponseDto.SendMessageInfo;
+import sns.pinocchio.application.chat.dto.ChatResponseDto.*;
 import sns.pinocchio.domain.chat.Chat;
 import sns.pinocchio.domain.chat.ChatException.ChatBadRequestException;
 import sns.pinocchio.domain.chat.ChatException.ChatInternalServerErrorException;
@@ -40,6 +38,9 @@ public class ChatService {
    *
    * @param senderTsid 발신자 TSID
    * @param sendMessage 메시지 전송 정보
+   * @return SendMessageInfo 전송된 메시지 정보
+   * @throws ChatBadRequestException 입력 값이 유효하지 않을 경우
+   * @throws ChatInternalServerErrorException 메시지 전송 또는 메시지 알림 전송이 실패했을 경우
    */
   @Transactional
   public SendMessageInfo sendMessageToChatroom(String senderTsid, SendMessage sendMessage) {
@@ -82,7 +83,7 @@ public class ChatService {
         chatRepository.save(
             Chat.builder()
                 .roomId(chatRoom.getId())
-                .roomTsid(TsidUtil.createTsid())
+                .roomTsid(chatRoom.getTsid())
                 .senderId(senderTsid)
                 .receiverId(sendMessage.receiverId())
                 .content(sendMessage.messageText())
@@ -91,6 +92,7 @@ public class ChatService {
                 .likeStatus(false)
                 .createdAt(sendMessage.sentAt())
                 .createdAtForTsid(TsidUtil.createTsid())
+                .modifiedAt(sendMessage.sentAt())
                 .build());
 
     log.debug("Saved Chat: {}", savedChat);
@@ -135,23 +137,17 @@ public class ChatService {
   public ChatRoom createNewChatRoom(String senderTsid, String receiverTsid, Instant createdAt) {
     ChatRoom newChatRoom =
         ChatRoom.builder()
+            .id(ChatRoom.generateChatRoomId(senderTsid, receiverTsid))
+            .tsid(TsidUtil.createTsid())
             .participantTsids(List.of(senderTsid, receiverTsid))
             .status(ChatRoomStatus.PENDING)
             .createdAt(createdAt)
+            .createdAtTsid(TsidUtil.createTsid())
             .build();
 
-    // 채팅방 ID 생성
-    newChatRoom.generateChatRoomId();
-
     ChatRoom savedChatRoom = chatRoomRepository.save(newChatRoom);
-
-    // DB에 저장하는 도중 에러가 발생했을 경우, 500에러 반환
-    if (savedChatRoom == null) {
-      log.error("Failed to save ChatRoom for sender: {}, receiver: {}", senderTsid, receiverTsid);
-      throw new ChatInternalServerErrorException("서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.");
-    }
-
     log.info("New ChatRoom Created: {}", savedChatRoom);
+
     return savedChatRoom;
   }
 
@@ -163,6 +159,7 @@ public class ChatService {
    * @param sortBy 정렬 기준 (latest / oldest)
    * @param cursor 페이징 커서 (생성 날짜 기준)
    * @return ChatRoomsInfo 유저가 포함된 채팅방 정보
+   * @throws ChatNotFoundException 등록된 사용자를 찾을 수 없을 경우
    */
   @Transactional
   public ChatRoomsInfo getChatRooms(String userTsid, int limit, String sortBy, String cursor) {
@@ -172,74 +169,72 @@ public class ChatService {
       throw new ChatNotFoundException("등록된 사용자를 찾을 수 없습니다.");
     }
 
-    Instant parsedCursor = null;
+    // 정렬 방식 설정
+    ChatRoomSortType sortType = ChatRoomSortType.from(sortBy);
 
-    // 커서가 존재하면 Instant 포맷으로 변경
-    if (cursor != null) {
-      parsedCursor = Instant.parse(cursor);
+    // 채팅방 조회 (다음 데이터 판단을 위해 limit + 1)
+    List<ChatRoom> chatRooms =
+        chatRoomRepositoryCustom.findChatRoomsByUserWithCursor(
+            userTsid, cursor, limit + 1, sortType);
+
+    log.info("Found ChatRooms: count {}, data {}", chatRooms.size(), chatRooms);
+
+    // hasNext 판단: 이후 데이터가 존재하지 않으면 false
+    boolean hasNext = chatRooms.size() > limit;
+
+    // 실제 응답에 보낼 데이터는 limit 까지만 저장
+    List<ChatRoom> sliced = hasNext ? chatRooms.subList(0, limit) : chatRooms;
+
+    // nextCursor 판단: 이후 데이터가 존재하지 않으면 null
+    String nextCursor = hasNext ? sliced.getLast().getCreatedAtTsid() : null;
+
+    // 응답 데이터 생성: ChatRoom Entity -> ChatRoomDetail Dto
+    List<ChatRoomsDetail> chatroomDetails =
+        sliced.stream().map(chatRoom -> ChatRoomsDetail.toDetail(userTsid, chatRoom)).toList();
+
+    return new ChatRoomsInfo(nextCursor, hasNext, chatroomDetails);
+  }
+
+  /**
+   * 채팅방 내 메시지 조회
+   *
+   * @param chatId 채팅방 TSID
+   * @param limit 최대 결과 개수
+   * @param sortBy 정렬 기준 (latest / oldest)
+   * @param cursor 페이징 커서 (생성 날짜 기준)
+   * @return ChatMessagesInfo 채팅방 내 메시지 정보들
+   * @throws ChatNotFoundException 등록된 채팅방을 찾을 수 없을 경우
+   */
+  @Transactional
+  public ChatMessagesInfo getMessages(String chatId, int limit, String sortBy, String cursor) {
+
+    if (chatId == null) {
+      log.error("chatId is null. Fail to get Chat Messages in ChatRoom.");
+      throw new ChatNotFoundException("등록된 채팅방을 찾을 수 없습니다.");
     }
 
     // 정렬 방식 설정
     ChatRoomSortType sortType = ChatRoomSortType.from(sortBy);
 
     // 채팅방 조회 (다음 데이터 판단을 위해 limit + 1)
-    List<ChatRoom> chatrooms =
-        chatRoomRepositoryCustom.findChatRoomsByUserWithCursor(
-            userTsid, parsedCursor, limit + 1, sortType);
+    List<Chat> chats =
+        chatRoomRepositoryCustom.findChatsByChatRoomWithCursor(chatId, cursor, limit + 1, sortType);
 
-    log.info("Found ChatRooms: count {}, data {}", chatrooms.size(), chatrooms);
+    log.info("Found Chats: count {}, data {}", chats.size(), chats);
 
     // hasNext 판단: 이후 데이터가 존재하지 않으면 false
-    boolean hasNext = chatrooms.size() > limit;
+    boolean hasNext = chats.size() > limit;
 
-    // 실제 응답에 보낼 데이터는 limit까지만 저장
-    List<ChatRoom> sliced = hasNext ? chatrooms.subList(0, limit) : chatrooms;
-
-    List<ChatRoomsDetail> chatroomDetails =
-        sliced.stream().map(chatRoom -> toDetail(userTsid, chatRoom)).toList();
+    // 실제 응답에 보낼 데이터는 limit 까지만 저장
+    List<Chat> sliced = hasNext ? chats.subList(0, limit) : chats;
 
     // nextCursor 판단: 이후 데이터가 존재하지 않으면 null
-    String nextCursor = hasNext ? sliced.getLast().getCreatedAt().toString() : null;
+    String nextCursor = hasNext ? sliced.getLast().getCreatedAtForTsid() : null;
 
-    return new ChatRoomsInfo(nextCursor, hasNext, chatroomDetails);
-  }
+    // 응답 데이터 생성: Chat Entity -> ChatMessageDetail Dto
+    List<ChatMessageDetail> chatMessageDetail =
+        sliced.stream().map(ChatMessageDetail::toDetail).toList();
 
-  /**
-   * ChatRoom entity -> ChatRoomsDetail Dto
-   *
-   * @param userTsid 유저 TSID
-   * @param chatRoom 채팅방 정보
-   * @return ChatRoomsDetail 채팅방 세부 정보
-   */
-  private ChatRoomsDetail toDetail(String userTsid, ChatRoom chatRoom) {
-
-    // 채팅 대상 확인: 없을 경우 null
-    String targetUserTsid =
-        chatRoom.getParticipantTsids().stream()
-            .filter(id -> !id.equals(userTsid))
-            .findFirst()
-            .orElse(null);
-
-    // 읽지 않은 메시지 개수 확인: 없으면 0
-    int unreadCounts = 0;
-    if (chatRoom.getUnreadCounts() != null && chatRoom.getUnreadCounts().containsKey(userTsid)) {
-      unreadCounts = chatRoom.getUnreadCounts().get(userTsid);
-    }
-
-    // 마지막 메시지 정보 확인: 없으면 null
-    String lastMessage = null;
-    Instant lastMessageTime = null;
-    if (chatRoom.getLastMessage() != null) {
-      lastMessage = chatRoom.getLastMessage().getContent();
-      lastMessageTime = chatRoom.getLastMessage().getCreatedAt();
-    }
-
-    return ChatRoomsDetail.builder()
-        .roomId(chatRoom.getId())
-        .targetUserId(targetUserTsid)
-        .lastMessage(lastMessage)
-        .lastMessageTime(lastMessageTime)
-        .unreadCounts(unreadCounts)
-        .build();
+    return new ChatMessagesInfo(nextCursor, hasNext, chatId, chatMessageDetail);
   }
 }

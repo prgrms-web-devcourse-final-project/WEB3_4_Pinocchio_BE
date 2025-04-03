@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import sns.pinocchio.infrastructure.shared.response.GlobalApiResponse;
 
-@Hidden
+/*@Hidden
 @RestControllerAdvice(
     annotations = {RestController.class},
     basePackages = "sns.pinocchio.presentation")
@@ -27,4 +27,4 @@ public class GlobalExceptionHandler {
     return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
         .body(GlobalApiResponse.error(500, "알 수 없는 서버 오류가 발생했습니다."));
   }
-}
+}*/

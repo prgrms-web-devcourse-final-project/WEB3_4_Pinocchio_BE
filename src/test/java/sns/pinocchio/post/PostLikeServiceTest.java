@@ -8,6 +8,7 @@ import sns.pinocchio.application.post.PostLikeService;
 import sns.pinocchio.domain.post.LikeStatus;
 import sns.pinocchio.domain.post.Post;
 import sns.pinocchio.domain.post.PostLike;
+import sns.pinocchio.domain.post.Visibility;
 import sns.pinocchio.infrastructure.persistence.mongodb.PostLikeRepository;
 import sns.pinocchio.infrastructure.persistence.mongodb.PostRepository;
 
@@ -38,12 +39,12 @@ public class PostLikeServiceTest {
 
         // 게시글 저장 (작성자는 user_123)
         Post post = Post.builder()
-                .userTsid("user_123")
+                .tsid("user_123")
                 .content("좋아요 테스트용 게시글")
                 .likes(0)
                 .commentsCount(0)
                 .views(0)
-                .visibility(sns.pinocchio.domain.post.Visibility.PUBLIC)
+                .visibility(Visibility.PUBLIC)
                 .status("active")
                 .createdAt(LocalDateTime.now())
                 .updatedAt(LocalDateTime.now())
@@ -63,7 +64,7 @@ public class PostLikeServiceTest {
     void 다른사람_첫_좋아요_누르면_생성됨() {
         postLikeService.toggleLike(savedPost.getId(), "user_456");
 
-        Optional<PostLike> result = postLikeRepository.findByPostIdAndUserTsid(savedPost.getId(), "user_456");
+        Optional<PostLike> result = postLikeRepository.findByPostIdAndTsid(savedPost.getId(), "user_456");
 
         assertThat(result).isPresent();
         assertThat(result.get().getStatus()).isEqualTo(LikeStatus.ACTIVE);
@@ -77,7 +78,7 @@ public class PostLikeServiceTest {
         // 두 번째 눌러서 취소
         postLikeService.toggleLike(savedPost.getId(), "user_456");
 
-        Optional<PostLike> result = postLikeRepository.findByPostIdAndUserTsid(savedPost.getId(), "user_456");
+        Optional<PostLike> result = postLikeRepository.findByPostIdAndTsid(savedPost.getId(), "user_456");
 
         assertThat(result).isPresent();
         assertThat(result.get().getStatus()).isEqualTo(LikeStatus.CANCELLED);
@@ -89,7 +90,7 @@ public class PostLikeServiceTest {
         postLikeService.toggleLike(savedPost.getId(), "user_456"); // 취소 → cancelled
         postLikeService.toggleLike(savedPost.getId(), "user_456"); // 다시 누름 → active
 
-        Optional<PostLike> result = postLikeRepository.findByPostIdAndUserTsid(savedPost.getId(), "user_456");
+        Optional<PostLike> result = postLikeRepository.findByPostIdAndTsid(savedPost.getId(), "user_456");
 
         assertThat(result).isPresent();
         assertThat(result.get().getStatus()).isEqualTo(LikeStatus.ACTIVE);

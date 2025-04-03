@@ -12,7 +12,7 @@ import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import sns.pinocchio.application.comment.CommentCreateRequest;
+import sns.pinocchio.application.comment.commentDto.CommentCreateRequest;
 import sns.pinocchio.application.comment.CommentService;
 import sns.pinocchio.domain.comment.Comment;
 import sns.pinocchio.infrastructure.persistence.mongodb.CommentRepository;
@@ -35,14 +35,14 @@ public class CommentCreateServiceTest {
 		String postId = "post_001";
 		String commentId = "comment_001";
 
-		CommentCreateRequest createRequest = CommentCreateRequest.builder().authorId(authorId).content("댓글이지롱").build();
+		CommentCreateRequest createRequest = CommentCreateRequest.builder().postId(postId).content("댓글이지롱").build();
 
 		Comment mockComment = Comment.builder().id(commentId).userId(authorId).postId(postId).content("댓글이지롱").build();
 
 		when(commentRepositoryMock.save(any(Comment.class))).thenReturn(mockComment);
 		when(commentRepositoryMock.findById(commentId)).thenReturn(Optional.of(mockComment));
 
-		Map<String, Object> response = commentService.createComment(createRequest, authorId, postId);
+		Map<String, Object> response = commentService.createComment(createRequest, authorId);
 		String createdCommentId = (String)response.get("commentId");
 
 		assertNotNull(createdCommentId);
@@ -61,8 +61,8 @@ public class CommentCreateServiceTest {
 		String commentId = "comment_001";
 
 		for(int i = 0; i<100; i++){
-			CommentCreateRequest createRequest = CommentCreateRequest.builder().authorId(authorId).content("댓글이지롱"+i).build();
-			Map<String, Object> response = commentServiceReal.createComment(createRequest, authorId, postId);
+			CommentCreateRequest createRequest = CommentCreateRequest.builder().postId(postId).content("댓글이지롱"+i).build();
+			Map<String, Object> response = commentServiceReal.createComment(createRequest, authorId);
 		}
 
 		System.out.println("✅ 댓글 생성 성공");

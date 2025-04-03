@@ -80,7 +80,7 @@ public class MemberControllerTest {
 
     ResultActions getProfileResponse =
         mockMvc.perform(
-            put("/member")
+            put("/user")
                 .header("Authorization", accessToken)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(updateRequestDto));
@@ -107,7 +107,7 @@ public class MemberControllerTest {
 
     ResultActions changePasswordResponse =
         mockMvc.perform(
-            put("/member/password")
+            put("/user/password")
                 .header("Authorization", accessToken)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(changePasswordDto));
@@ -129,7 +129,7 @@ public class MemberControllerTest {
 
     ResultActions deleteMemberResponse =
         mockMvc.perform(
-            delete("/member")
+            delete("/user")
                 .header("Authorization", accessToken)
                 .cookie(new Cookie("refreshToken", refreshTokenValue))
                 .contentType(MediaType.APPLICATION_JSON)
@@ -161,7 +161,7 @@ public class MemberControllerTest {
 
     ResultActions reportResponse =
         mockMvc.perform(
-            post("/member/report")
+            post("/user/report")
                 .header("Authorization", accessToken)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(reportRequestDto));

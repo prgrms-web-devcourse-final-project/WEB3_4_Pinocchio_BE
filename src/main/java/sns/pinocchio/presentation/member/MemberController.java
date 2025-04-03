@@ -20,7 +20,7 @@ import sns.pinocchio.application.report.reportDto.ReportRequestDto;
 import sns.pinocchio.config.global.auth.model.CustomUserDetails;
 import sns.pinocchio.domain.member.Member;
 
-@RequestMapping("/member")
+@RequestMapping("/user")
 @RequiredArgsConstructor
 @RestController
 public class MemberController {

@@ -11,23 +11,22 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import sns.pinocchio.application.user.UserFollowRequest;
-import sns.pinocchio.application.user.UserFollowService;
-import sns.pinocchio.presentation.user.UserFollowController;
+import sns.pinocchio.application.member.memberDto.MemberFollowRequest;
+import sns.pinocchio.application.member.MemberFollowService;
+import sns.pinocchio.presentation.member.MemberFollowController;
 
-@WebMvcTest(UserFollowController.class)
-class UserFollowControllerTest {
+@WebMvcTest(MemberFollowController.class)
+class MemberFollowControllerTest {
 	@Autowired
 	private MockMvc mockMvc;
 
 	@MockBean
-	private UserFollowService userFollowService;
+	private MemberFollowService memberFollowService;
 
 	//유저 팔로우 테스트
 	@Test
@@ -35,9 +34,9 @@ class UserFollowControllerTest {
 		String userId = "user_002";
 		String authorId = "user_001";
 		String authorNickname = "고길동";
-		UserFollowRequest request = UserFollowRequest.builder().followingNickname("홍길동").build();
+		MemberFollowRequest request = MemberFollowRequest.builder().followingNickname("홍길동").build();
 		Map<String, Object> response = Map.of("message", "팔로우에 성공하였습니다.", "followed", true);
-		when(userFollowService.followingUser(request,userId,authorId,authorNickname) ).thenReturn(response);
+		when(memberFollowService.followingUser(request,userId,authorId,authorNickname) ).thenReturn(response);
 
 		mockMvc.perform(post("/users/"+userId+"/follow").contentType(MediaType.APPLICATION_JSON)
 				.content(new ObjectMapper().writeValueAsString(request)))
@@ -54,9 +53,9 @@ class UserFollowControllerTest {
 		String userId = "user_002";
 		String authorId = "user_001";
 		String authorNickname = "고길동";
-		UserFollowRequest request = UserFollowRequest.builder().followingNickname("홍길동").build();
+		MemberFollowRequest request = MemberFollowRequest.builder().followingNickname("홍길동").build();
 		Map<String, Object> response = Map.of("message", "팔로우 취소에 성공하였습니다.", "followed", false);
-		when(userFollowService.followingUser(request,userId,authorId,authorNickname) ).thenReturn(response);
+		when(memberFollowService.followingUser(request,userId,authorId,authorNickname) ).thenReturn(response);
 
 		mockMvc.perform(post("/users/"+userId+"/follow").contentType(MediaType.APPLICATION_JSON)
 				.content(new ObjectMapper().writeValueAsString(request)))

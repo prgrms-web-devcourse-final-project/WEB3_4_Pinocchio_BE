@@ -1,5 +1,7 @@
 package sns.pinocchio.domain.blockedUser;
 
+import org.springframework.data.redis.core.RedisHash;
+
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;

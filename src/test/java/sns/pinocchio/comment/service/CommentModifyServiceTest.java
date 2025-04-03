@@ -12,7 +12,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import sns.pinocchio.application.comment.CommentModifyRequest;
+import sns.pinocchio.application.comment.commentDto.CommentModifyRequest;
 import sns.pinocchio.application.comment.CommentService;
 import sns.pinocchio.domain.comment.Comment;
 import sns.pinocchio.domain.comment.CommentStatus;

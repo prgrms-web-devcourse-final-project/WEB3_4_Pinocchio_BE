@@ -1,4 +1,4 @@
-package sns.pinocchio.presentation.user;
+package sns.pinocchio.presentation.member;
 
 import java.security.Principal;
 import java.util.Map;
@@ -7,6 +7,7 @@ import java.util.Optional;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -19,8 +20,9 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import sns.pinocchio.application.user.UserFollowRequest;
-import sns.pinocchio.application.user.UserFollowService;
+import sns.pinocchio.application.member.memberDto.MemberFollowRequest;
+import sns.pinocchio.application.member.MemberFollowService;
+import sns.pinocchio.config.global.auth.model.CustomUserDetails;
 import sns.pinocchio.domain.member.Member;
 import sns.pinocchio.infrastructure.member.MemberRepository;
 
@@ -28,8 +30,8 @@ import sns.pinocchio.infrastructure.member.MemberRepository;
 @RestController
 @RequestMapping("/users")
 @RequiredArgsConstructor
-public class UserFollowController {
-	private final UserFollowService userFollowService;
+public class MemberFollowController {
+	private final MemberFollowService memberFollowService;
 	private final MemberRepository memberRepository;
 
 	@Operation(summary = "유저 팔로우", description = "유저 팔로우 토글")
@@ -39,22 +41,17 @@ public class UserFollowController {
 		@ApiResponse(responseCode = "404", description = "유저 조회 실패"),
 		@ApiResponse(responseCode = "500", description = "서버 내부 오류")})
 	@PostMapping("/{userId}/follow")
-	public ResponseEntity<Map<String, Object>> toggleUserFollow(Principal principal, @PathVariable String userId,
-		@RequestBody UserFollowRequest request) {
-		Optional<Member> optMember = memberRepository.findByName(principal.getName());
-		if (optMember.isEmpty()) {
-			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("message", "등록된 유저를 찾을 수 없습니다."));
-		}
-
-		Member authorMember = optMember.get();
+	public ResponseEntity<Map<String, Object>> toggleUserFollow(@AuthenticationPrincipal CustomUserDetails userDetails,
+		@PathVariable String userId,
+		@RequestBody MemberFollowRequest request) {
+		Member authorMember = userDetails.getMember();
 
 		if (Objects.equals(authorMember.getTsid(), userId)) {
 			return ResponseEntity.status(HttpStatus.FORBIDDEN)
 				.body(Map.of("message", "스스로 팔로잉 불가능"));
-
 		}
 
-		Map<String, Object> response = userFollowService.followingUser(request, userId, authorMember.getTsid(),
+		Map<String, Object> response = memberFollowService.followingUser(request, userId, authorMember.getTsid(),
 			authorMember.getNickname());
 
 		return ResponseEntity.status(HttpStatus.OK).body(response);
@@ -67,11 +64,12 @@ public class UserFollowController {
 	@PostMapping("/{userId}/followers")
 	public ResponseEntity<Map<String, Object>> findFollowers(@PathVariable String userId,
 		@RequestParam(value = "page", defaultValue = "0") int page) {
-		if (false/*유저 확인*/) {
+		Optional<Member> optMember = memberRepository.findByTsid(userId);
+		if (optMember.isEmpty()) {
 			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("message", "등록된 유저를 찾을 수 없습니다."));
 		}
 
-		Map<String, Object> response = userFollowService.findFollowers(userId, page);
+		Map<String, Object> response = memberFollowService.findFollowers(userId, page);
 
 		return ResponseEntity.status(HttpStatus.OK).body(response);
 	}
@@ -88,7 +86,7 @@ public class UserFollowController {
 			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("message", "등록된 유저를 찾을 수 없습니다."));
 		}
 
-		Map<String, Object> response = userFollowService.findFollowings(userId, page);
+		Map<String, Object> response = memberFollowService.findFollowings(userId, page);
 
 		return ResponseEntity.status(HttpStatus.OK).body(response);
 	}

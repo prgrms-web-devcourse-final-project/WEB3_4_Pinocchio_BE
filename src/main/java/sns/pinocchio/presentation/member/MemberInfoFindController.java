@@ -1,4 +1,4 @@
-package sns.pinocchio.presentation.user;
+package sns.pinocchio.presentation.member;
 
 import java.security.Principal;
 import java.util.HashMap;
@@ -6,8 +6,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -21,7 +23,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import sns.pinocchio.application.comment.CommentService;
 import sns.pinocchio.application.post.PostLikeSearchService;
-import sns.pinocchio.application.post.PostService;
+import sns.pinocchio.config.global.auth.model.CustomUserDetails;
 import sns.pinocchio.domain.member.Member;
 import sns.pinocchio.domain.post.PostLike;
 import sns.pinocchio.infrastructure.member.MemberRepository;
@@ -30,9 +32,8 @@ import sns.pinocchio.infrastructure.member.MemberRepository;
 @RestController
 @RequestMapping("/users")
 @RequiredArgsConstructor
-public class UserInfoFindController {
+public class MemberInfoFindController {
 	private final CommentService commentService;
-	private final MemberRepository memberRepository;
 	private final PostLikeSearchService postLikeSearchService;
 
 	@Operation(summary = "유저 댓글 목록", description = "유저 본인의 댓글 목록 가져오기")
@@ -40,14 +41,10 @@ public class UserInfoFindController {
 		@ApiResponse(responseCode = "401", description = "JWT 토큰 누락 또는 인증 실패"),
 		@ApiResponse(responseCode = "500", description = "서버 내부 오류")})
 	@GetMapping("/{userId}/activities/comments")
-	public ResponseEntity<Map<String, Object>> findFindComments(Principal principal, @PathVariable String userId,
+	public ResponseEntity<Map<String, Object>> findFindComments(@AuthenticationPrincipal CustomUserDetails userDetails,
+		@PathVariable String userId,
 		@RequestParam(value = "page", defaultValue = "0") int page) {
-		Optional<Member> optMember = memberRepository.findByName(principal.getName());
-		if (optMember.isEmpty()) {
-			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("message", "등록된 유저를 찾을 수 없습니다."));
-		}
-
-		Member authorMember = optMember.get();
+		Member authorMember = userDetails.getMember();
 		Map<String, Object> response = commentService.findCommentsByUser(authorMember.getTsid(), page);
 
 		return ResponseEntity.status(HttpStatus.OK).body(response);
@@ -58,19 +55,17 @@ public class UserInfoFindController {
 		@ApiResponse(responseCode = "401", description = "JWT 토큰 누락 또는 인증 실패"),
 		@ApiResponse(responseCode = "500", description = "서버 내부 오류")})
 	@GetMapping("/{userId}/activities/likes")
-	public ResponseEntity<Map<String, Object>> findFindLikes(Principal principal, @PathVariable String userId,
+	public ResponseEntity<Map<String, Object>> findFindLikes(@AuthenticationPrincipal CustomUserDetails userDetails,
+		@PathVariable String userId,
 		@RequestParam(value = "page", defaultValue = "0") int page) {
-		Optional<Member> optMember = memberRepository.findByName(principal.getName());
-		if (optMember.isEmpty()) {
-			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("message", "등록된 유저를 찾을 수 없습니다."));
-		}
+		Member authorMember = userDetails.getMember();
 
-		Member authorMember = optMember.get();
-
-		List<PostLike> postLikeList = postLikeSearchService.findLikesByUser(authorMember.getTsid());
-		Map<String,Object> response = new HashMap<>();
-		response.put("meesage","게시물 좋아요 목록 요청 성공");
-		response.put("likes",postLikeList);
+		Page<PostLike> postLikePage= postLikeSearchService.findLikesByUser(userId,page);
+		Map<String, Object> response = new HashMap<>();
+		response.put("meesage", "게시물 좋아요 목록 요청 성공");
+		response.put("likes", postLikePage.getContent());
+		response.put("totalPages",postLikePage.getTotalPages());
+		response.put("totalElements",postLikePage.getTotalElements());
 		return ResponseEntity.status(HttpStatus.OK).body(response);
 	}
 }

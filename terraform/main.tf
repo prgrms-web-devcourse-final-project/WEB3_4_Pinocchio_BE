@@ -315,7 +315,7 @@ EOF
 # Elastic IP 생성
 # ----------------------------------------
 resource "aws_eip" "web_eip" {
-  vpc = true
+  domain = "vpc"
 
   tags = {
     Name         = "${var.prefix}-eip"
@@ -352,4 +352,49 @@ resource "aws_volume_attachment" "ebs_attach" {
   device_name = "/dev/xvdf"
   volume_id   = aws_ebs_volume.extra_storage.id
   instance_id = aws_instance.ec2.id
+}
+
+# ----------------------------------------
+# S3 버킷 - 이미지 저장용
+# ----------------------------------------
+resource "aws_s3_bucket" "image_bucket" {
+  bucket = "${var.prefix}-image-bucket"
+  force_destroy = true  # 삭제 시 객체도 같이 삭제 (테스트에 유용)
+
+  tags = {
+    Name = "${var.prefix}-image-bucket"
+    (var.tagKey) = var.tagValue
+  }
+}
+
+# ----------------------------------------
+# 퍼블릭 접근 차단 해제 (정적 이미지 접근을 위함)
+# ----------------------------------------
+resource "aws_s3_bucket_public_access_block" "image_bucket_public_block" {
+  bucket = aws_s3_bucket.image_bucket.id
+
+  block_public_acls       = false
+  block_public_policy     = false
+  ignore_public_acls      = false
+  restrict_public_buckets = false
+}
+
+# ----------------------------------------
+# 모든 사용자에게 이미지 읽기 허용 (s3:GetObject)
+# ----------------------------------------
+resource "aws_s3_bucket_policy" "image_bucket_policy" {
+  bucket = aws_s3_bucket.image_bucket.id
+
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Sid       = "AllowPublicRead",
+        Effect    = "Allow",
+        Principal = "*",
+        Action    = "s3:GetObject",
+        Resource  = "${aws_s3_bucket.image_bucket.arn}/*"
+      }
+    ]
+  })
 }

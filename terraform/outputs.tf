@@ -17,3 +17,13 @@ output "ec2_instance_id" {
   description = "생성된 EC2 인스턴스 ID"
   value       = aws_instance.ec2.id
 }
+
+output "s3_bucket_name" {
+  description = "이미지 저장용 S3 버킷 이름"
+  value       = aws_s3_bucket.image_bucket.id
+}
+
+output "s3_bucket_arn" {
+  description = "S3 버킷 ARN"
+  value       = aws_s3_bucket.image_bucket.arn
+}

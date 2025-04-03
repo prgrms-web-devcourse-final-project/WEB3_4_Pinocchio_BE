@@ -30,10 +30,9 @@ public class MemberController {
   private final ReportService reportService;
 
   // 유저 프로필 조회
-  @GetMapping
-  public ResponseEntity<ProfileResponseDto> getProfile(
-      @AuthenticationPrincipal CustomUserDetails userDetails) {
-    Member member = userDetails.getMember();
+  @GetMapping("/{userId}")
+  public ResponseEntity<ProfileResponseDto> getProfile(@PathVariable Long userId) {
+    Member member = memberService.findById(userId);
 
     // 응답 DTO 변환
     ProfileResponseDto profileResponseDto =

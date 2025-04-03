@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -59,10 +60,12 @@ public class MemberInfoFindController {
 		@RequestParam(value = "page", defaultValue = "0") int page) {
 		Member authorMember = userDetails.getMember();
 
-		List<PostLike> postLikeList = postLikeSearchService.findLikesByUser(authorMember.getTsid());
+		Page<PostLike> postLikePage= postLikeSearchService.findLikesByUser(userId,page);
 		Map<String, Object> response = new HashMap<>();
 		response.put("meesage", "게시물 좋아요 목록 요청 성공");
-		response.put("likes", postLikeList);
+		response.put("likes", postLikePage.getContent());
+		response.put("totalPages",postLikePage.getTotalPages());
+		response.put("totalElements",postLikePage.getTotalElements());
 		return ResponseEntity.status(HttpStatus.OK).body(response);
 	}
 }

@@ -1,7 +1,12 @@
 package sns.pinocchio.infrastructure.persistence.mongodb;
 
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.repository.MongoRepository;
+
+import sns.pinocchio.domain.comment.Comment;
+import sns.pinocchio.domain.comment.CommentStatus;
 import sns.pinocchio.domain.post.LikeStatus;
 import sns.pinocchio.domain.post.PostLike;
 
@@ -17,8 +22,7 @@ public interface PostLikeRepository extends MongoRepository<PostLike, String> {
     long countByPostIdAndStatus(String postId, LikeStatus status);
 
     // 내가 좋아요 누른 게시글 리스트 조회
-    List<PostLike> findAllByTsidAndStatus(String tsid, LikeStatus status);
-
+    Page<PostLike> findAllByTsidAndStatus(String tsid, LikeStatus status,Pageable pageable);
     // 특정 게시글에 좋아요 누른 전체 사용자 조회
     List<PostLike> findAllByPostIdAndStatus(String postId, LikeStatus status);
 

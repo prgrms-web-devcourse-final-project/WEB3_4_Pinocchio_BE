@@ -129,7 +129,7 @@ public class CommentService {
 		long totalElements = pagingComment.getTotalElements();
 		long totalpages = pagingComment.getTotalPages();
 
-		return Map.of("message", "댓글요청에 성공하였습니다.", "page", page, "totalElements", totalElements, "totalpages",
+		return Map.of("message", "댓글요청에 성공하였습니다.", "page", page, "totalElements", totalElements, "totalPages",
 			totalpages, "comments",
 			pagingComment.getContent());
 	}

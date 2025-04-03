@@ -5,133 +5,211 @@ import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
-import com.mongodb.client.model.search.FieldSearchPath;
+import com.mongodb.client.model.search.VectorSearchOptions;
 import org.bson.BsonArray;
-import org.bson.BsonValue;
 import org.bson.Document;
 import org.bson.conversions.Bson;
-import sns.pinocchio.infrastructure.ai.EmbeddingProvider;
+import org.openkoreantext.processor.KoreanTokenJava;
+import org.openkoreantext.processor.OpenKoreanTextProcessorJava;
+import org.openkoreantext.processor.tokenizer.KoreanTokenizer;
+import scala.collection.Seq;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import static com.mongodb.client.model.Aggregates.project;
 import static com.mongodb.client.model.Aggregates.vectorSearch;
-import static com.mongodb.client.model.Projections.exclude;
-import static com.mongodb.client.model.Projections.fields;
-import static com.mongodb.client.model.Projections.include;
-import static com.mongodb.client.model.Projections.metaVectorSearchScore;
+import static com.mongodb.client.model.Projections.*;
 import static com.mongodb.client.model.search.SearchPath.fieldPath;
-import static com.mongodb.client.model.search.VectorSearchOptions.exactVectorSearchOptions;
-import static java.util.Arrays.asList;
+
 public class VectorQuery {
-    /**
-     * 주어진 쿼리 문자열에 대해 벡터 유사성 검색을 수행합니다.
-     *
-     * @param queryString 검색할 쿼리 문자열
-     * @param limit 반환할 최대 결과 수
-     * @return 유사한 문서 목록
-     */
-    public static List<SimilarityResult> searchSimilarDocuments(String queryString, int limit) {
-      String uri = System.getenv("ATLAS_CONNECTION_STRING");
-      if (uri == null || uri.isEmpty()) {
-        throw new IllegalStateException("ATLAS_CONNECTION_STRING env variable is not set or is empty.");
+
+  private static final Set<String> stopwords;
+
+  private static final Set<String> allowedPos = Set.of(
+          "Noun", "Verb", "Adjective", "Adverb", "Exclamation", "KoreanParticle"
+  );
+
+  private static final String STOPWORDS_RESOURCE_PATH = "stopwords.txt";
+
+  static {
+    try {
+      stopwords = loadStopwords(STOPWORDS_RESOURCE_PATH);
+    } catch (IOException e) {
+      System.err.println("Failed to load stopwords from " + STOPWORDS_RESOURCE_PATH + ": " + e.getMessage());
+      throw new RuntimeException("Failed to initialize VectorQuery due to stopword loading failure.", e);
+    }
+  }
+
+  private static Set<String> loadStopwords(String resourcePath) throws IOException {
+    Set<String> stopwordsSet = new HashSet<>();
+    InputStream inputStream = VectorQuery.class.getClassLoader().getResourceAsStream(resourcePath);
+
+    if (inputStream == null) {
+      throw new IOException("불용어 파일이 해당 경로에 없습니다: " + resourcePath);
+    }
+
+    try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
+      String line;
+      while ((line = reader.readLine()) != null) {
+        stopwordsSet.add(line.trim());
       }
+    }
+    return stopwordsSet;
+  }
+  private static String preprocessQueryText(String text) {
+    if (text == null || text.isBlank()) {
+      return "";
+    }
+    // 1. 정규화 (Normalize)
+    CharSequence normalized = OpenKoreanTextProcessorJava.normalize(text);
 
-      List<SimilarityResult> similarityResults = new ArrayList<>();
+    // 2. 토큰화 (Tokenize)
+    Seq<KoreanTokenizer.KoreanToken> tokens = OpenKoreanTextProcessorJava.tokenize(normalized);
+    List<KoreanTokenJava> tokenList = OpenKoreanTextProcessorJava.tokensToJavaKoreanTokenList(tokens);
 
-      try (MongoClient mongoClient = MongoClients.create(uri)) {
-        MongoDatabase database = mongoClient.getDatabase("rag_db");
-        MongoCollection<Document> collection = database.getCollection("scenes");
+    // 3. 품사 필터링 및 불용어 제거, 공백으로 연결
+    String processedText = tokenList.stream()
+            .filter(token -> allowedPos.contains(token.getPos().toString()))
+            .map(KoreanTokenJava::getText)
+            .filter(tokenText -> !stopwords.contains(tokenText))
+            .collect(Collectors.joining(" "));
 
-        // 쿼리 문자열에 대한 임베딩 생성
-        EmbeddingProvider embeddingProvider = new EmbeddingProvider();
-        BsonArray embeddingBsonArray = embeddingProvider.getEmbedding(queryString);
-        List<Double> embedding = new ArrayList<>();
-        for (BsonValue value : embeddingBsonArray.stream().toList()) {
-          embedding.add(value.asDouble().getValue());
-        }
+    System.out.println("입력된 쿼리문: " + text);
+    System.out.println("전처리된 쿼리문: " + processedText);
+    return processedText;
+  }
 
-        // 벡터 검색 파이프라인 설정
-        String indexName = "vector_index";
-        FieldSearchPath fieldSearchPath = fieldPath("scenes");
+  public static List<SimilarityResult> searchSimilarDocuments(String queryString, int limit) {
+    String uri = System.getenv("ATLAS_CONNECTION_STRING");
+    if (uri == null || uri.isEmpty()) {
+      throw new IllegalStateException("ATLAS_CONNECTION_STRING env variable is not set or is empty.");
+    }
 
-        List<Bson> pipeline = asList(
-                vectorSearch(
-                        fieldSearchPath,
-                        embedding,
-                        indexName,
-                        limit,
-                        exactVectorSearchOptions()
-                ),
-                project(
-                        fields(exclude("_id"), include("text"),
-                                metaVectorSearchScore("score"))
-                )
-        );
+    List<SimilarityResult> similarityResults = new ArrayList<>();
 
-        // 쿼리 실행 및 결과 처리
-        List<Document> results = collection.aggregate(pipeline).into(new ArrayList<>());
+    try (MongoClient mongoClient = MongoClients.create(uri)) {
+      MongoDatabase database = mongoClient.getDatabase("rag_db");
+      MongoCollection<Document> collection = database.getCollection("scenes");
 
-        for (Document doc : results) {
-          similarityResults.add(new SimilarityResult(
-                  doc.getString("text"),
-                  doc.getDouble("score")
-          ));
-        }
+      // 1. 쿼리 문자열 전처리
+      String processedQuery = preprocessQueryText(queryString);
 
+      // 전처리 결과가 비어있으면 검색 의미 없음
+      if (processedQuery.isEmpty()) {
+        System.out.println("전처리 결과가 비어있습니다.");
         return similarityResults;
-      } catch (MongoException me) {
-        throw new RuntimeException("Failed to connect to MongoDB", me);
-      } catch (Exception e) {
-        throw new RuntimeException("Operation failed", e);
       }
+
+      // 2. 전처리된 쿼리 문자열에 대한 임베딩 생성
+      EmbeddingProvider embeddingProvider = new EmbeddingProvider();
+      BsonArray embeddingBsonArray = embeddingProvider.getEmbedding(processedQuery);
+
+      List<Double> queryEmbedding = embeddingBsonArray.stream()
+              .map(bsonValue -> bsonValue.asDouble().getValue())
+              .collect(Collectors.toList());
+
+
+      // 3. 벡터 검색 파이프라인 설정
+      String indexName = "korean_multilingual_vector_index";
+      String embeddingFieldPath = "embedding";
+
+      List<Bson> pipeline = List.of(
+              vectorSearch(
+                      fieldPath(embeddingFieldPath),
+                      queryEmbedding,
+                      indexName,
+                      limit,
+                      VectorSearchOptions.exactVectorSearchOptions()
+                      // .filter(Filters.eq("some_field", "some_value")) // 필요시 메타데이터 필터 추가
+              ),
+              project( // 결과 필드 프로젝션 수정
+                      fields(
+                              excludeId(),
+                              include("utterance"),
+                              metaVectorSearchScore("score")
+                      )
+              )
+      );
+
+      // 쿼리 실행 및 결과 처리
+      List<Document> results = collection.aggregate(pipeline).into(new ArrayList<>());
+
+      for (Document doc : results) {
+        similarityResults.add(new SimilarityResult(
+                doc.getString("utterance"),
+                doc.getDouble("score")
+        ));
+      }
+
+      return similarityResults;
+
+    } catch (MongoException me) {
+      System.err.println("MongoDB connection or query failed: " + me.getMessage());
+      throw new RuntimeException("Failed to connect or query MongoDB", me);
+    } catch (Exception e) {
+      System.err.println("An unexpected error occurred during vector search: " + e.getMessage());
+      e.printStackTrace();
+      throw new RuntimeException("Vector search operation failed", e);
+    }
+  }
+
+  public static class SimilarityResult {
+    private final String utterance;
+    private final double score;
+
+    public SimilarityResult(String utterance, double score) {
+      this.utterance = utterance;
+      this.score = score;
     }
 
-    /**
-     * 유사성 검색 결과를 저장하는 정적 내부 클래스
-     */
-    public static class SimilarityResult {
-      private String text;
-      private double score;
-
-      public SimilarityResult(String text, double score) {
-        this.text = text;
-        this.score = score;
-      }
-
-      public String getText() {
-        return text;
-      }
-
-      public double getScore() {
-        return score;
-      }
-
-      @Override
-      public String toString() {
-        return "SimilarityResult{" +
-                "text='" + text + '\'' +
-                ", score=" + score +
-                '}';
-      }
+    public String getUtterance() {
+      return utterance;
     }
 
-    // 사용 예시 메서드
-    public static void main(String[] args) {
-      String queryString = "정의를 실현하기 위해서 졸라 고독할 수밖에 없거든";
-      int limit = 2;
+    public double getScore() {
+      return score;
+    }
 
+    @Override
+    public String toString() {
+      return "SimilarityResult{" +
+              "utterance='" + utterance + '\'' +
+              ", score=" + score +
+              '}';
+    }
+  }
+
+  // 사용 예시 메서드
+  public static void main(String[] args) {
+    // 예시 쿼리 문자열
+    String queryString = "정의";
+    int limit = 3;
+
+    try {
       List<SimilarityResult> results = searchSimilarDocuments(queryString, limit);
 
       if (results.isEmpty()) {
-        System.out.println("No similar documents found.");
+        System.out.println("\n문서를 찾지 못했습니다..");
       } else {
-        System.out.println("Similar documents:");
+        System.out.println("\n찾은 문서들:");
         for (SimilarityResult result : results) {
-          System.out.println("Text: " + result.getText());
+          System.out.println("Utterance: " + result.getUtterance());
           System.out.println("Similarity Score: " + result.getScore());
           System.out.println("---");
         }
       }
+    } catch (Exception e) {
+      System.err.println(e.getMessage());
+      e.printStackTrace();
     }
+  }
 }

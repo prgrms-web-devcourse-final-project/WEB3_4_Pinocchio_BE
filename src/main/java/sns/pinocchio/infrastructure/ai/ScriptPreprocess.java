@@ -2,15 +2,14 @@ package sns.pinocchio.infrastructure.ai;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import org.openkoreantext.processor.KoreanTokenJava;
 import org.openkoreantext.processor.OpenKoreanTextProcessorJava;
 import org.openkoreantext.processor.tokenizer.KoreanTokenizer;
+import org.openkoreantext.processor.KoreanPosJava;
 import scala.collection.Seq;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -22,6 +21,7 @@ public class ScriptPreprocess {
   public ScriptPreprocess(String stopwordsPath) throws IOException {
     this.stopwords = loadStopwords(stopwordsPath);
     this.objectMapper = new ObjectMapper();
+    this.objectMapper.enable(SerializationFeature.INDENT_OUTPUT); // JSON pretty print
   }
 
   private Set<String> loadStopwords(String resourcePath) throws IOException {
@@ -41,10 +41,9 @@ public class ScriptPreprocess {
     return stopwordsSet;
   }
 
-
   //JSON 파일에서 대화 데이터를 로드 후 utterance를 추출
-  public List<String> loadAndExtractText(String resourcePath, String textFieldName) throws IOException {
-    List<String> textList = new ArrayList<>();
+  public List<Map<String, Object>> loadAndExtract(String resourcePath, String textFieldName) throws IOException {
+    List<Map<String, Object>> dataList = new ArrayList<>();
     InputStream inputStream = getClass().getClassLoader().getResourceAsStream(resourcePath);
 
     if (inputStream == null) {
@@ -55,35 +54,26 @@ public class ScriptPreprocess {
 
     if (rootNode.isArray()) {
       for (JsonNode node : rootNode) {
-        if (node.has(textFieldName)) {
-          textList.add(node.get(textFieldName).asText());
-        } else {
-          System.err.println("Warning: Array element missing field '" + textFieldName + "': " + node.toString());
-        }
+        Map<String, Object> data = objectMapper.convertValue(node, Map.class);
+        dataList.add(data);
       }
     } else if (rootNode.isObject()) {
       JsonNode scenesNode = rootNode.get("scenes");
 
       if (scenesNode != null && scenesNode.isArray()) {
         for (JsonNode sceneNode : scenesNode) {
-          if (sceneNode.has(textFieldName)) {
-            textList.add(sceneNode.get(textFieldName).asText());
-          } else {
-            System.err.println("Warning: Scene object missing field '" + textFieldName + "': " + sceneNode.toString());
-          }
+          Map<String, Object> data = objectMapper.convertValue(sceneNode, Map.class);
+          dataList.add(data);
         }
       } else {
         System.out.println("Warning: 'scenes' array not found or not an array in the root object. Trying to extract from root object itself.");
-        if (rootNode.has(textFieldName)) {
-          textList.add(rootNode.get(textFieldName).asText());
-        } else {
-          System.err.println(textFieldName + "이 없습니다.");
-        }
+        Map<String, Object> data = objectMapper.convertValue(rootNode, Map.class);
+        dataList.add(data);
       }
     } else {
       System.err.println("Warning: JSON root is neither an array nor an object in " + resourcePath);
     }
-    return textList;
+    return dataList;
   }
 
   public List<String> preprocessText(String text) {
@@ -97,7 +87,8 @@ public class ScriptPreprocess {
 
     // 3. 불용어 제거
     Set<String> allowedPos = Set.of(
-            "Noun", "Verb", "Adjective", "Adverb", "Exclamation", "Modifier");
+            KoreanPosJava.Noun.toString(), KoreanPosJava.Verb.toString(), KoreanPosJava.Adjective.toString(), KoreanPosJava.Adverb.toString(),
+            KoreanPosJava.Exclamation.toString(), KoreanPosJava.Modifier.toString());
 
     return tokenList.stream()
             .filter(token -> allowedPos.contains(token.getPos().toString()))
@@ -106,25 +97,31 @@ public class ScriptPreprocess {
             .collect(Collectors.toList());
   }
 
-  public static void main(String[] args) {
-    try {
-
-      String jsonFilePath = "data1.json";
-      String stopwordsFilePath = "stopwords.txt";
-      String fieldToExtract = "utterance";
-
-      ScriptPreprocess preprocessor = new ScriptPreprocess(stopwordsFilePath);
-
-      List<String> dialogues = preprocessor.loadAndExtractText(jsonFilePath, fieldToExtract);
-
-      for (String dialogue : dialogues) {
-        System.out.println("원본: " + dialogue);
-        List<String> processedTokens = preprocessor.preprocessText(dialogue);
-        System.out.println("전처리: " + processedTokens);        System.out.println("---");
+  public void savePreprocessedData(List<Map<String, Object>> dataList, String outputFilePath) throws IOException {
+    List<Map<String, Object>> preprocessedList = new ArrayList<>();
+    for (Map<String, Object> originalData : dataList) {
+      if (originalData.containsKey("utterance")) {
+        String originalText = (String) originalData.get("utterance");
+        List<String> processedTokens = preprocessText(originalText);
+        Map<String, Object> preprocessedData = new HashMap<>(originalData); // 기존 메타데이터 복사
+        preprocessedData.put("processed_tokens", processedTokens); // processed_tokens 추가
+        preprocessedList.add(preprocessedData);
       }
+    }
+    objectMapper.writeValue(new File(outputFilePath), preprocessedList);
+    System.out.println("전처리된 데이터가 " + outputFilePath + "에 저장되었습니다.");
+  }
 
+  public static void main(String[] args) {
+    String stopwordsPath = "stopwords.txt"; // resources 폴더에 있어야 함
+    String inputFilePath = "data1.json"; // resources 폴더에 있어야 함
+    String outputFilePath = "src/main/resources/preprocessed_data.json"; // 저장될 파일 경로
+
+    try {
+      ScriptPreprocess preprocess = new ScriptPreprocess(stopwordsPath);
+      List<Map<String, Object>> rawData = preprocess.loadAndExtract(inputFilePath, "utterance");
+      preprocess.savePreprocessedData(rawData, outputFilePath);
     } catch (IOException e) {
-      System.err.println("전처리 에러: " + e.getMessage());
       e.printStackTrace();
     }
   }

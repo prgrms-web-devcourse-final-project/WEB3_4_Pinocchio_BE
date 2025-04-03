@@ -1,4 +1,4 @@
-package sns.pinocchio.infrastructure.ai;
+package sns.pinocchio.infrastructure.ai.vectorDB;
 
 import com.mongodb.MongoException;
 import com.mongodb.client.MongoClient;
@@ -192,7 +192,7 @@ public class VectorQuery {
   public static void main(String[] args) {
     // 예시 쿼리 문자열
     String queryString = "정의";
-    int limit = 3;
+    int limit = 1;
 
     try {
       List<SimilarityResult> results = searchSimilarDocuments(queryString, limit);

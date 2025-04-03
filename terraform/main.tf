@@ -300,6 +300,11 @@ resource "aws_instance" "ec2" {
     (var.tagKey) = var.tagValue
   }
 
+  metadata_options {
+    http_tokens   = "required"
+    http_endpoint = "enabled"
+  }
+
   # root 볼륨 크기 12GB 설정
   root_block_device {
     volume_type = "gp3"
@@ -358,11 +363,11 @@ resource "aws_volume_attachment" "ebs_attach" {
 # S3 버킷 - 이미지 저장용
 # ----------------------------------------
 resource "aws_s3_bucket" "image_bucket" {
-  bucket = "${var.prefix}-image-bucket"
-  force_destroy = true  # 삭제 시 객체도 같이 삭제 (테스트에 유용)
+  bucket = "${var.tagValue}-image-bucket"
+  force_destroy = true
 
   tags = {
-    Name = "${var.prefix}-image-bucket"
+    Name         = "${var.tagValue}-image-bucket"
     (var.tagKey) = var.tagValue
   }
 }
@@ -384,6 +389,8 @@ resource "aws_s3_bucket_public_access_block" "image_bucket_public_block" {
 # ----------------------------------------
 resource "aws_s3_bucket_policy" "image_bucket_policy" {
   bucket = aws_s3_bucket.image_bucket.id
+
+  depends_on = [aws_s3_bucket_public_access_block.image_bucket_public_block]
 
   policy = jsonencode({
     Version = "2012-10-17",

@@ -19,12 +19,9 @@ const useResizeObserver = (ref, callback) => {
 const SearchCardBox = ({
     children,
     foldHeight = 68, // 접힌 상태의 높이
-    tooltipComment = "검색하실 수 있습니다!",
-    useTooltip = false,
     isButtonShow = true
 }) => {
     const [isSearchFormOpen, setSearchFormOpen] = useState(true);
-    const [showTooltip, setShowTooltip] = useState(false);
     const [contentHeight, setContentHeight] = useState(foldHeight); // 초기 높이 설정
     const contentRef = useRef(null);
 
@@ -36,10 +33,6 @@ const SearchCardBox = ({
 
     const handleSearchToggleClick = () => {
         setSearchFormOpen((prevState) => !prevState);
-        if (isSearchFormOpen) {
-            setShowTooltip(true);
-            setTimeout(() => setShowTooltip(false), 2000);
-        }
     };
 
     const [shouldShowOverflow, setShouldShowOverflow] = useState(false);
@@ -48,10 +41,7 @@ const SearchCardBox = ({
         <Card className="mb-7">
             <Card.Body>
                 <motion.div
-                    className={clsx("kw-searchform", {
-                        "kw-searchform--open": isSearchFormOpen,
-                        "kw-searchform--tooltip": useTooltip ? showTooltip : false
-                    })}
+                    className={clsx("kw-searchform", {"kw-searchform--open": isSearchFormOpen,})}
                     initial={{ height: foldHeight }} // 처음에는 foldHeight 크기로 설정
                     animate={{
                         height: isSearchFormOpen ? contentHeight : foldHeight, // 열릴 때는 contentHeight, 닫을 때는 foldHeight
@@ -79,18 +69,6 @@ const SearchCardBox = ({
                     <Button bsPrefix={`kw-searchform-toggle${isSearchFormOpen ? '-close' : ''}`} onClick={handleSearchToggleClick}>
                         {isSearchFormOpen ? "닫기" : "열기"}
                     </Button>
-                )}
-
-                {useTooltip && (
-                    <div className="kw-searchform-tooltip">
-                        <dl>
-                            <dt>더보기</dt>
-                            <dd>
-                                다시 열어<br />
-                                {tooltipComment}
-                            </dd>
-                        </dl>
-                    </div>
                 )}
             </Card.Body>
         </Card>

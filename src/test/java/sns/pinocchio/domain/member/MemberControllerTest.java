@@ -1,19 +1,10 @@
 package sns.pinocchio.domain.member;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-import static sns.pinocchio.domain.report.ReportedType.POST;
-
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.servlet.http.Cookie;
 import jakarta.transaction.Transactional;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -28,6 +19,14 @@ import sns.pinocchio.domain.report.Report;
 import sns.pinocchio.infrastructure.member.MemberRepository;
 import sns.pinocchio.presentation.member.exception.MemberException;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static sns.pinocchio.domain.report.ReportedType.POST;
+
+@Tag("integration")
 @SpringBootTest
 @AutoConfigureMockMvc
 @Transactional
@@ -80,7 +79,7 @@ public class MemberControllerTest {
 
     ResultActions getProfileResponse =
         mockMvc.perform(
-            put("/member")
+            put("/user")
                 .header("Authorization", accessToken)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(updateRequestDto));
@@ -107,7 +106,7 @@ public class MemberControllerTest {
 
     ResultActions changePasswordResponse =
         mockMvc.perform(
-            put("/member/password")
+            put("/user/password")
                 .header("Authorization", accessToken)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(changePasswordDto));
@@ -129,7 +128,7 @@ public class MemberControllerTest {
 
     ResultActions deleteMemberResponse =
         mockMvc.perform(
-            delete("/member")
+            delete("/user")
                 .header("Authorization", accessToken)
                 .cookie(new Cookie("refreshToken", refreshTokenValue))
                 .contentType(MediaType.APPLICATION_JSON)
@@ -161,7 +160,7 @@ public class MemberControllerTest {
 
     ResultActions reportResponse =
         mockMvc.perform(
-            post("/member/report")
+            post("/user/report")
                 .header("Authorization", accessToken)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(reportRequestDto));

@@ -1,23 +1,24 @@
 package sns.pinocchio.comment.service;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.springframework.boot.test.context.SpringBootTest;
+import sns.pinocchio.application.comment.CommentService;
+import sns.pinocchio.application.comment.commentDto.CommentModifyRequest;
+import sns.pinocchio.domain.comment.Comment;
+import sns.pinocchio.domain.comment.CommentStatus;
+import sns.pinocchio.infrastructure.persistence.mongodb.CommentRepository;
 
 import java.time.LocalDateTime;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
-import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.springframework.boot.test.context.SpringBootTest;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
-import sns.pinocchio.application.comment.commentDto.CommentModifyRequest;
-import sns.pinocchio.application.comment.CommentService;
-import sns.pinocchio.domain.comment.Comment;
-import sns.pinocchio.domain.comment.CommentStatus;
-import sns.pinocchio.infrastructure.persistence.mongodb.CommentRepository;
-
+@Tag("unit")
 @SpringBootTest
 public class CommentModifyServiceTest {
 	@Mock

@@ -2,7 +2,7 @@ package sns.pinocchio.application.base.errorResponse;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-
+// 테스트 주석
 // 에러 응답 DTO
 @Getter
 @AllArgsConstructor

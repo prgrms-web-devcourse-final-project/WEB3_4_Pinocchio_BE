@@ -1,5 +1,5 @@
 import logo from "../../assets/images/pinocchio.png"
-import {Link, useNavigate} from "react-router-dom";
+import {Link, useLocation, useNavigate} from "react-router-dom";
 import useConfirm from "../../hooks/useConfirm";
 import BoardSearch from "../../pages/board/share/BoardSearch";
 import {Button} from "react-bootstrap";
@@ -17,7 +17,7 @@ const Header = () => {
     const [isChangePasswordModalOpen, setChangePasswordModalOpen] = useState(false);
     const navigate = useNavigate();
     const { openConfirm } = useConfirm();
-
+    const { pathname } = useLocation();
 
     const handlePasswordChangeSave = async (data) => {
         try {
@@ -70,7 +70,7 @@ const Header = () => {
                     </div>
                     <BoardSearch type={'notice'} />
                     <Button size={"md"} onClick={handleLogoutClick}>LOGOUT</Button>
-                    <Button size={"md"} onClick={() => navigate("/board/mypage")}>MYPAGE</Button>
+                    {!pathname.includes("/board/mypage") && <Button size={"md"} onClick={() => navigate("/board/mypage/like")}>MYPAGE</Button>}
                     <ChangePassword isOpen={isChangePasswordModalOpen}
                                     onHide={() => setChangePasswordModalOpen(false)}
                                     onSave={handlePasswordChangeSave}

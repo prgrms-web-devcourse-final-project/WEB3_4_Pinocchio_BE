@@ -16,7 +16,7 @@ RUN gradle build -x test --no-daemon
 # 2단계: Run Stage (최종 이미지)
 # ----------------------------------------
 # OpenJDK 21 기반 이미지 사용
-FROM openjdk:21-jdk-slim
+FROM openjdk:21-jdk
 
 # 작업 디렉토리 설정
 WORKDIR /home/devuser/app

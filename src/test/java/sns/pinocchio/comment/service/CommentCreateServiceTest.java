@@ -1,21 +1,23 @@
 package sns.pinocchio.comment.service;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
-
-import java.util.Map;
-import java.util.Optional;
-
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-
-import sns.pinocchio.application.comment.commentDto.CommentCreateRequest;
 import sns.pinocchio.application.comment.CommentService;
+import sns.pinocchio.application.comment.commentDto.CommentCreateRequest;
 import sns.pinocchio.domain.comment.Comment;
 import sns.pinocchio.infrastructure.persistence.mongodb.CommentRepository;
+
+import java.util.Map;
+import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.Mockito.*;
+
 
 @SpringBootTest
 
@@ -29,6 +31,7 @@ public class CommentCreateServiceTest {
 	private CommentRepository commentRepositoryMock;
 
 	//댓글 생성 테스트 메서드 Mock으로 실행
+    @Tag("unit")
 	@Test
 	void 댓글_생성_테스트() {
 		String authorId = "user_001";
@@ -53,7 +56,7 @@ public class CommentCreateServiceTest {
 
 	}
 
-
+    @Tag("integration")
 	@Test
 	void 댓글_생성_테스트_진짜() {
 		String authorId = "user_001";

@@ -1,0 +1,12 @@
+{
+  "members": [
+    {
+      "name": "홍길동",
+      "email": "qqqq@qqqqq.qqq",
+      "nickname": "홍길동",
+      "password": "password",
+      "type": "(백터 DB 관련)",
+      "prompt": "within 30 characters, refer to answer ex, reply to memberJust one answer, Nothing else is needed besides answer, write korean"
+    }
+  ]
+}

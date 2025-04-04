@@ -2,8 +2,11 @@ package sns.pinocchio.application.post;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import sns.pinocchio.application.member.MemberService;
+import sns.pinocchio.config.global.event.PostEvent;
 import sns.pinocchio.domain.member.Member;
 import sns.pinocchio.domain.post.Hashtag;
 import sns.pinocchio.domain.post.Post;
@@ -21,6 +24,7 @@ public class PostService {
     private final PostRepository postRepository;
     private final HashtagRepository hashtagRepository;
     private final MemberService memberService;
+    private final ApplicationEventPublisher publisher;
 
     // 게시물 생성
     public String createPost(PostCreateRequest request, String tsid) {
@@ -47,6 +51,7 @@ public class PostService {
                 .build();
 
         Post savedPost = postRepository.save(post);
+        publisher.publishEvent(new PostEvent(request.getContent(),post.getId()));
 
         // 📌 해시태그 MySQL 반영  (신규 생성 or 사용량 증가)
         updateHashtagUsage(request.getHashtags());

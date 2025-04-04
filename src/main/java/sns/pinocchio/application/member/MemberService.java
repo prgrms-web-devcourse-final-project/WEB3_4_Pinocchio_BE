@@ -34,17 +34,17 @@ public class MemberService {
   @Transactional
   public Member createMember(SignupRequestDto signupRequestDto) {
     // 이메일 중복 체크
-    checkEmailDuplicate(signupRequestDto.email());
+    checkEmailDuplicate(signupRequestDto.getEmail());
 
         // 닉네임 중복 체크
-        checkNicknameDuplicate(signupRequestDto.nickname());
+        checkNicknameDuplicate(signupRequestDto.getNickname());
 
     Member member =
         Member.builder()
-            .email(signupRequestDto.email())
-            .name(signupRequestDto.name())
-            .nickname(signupRequestDto.nickname())
-            .password(passwordEncoder.encode(signupRequestDto.password()))
+            .email(signupRequestDto.getEmail())
+            .name(signupRequestDto.getName())
+            .nickname(signupRequestDto.getNickname())
+            .password(passwordEncoder.encode(signupRequestDto.getPassword()))
             .build();
 
     this.memberRepository.save(member);

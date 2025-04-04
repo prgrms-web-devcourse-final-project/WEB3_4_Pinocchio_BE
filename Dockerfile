@@ -8,7 +8,7 @@ FROM openjdk:21-jdk
 WORKDIR /home/devuser/app
 
 # 빌드된 jar 파일 복사
-COPY --from=builder /home/devuser/app/build/libs/*.jar app.jar
+COPY /home/devuser/app/build/libs/*.jar app.jar
 
 # 컨테이너 실행 시 jar 실행
 ENTRYPOINT ["java", "-jar", "app.jar"]

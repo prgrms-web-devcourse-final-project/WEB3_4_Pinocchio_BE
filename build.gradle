@@ -97,6 +97,9 @@ dependencies {
 
     // TSID
     implementation 'com.github.f4b6a3:tsid-creator:5.2.4'
+
+    //ollama
+    implementation 'io.github.ollama4j:ollama4j:1.0.93'
 }
 
 def querydslDir = "src/main/generated"

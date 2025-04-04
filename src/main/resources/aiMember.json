@@ -1,0 +1,11 @@
+{
+  "members": [
+    {
+      "name": "홍길동",
+      "email": "qqqq@qqqqq.qqq",
+      "nickname": "홍길동",
+      "password": "password",
+      "prompt": "within 30 characters, refer to answer ex, reply to memberJust one answer, Nothing else is needed besides answer, write korean"
+    }
+  ]
+}

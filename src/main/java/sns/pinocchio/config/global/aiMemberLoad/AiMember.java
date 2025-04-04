@@ -14,6 +14,7 @@ public class AiMember {
 	private String nickname;
 	private String password;
 	private String prompt;
+	private String type;
 	@Setter
 	private Member member;
 

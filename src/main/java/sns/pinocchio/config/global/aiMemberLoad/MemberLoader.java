@@ -17,6 +17,7 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import sns.pinocchio.application.member.MemberService;
 import sns.pinocchio.domain.member.Member;
+import sns.pinocchio.presentation.member.exception.MemberException;
 
 @Slf4j
 @Component
@@ -64,6 +65,7 @@ public class MemberLoader {
 			.nickname(memberNode.get("nickname").asText())
 			.password(memberNode.get("password").asText())
 			.prompt(memberNode.get("prompt").asText())
+			.type(memberNode.get("type").asText())
 			.build();
 	}
 
@@ -71,7 +73,7 @@ public class MemberLoader {
 	private Member createMember(AiMember aiMember) {
 		try {
 			return memberService.findByEmail(aiMember.getEmail()); // 기존 멤버 반환
-		} catch (NoSuchElementException e) {
+		} catch (MemberException e) {
 			return memberService.createMember(aiMember.toSignupRequestDto());
 		}
 	}

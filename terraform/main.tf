@@ -217,68 +217,144 @@ resource "aws_iam_instance_profile" "instance_profile" {
 }
 
 # ----------------------------------------
-# EC2 User Data (인스턴스 부팅 시 실행될 스크립트)
-# 1. 로그 파일 설정 (/var/log/user_data.log)
-# 2. Docker, Git, 파일시스템 도구(xfsprogs) 설치
-# 3. Swap 메모리 4GB 추가
-# 4. 추가 EBS 디스크를 /data에 마운트 및 디렉토리 생성
-# 5. devuser 사용자 생성 + docker 권한 부여 + 환경변수 설정
-# 6. /data 디렉토리 소유권을 devuser로 변경
-# 7. docker-compose 설치
-# 8. GitHub 레포지토리를 /home/devuser/app 경로에 클론
-# 9. devuser 권한으로 docker-compose 실행
+# EC2 User Data (도커 허브 이미지 기반으로 서버 실행)
 # ----------------------------------------
-
 locals {
   ec2_user_data_base = <<-END_OF_FILE
 #!/bin/bash
 
 # 로그 설정
-  exec > /var/log/user_data.log 2>&1
-  set -x
+exec > /var/log/user_data.log 2>&1
+set -x
 
 # 1. Docker, Git, xfsprogs 설치
-  yum install docker git xfsprogs -y
+yum install docker git xfsprogs -y
 
 # 2. Docker 서비스 설정
-  systemctl enable docker
-  systemctl start docker
+systemctl enable docker
+systemctl start docker
 
 # 3. 스왑 메모리 추가
-  dd if=/dev/zero of=/swapfile bs=128M count=32
-  chmod 600 /swapfile
-  mkswap /swapfile
-  swapon /swapfile
-  echo "/swapfile swap swap defaults 0 0" >> /etc/fstab
+dd if=/dev/zero of=/swapfile bs=128M count=32
+chmod 600 /swapfile
+mkswap /swapfile
+swapon /swapfile
+echo "/swapfile swap swap defaults 0 0" >> /etc/fstab
 
 # 4. EBS 마운트
-  mkfs -t xfs /dev/xvdf
-  mkdir /data
-  mount /dev/xvdf /data
-  echo "/dev/xvdf /data xfs defaults,nofail 0 2" >> /etc/fstab
-  mkdir -p /data/mysql /data/mongodb /data/redis
+mkfs -t xfs /dev/xvdf
+mkdir /data
+mount /dev/xvdf /data
+echo "/dev/xvdf /data xfs defaults,nofail 0 2" >> /etc/fstab
+mkdir -p /data/mysql /data/mongodb /data/redis
 
 # 5. devuser 계정 생성 + Docker 권한 부여 + 환경변수 설정
-  useradd -m devuser
-  echo "devuser ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
-  usermod -aG docker devuser
-  echo 'export PATH=$PATH:/usr/local/bin' >> /home/devuser/.bash_profile
-  chown devuser:devuser /home/devuser/.bash_profile
+useradd -m devuser
+echo "devuser ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
+usermod -aG docker devuser
+echo 'export PATH=$PATH:/usr/local/bin' >> /home/devuser/.bash_profile
+chown devuser:devuser /home/devuser/.bash_profile
 
 # 6. /data 디렉토리 소유권 변경
-  chown -R devuser:devuser /data
+chown -R devuser:devuser /data
 
 # 7. docker-compose 설치
-  curl -L "https://github.com/docker/compose/releases/download/v2.34.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-  chmod +x /usr/local/bin/docker-compose
+curl -L "https://github.com/docker/compose/releases/download/v2.34.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+chmod +x /usr/local/bin/docker-compose
 
-# 8. app 다운로드 및 권한 부여
-  git clone https://github.com/prgrms-web-devcourse-final-project/WEB3_4_Pinocchio_BE.git /home/devuser/app
-  chown -R devuser:devuser /home/devuser/app
+# 8. docker-compose.yml 직접 작성 및 실행 (도커 허브 이미지 사용)
+sudo -u devuser -i bash <<'EOC'
+mkdir -p ~/app && cd ~/app
 
-# 9. devuser로 docker-compose 실행
-  sudo -u devuser -i bash <<'EOC'
-cd /home/devuser/app
+cat <<EOF2 > docker-compose.yml
+version: "3.8"
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: mysql-container
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: devteam9
+      MYSQL_DATABASE: pino
+      MYSQL_USER: dev
+      MYSQL_PASSWORD: devteam9
+    ports:
+      - "3306:3306"
+    volumes:
+      - /data/mysql:/var/lib/mysql
+    networks:
+      - app-network
+
+  mongodb:
+    image: mongo:6.0
+    container_name: mongodb-container
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: dev
+      MONGO_INITDB_ROOT_PASSWORD: devteam9
+      MONGO_INITDB_DATABASE: pino
+    ports:
+      - "27017:27017"
+    volumes:
+      - /data/mongodb:/data/db
+    networks:
+      - app-network
+
+  redis:
+    image: redis:7
+    container_name: redis-container
+    restart: always
+    ports:
+      - "6379:6379"
+    command: ["redis-server", "--requirepass", "devteam9"]
+    volumes:
+      - /data/redis:/data
+    networks:
+      - app-network
+
+  spring:
+    image: jeong6/spring-app:latest
+    container_name: spring-app-container
+    restart: always
+    ports:
+      - "8080:8080"
+    depends_on:
+      mysql:
+        condition: service_healthy
+      mongodb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/pino
+      SPRING_DATASOURCE_USERNAME: dev
+      SPRING_DATASOURCE_PASSWORD: devteam9
+      SPRING_DATA_MONGODB_URI: mongodb://dev:devteam9@mongodb:27017/pino
+      SPRING_REDIS_HOST: redis
+    networks:
+      - app-network
+
+  nginx:
+    image: nginx:latest
+    container_name: nginx-container
+    restart: always
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/conf.d:/etc/nginx/conf.d
+      - ./nginx/html:/usr/share/nginx/html
+    depends_on:
+      spring:
+        condition: service_healthy
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
+EOF2
+
+docker-compose pull
 docker-compose up -d
 EOC
 

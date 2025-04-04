@@ -1,19 +1,5 @@
 # ----------------------------------------
-# 1단계: Build Stage
-# ----------------------------------------
-FROM gradle:8.5-jdk21 AS builder
-
-# 작업 디렉토리 설정
-WORKDIR /home/devuser/app
-
-# 소스코드 복사
-COPY . .
-
-# 빌드 수행
-RUN gradle build -x test --no-daemon
-
-# ----------------------------------------
-# 2단계: Run Stage (최종 이미지)
+# 1단계: Run Stage (최종 이미지)
 # ----------------------------------------
 # OpenJDK 21 기반 이미지 사용
 FROM openjdk:21-jdk

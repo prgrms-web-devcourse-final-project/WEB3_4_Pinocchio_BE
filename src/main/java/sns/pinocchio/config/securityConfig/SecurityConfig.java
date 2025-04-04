@@ -45,6 +45,9 @@ public class SecurityConfig {
                                 "/auth/logout",
                                 "/posts/search"
                         ).permitAll()
+                        .requestMatchers(
+                                "/actuator/health"
+                        ).permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(memberAuthFilter, UsernamePasswordAuthenticationFilter.class);

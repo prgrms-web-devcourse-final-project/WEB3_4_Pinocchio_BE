@@ -422,6 +422,8 @@ resource "aws_eip" "web_eip" {
     Name         = "${var.prefix}-eip"
     (var.tagKey) = var.tagValue
   }
+
+  depends_on = [aws_instance.ec2]
 }
 
 # ----------------------------------------

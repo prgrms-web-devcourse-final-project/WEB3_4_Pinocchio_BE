@@ -18,7 +18,7 @@ public class AiMember {
 	@Setter
 	private Member member;
 
- 	public SignupRequestDto toSignupRequestDto(){
-		 return new SignupRequestDto(name,email,nickname,password);
+	public SignupRequestDto toSignupRequestDto() {
+		return new SignupRequestDto(name, email, nickname, password);
 	}
 }

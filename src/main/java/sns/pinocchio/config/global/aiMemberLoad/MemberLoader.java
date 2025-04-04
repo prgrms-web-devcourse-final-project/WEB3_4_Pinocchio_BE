@@ -5,7 +5,6 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.NoSuchElementException;
 
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Component;
@@ -31,7 +30,6 @@ public class MemberLoader {
 		this.memberService = memberService;
 		loadMembers();
 	}
-
 
 	// AI 유저 정보 불러오기
 	private void loadMembers() {

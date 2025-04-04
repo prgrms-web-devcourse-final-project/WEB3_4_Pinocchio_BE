@@ -8,15 +8,17 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import sns.pinocchio.config.global.event.PostEvent;
 import sns.pinocchio.config.global.event.eventRunner.PostEventRunner;
+
 @Slf4j
 @Component
 @RequiredArgsConstructor
 public class PostEventListener {
 	private final PostEventRunner postEventRunner;
+
 	@Async
 	@EventListener
 	public void postCreateEvent(PostEvent event) {
-		try{
+		try {
 			postEventRunner.createAiComment(event);
 		} catch (Exception e) {
 			log.error("Failed to create Ai comment :" + e);

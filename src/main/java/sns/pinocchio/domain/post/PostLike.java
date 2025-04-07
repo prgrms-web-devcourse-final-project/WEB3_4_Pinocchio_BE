@@ -1,6 +1,8 @@
 package sns.pinocchio.domain.post;
 
 import lombok.*;
+import sns.pinocchio.config.global.enums.CancellState;
+
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.index.Indexed;
@@ -27,7 +29,7 @@ public class PostLike {
     @Indexed
     private String tsid;  // 좋아요를 누른 사람의 TSID
 
-    private LikeStatus status; // enum 타입 관리 "active" or "cancelled" (소프트 딜리트 대응)
+    private CancellState status; // enum 타입 관리 "active" or "cancelled" (소프트 딜리트 대응)
 
     private LocalDateTime likedAt;     // 최초 좋아요 누른 시간
 

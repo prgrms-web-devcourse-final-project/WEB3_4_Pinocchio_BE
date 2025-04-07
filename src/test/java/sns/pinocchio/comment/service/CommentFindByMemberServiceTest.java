@@ -16,8 +16,8 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 
 import sns.pinocchio.application.comment.CommentService;
+import sns.pinocchio.config.global.enums.CancellState;
 import sns.pinocchio.domain.comment.Comment;
-import sns.pinocchio.domain.comment.CommentStatus;
 import sns.pinocchio.infrastructure.persistence.mongodb.CommentRepository;
 
 @SpringBootTest
@@ -38,7 +38,7 @@ public class CommentFindByMemberServiceTest {
 		Page<Comment> commentPage = new PageImpl<>(List.of(comment, comment, comment, comment));
 
 		when(commentRepository.findAllByUserIdAndStatus(anyString(), any(Pageable.class),
-			any(CommentStatus.class))).thenReturn(commentPage);
+			any(CancellState.class))).thenReturn(commentPage);
 
 		Map<String, Object> response = commentService.findCommentsByUser(authorId, page);
 		String message = (String)response.get("message");
@@ -47,7 +47,7 @@ public class CommentFindByMemberServiceTest {
 		assertEquals("댓글요청에 성공하였습니다.", message);
 		assertEquals(4, totalElements);
 		verify(commentRepository, times(1)).findAllByUserIdAndStatus(anyString(), any(Pageable.class),
-			any(CommentStatus.class));
+			any(CancellState.class));
 		System.out.println("✅ 댓글 유저로 조회 성공");
 
 	}

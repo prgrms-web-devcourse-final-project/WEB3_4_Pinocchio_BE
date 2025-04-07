@@ -16,8 +16,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
 import sns.pinocchio.application.member.MemberFollowService;
+import sns.pinocchio.config.global.enums.CancellState;
 import sns.pinocchio.domain.user.UserFollow;
-import sns.pinocchio.domain.user.UserFollowStatus;
 import sns.pinocchio.infrastructure.persistence.mongodb.UserFollowRepository;
 
 @SpringBootTest
@@ -27,7 +27,6 @@ public class MemberFollowFindServiceTest {
 
 	@InjectMocks
 	private MemberFollowService memberFollowService;
-	
 
 	//유저 팔로워 조회 테스트
 	@Test
@@ -49,7 +48,7 @@ public class MemberFollowFindServiceTest {
 		Page<UserFollow> followingsPage = new PageImpl<>(List.of(userFollow, userFollow, userFollow));
 
 		when(userFollowRepository.findAllByFollowingIdAndStatusOrderByUpdatedAtDesc(followingId, pageable,
-			UserFollowStatus.ACTIVE)).thenReturn(followingsPage);
+			CancellState.ACTIVE)).thenReturn(followingsPage);
 
 		Map<String, Object> result = memberFollowService.findFollowers(followingId, page);
 		String message = (String)result.get("message");
@@ -59,7 +58,7 @@ public class MemberFollowFindServiceTest {
 		assertEquals("팔로워 조회에 성공하였습니다.", message);
 		assertEquals(3, followers.size());
 		verify(userFollowRepository, times(1)).findAllByFollowingIdAndStatusOrderByUpdatedAtDesc(followingId, pageable,
-			UserFollowStatus.ACTIVE); // Verify that the method was called with pageable
+			CancellState.ACTIVE); // Verify that the method was called with pageable
 	}
 
 	//유저 팔로잉 조회 테스트
@@ -83,7 +82,7 @@ public class MemberFollowFindServiceTest {
 		Page<UserFollow> followingsPage = new PageImpl<>(List.of(userFollow, userFollow, userFollow));
 
 		when(userFollowRepository.findAllByFollowerIdAndStatusOrderByUpdatedAtDesc(followerId, pageable,
-			UserFollowStatus.ACTIVE)).thenReturn(followingsPage);
+			CancellState.ACTIVE)).thenReturn(followingsPage);
 
 		Map<String, Object> result = memberFollowService.findFollowings(followerId, page);
 		String meesage = (String)result.get("message");
@@ -93,6 +92,6 @@ public class MemberFollowFindServiceTest {
 		assertEquals("팔로잉 조회에 성공하였습니다.", meesage);
 		assertEquals(3, followings.size());
 		verify(userFollowRepository, times(1)).findAllByFollowerIdAndStatusOrderByUpdatedAtDesc(followerId, pageable,
-			UserFollowStatus.ACTIVE);
+			CancellState.ACTIVE);
 	}
 }

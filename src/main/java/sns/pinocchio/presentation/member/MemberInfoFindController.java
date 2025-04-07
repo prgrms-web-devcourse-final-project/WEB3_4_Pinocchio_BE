@@ -1,10 +1,7 @@
 package sns.pinocchio.presentation.member;
 
-import java.security.Principal;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -26,11 +23,10 @@ import sns.pinocchio.application.post.PostLikeSearchService;
 import sns.pinocchio.config.global.auth.model.CustomUserDetails;
 import sns.pinocchio.domain.member.Member;
 import sns.pinocchio.domain.post.PostLike;
-import sns.pinocchio.infrastructure.member.MemberRepository;
 
 @Tag(name = "유저 정보 조회", description = "유저 정보 관련 API")
 @RestController
-@RequestMapping("/users")
+@RequestMapping("/members")
 @RequiredArgsConstructor
 public class MemberInfoFindController {
 	private final CommentService commentService;
@@ -55,17 +51,15 @@ public class MemberInfoFindController {
 		@ApiResponse(responseCode = "401", description = "JWT 토큰 누락 또는 인증 실패"),
 		@ApiResponse(responseCode = "500", description = "서버 내부 오류")})
 	@GetMapping("/{userId}/activities/likes")
-	public ResponseEntity<Map<String, Object>> findFindLikes(@AuthenticationPrincipal CustomUserDetails userDetails,
-		@PathVariable String userId,
+	public ResponseEntity<Map<String, Object>> findFindLikes(@PathVariable String userId,
 		@RequestParam(value = "page", defaultValue = "0") int page) {
-		Member authorMember = userDetails.getMember();
 
-		Page<PostLike> postLikePage= postLikeSearchService.findLikesByUser(userId,page);
+		Page<PostLike> postLikePage = postLikeSearchService.findLikesByUser(userId, page);
 		Map<String, Object> response = new HashMap<>();
-		response.put("meesage", "게시물 좋아요 목록 요청 성공");
+		response.put("message", "게시물 좋아요 목록 요청 성공");
 		response.put("likes", postLikePage.getContent());
-		response.put("totalPages",postLikePage.getTotalPages());
-		response.put("totalElements",postLikePage.getTotalElements());
+		response.put("totalPages", postLikePage.getTotalPages());
+		response.put("totalElements", postLikePage.getTotalElements());
 		return ResponseEntity.status(HttpStatus.OK).body(response);
 	}
 }

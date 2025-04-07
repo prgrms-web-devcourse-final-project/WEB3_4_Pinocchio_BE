@@ -35,4 +35,14 @@ public class UserFollow {
 
 	private LocalDateTime updatedAt;
 
+	public boolean toggleFollowStatus() {
+		if (this.status == UserFollowStatus.ACTIVE) {
+			this.status = UserFollowStatus.DELETE;
+			return false;
+		} else{
+			this.status = UserFollowStatus.ACTIVE;
+			return true;
+		}
+	}
+
 }

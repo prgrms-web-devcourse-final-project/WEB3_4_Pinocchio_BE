@@ -53,20 +53,4 @@ public class CommentCreateServiceTest {
 
 	}
 
-
-	@Test
-	void 댓글_생성_테스트_진짜() {
-		String authorId = "user_001";
-		String postId = "post_001";
-		String commentId = "comment_001";
-
-		for(int i = 0; i<100; i++){
-			CommentCreateRequest createRequest = CommentCreateRequest.builder().postId(postId).content("댓글이지롱"+i).build();
-			Map<String, Object> response = commentServiceReal.createComment(createRequest, authorId);
-		}
-
-		System.out.println("✅ 댓글 생성 성공");
-
-	}
-
 }

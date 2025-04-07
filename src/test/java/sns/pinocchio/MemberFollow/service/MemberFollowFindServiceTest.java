@@ -1,4 +1,4 @@
-package sns.pinocchio.UserFollow.service;
+package sns.pinocchio.MemberFollow.service;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -9,7 +9,6 @@ import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -22,7 +21,7 @@ import sns.pinocchio.domain.user.UserFollowStatus;
 import sns.pinocchio.infrastructure.persistence.mongodb.UserFollowRepository;
 
 @SpringBootTest
-public class UserFollowFindServiceTest {
+public class MemberFollowFindServiceTest {
 	@Mock
 	private UserFollowRepository userFollowRepository;
 
@@ -63,9 +62,9 @@ public class UserFollowFindServiceTest {
 			UserFollowStatus.ACTIVE); // Verify that the method was called with pageable
 	}
 
-	//유저 팔로워 조회 테스트
+	//유저 팔로잉 조회 테스트
 	@Test
-	void 유저_팔로우_조회_테스트() {
+	void 유저_팔로잉_조회_테스트() {
 		// Given
 		String followingId = "user123";
 		String followingNickname = "홍길동";

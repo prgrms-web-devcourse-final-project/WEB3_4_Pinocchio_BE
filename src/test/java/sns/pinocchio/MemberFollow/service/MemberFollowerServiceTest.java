@@ -1,4 +1,4 @@
-package sns.pinocchio.UserFollow.service;
+package sns.pinocchio.MemberFollow.service;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -19,7 +19,7 @@ import sns.pinocchio.domain.user.UserFollowStatus;
 import sns.pinocchio.infrastructure.persistence.mongodb.UserFollowRepository;
 
 @SpringBootTest
-public class UserFollowerServiceTest {
+public class MemberFollowerServiceTest {
 	@InjectMocks
 	private MemberFollowService memberFollowService;
 

@@ -31,4 +31,14 @@ public class CommentLike {
 	private LocalDateTime updatedAt;
 
 	private CommentLikeStatus status;
+
+	public boolean toggleCommentLike(){
+		if(this.getStatus() == CommentLikeStatus.ACTIVE){
+			this.setStatus(CommentLikeStatus.DELETE);
+			return false;
+		} else{
+			this.setStatus(CommentLikeStatus.ACTIVE);
+			return true;
+		}
+	}
 }

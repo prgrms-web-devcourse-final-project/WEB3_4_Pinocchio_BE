@@ -48,6 +48,8 @@ public class CommentModifyControllerTest {
 	@Autowired
 	private MemberRepository memberRepository;
 
+    private final ObjectMapper objectMapper = new ObjectMapper();
+
 	private ResultActions loginAndGetResponse() throws Exception {
 		String loginRequestJson =
 			TestFixture.createLoginRequestJson("example@naver.com", "testPassword!");
@@ -70,30 +72,38 @@ public class CommentModifyControllerTest {
 
 	//댓글 수정 테스트
 	@Test
-	public void 댓글_수정_테스트() throws Exception {
-		Member member =  setUp();
-		ResultActions loginResponse = loginAndGetResponse();
-		String accessToken = loginResponse.andReturn().getResponse().getHeader("Authorization");
-		String commetId = "comment_001";
-		String postId = "post_001";
+    public void 댓글_수정_테스트() throws Exception {
+        Member member = setUp();
+        ResultActions loginResponse = loginAndGetResponse();
+        String accessToken = loginResponse.andReturn().getResponse().getHeader("Authorization");
 
-		CommentModifyRequest request = CommentModifyRequest.builder()
-			.commentId(commetId)
-			.postId(postId)
-			.content("수정된 댓글 내용")
-			.build();
-		Map<String, Object> response = Map.of("message", "댓글이 성공적으로 수정되었습니다.", "postId", postId, "commentId", commetId,
-			"updatedAt", LocalDateTime.now().toString());
+        String commentId = "comment_001";
+        String postId = "post_001";
 
-		when(commentService.modifyComment(any(CommentModifyRequest.class))).thenReturn(response);
-		mockMvc.perform(put("/comments").contentType(MediaType.APPLICATION_JSON)
-				.content(new ObjectMapper().writeValueAsString(request))
-				.header("Authorization", accessToken))
-			.andExpect(status().isOk())
-			.andExpect(jsonPath("$.message").value("댓글이 성공적으로 수정되었습니다."))
-			.andExpect(jsonPath("$.commentId").value(commetId))
-			.andDo(print());
+        CommentModifyRequest request = CommentModifyRequest.builder()
+                .commentId(commentId)
+                .postId(postId)
+                .content("수정된 댓글 내용")
+                .build();
 
+        Map<String, Object> response = Map.of(
+                "message", "댓글이 성공적으로 수정되었습니다.",
+                "postId", postId,
+                "commentId", commentId,
+                "updatedAt", LocalDateTime.now().toString()
+        );
+
+        when(commentService.isInvalidComment(commentId, postId)).thenReturn(false);
+        when(commentService.modifyComment(any(CommentModifyRequest.class))).thenReturn(response);
+
+        mockMvc.perform(put("/comments")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request))
+                        .header("Authorization", accessToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("댓글이 성공적으로 수정되었습니다."))
+                .andExpect(jsonPath("$.commentId").value(commentId))
+                .andDo(print());
 	}
 
 	//댓글 수정 실패 테스트 댓글없음
@@ -110,11 +120,11 @@ public class CommentModifyControllerTest {
 			.postId(postId)
 			.content("수정된 댓글 내용")
 			.build();
-		Map<String, Object> response = Map.of("message", "댓글이 성공적으로 수정되었습니다.", "postId", postId, "commentId", commentId,
-			"updatedAt", LocalDateTime.now().toString());
 
-		when(commentService.modifyComment(any(CommentModifyRequest.class))).thenReturn(response);
-		when(commentService.isInvalidComment(commentId, postId)).thenReturn(true);
+
+        // ❗ 예외 발생을 명시적으로 지정
+        when(commentService.isInvalidComment(commentId, postId))
+                .thenReturn(true); // 이 조건에서 컨트롤러가 CommentException 던짐
 
 		mockMvc.perform(put("/comments").contentType(MediaType.APPLICATION_JSON)
 				.content(new ObjectMapper().writeValueAsString(request))

@@ -76,9 +76,11 @@ public class CommentLikeControllerTest {
 		Map<String, Object> response = Map.of("message", "좋아요 요청에 성공했습니다.", "userId", "user_001", "liked", true,
 			"likes", 1);
 
-		when(commentService.toggleCommentLike(any(CommentLikeRequest.class), anyString(), anyString())).thenReturn(
-			response);
-		when(commentService.isInvalidComment(commentId, postId)).thenReturn(false);
+
+        when(commentService.isInvalidComment(commentId, postId)).thenReturn(false);
+        when(commentService.toggleCommentLike(any(), anyString(), anyString()))
+                .thenReturn(response);
+
 		mockMvc.perform(post("/comments/comment_001/like").contentType(MediaType.APPLICATION_JSON)
 				.content(new ObjectMapper().writeValueAsString(request))
 				.header("Authorization", accessToken))
@@ -103,9 +105,9 @@ public class CommentLikeControllerTest {
 		Map<String, Object> response = Map.of("message", "좋아요 요청에 성공했습니다.", "userId", "user_001", "liked", true,
 			"likes", 1);
 
-		when(commentService.toggleCommentLike(any(CommentLikeRequest.class), anyString(), anyString())).thenReturn(
-			response);
-		when(commentService.isInvalidComment(commentId, postId)).thenReturn(true);
+        // 예외 발생을 명시적으로 설정
+        when(commentService.isInvalidComment(commentId, postId))
+                .thenReturn(true); // controller 내부에서 조건 체크 후 예외 던짐
 
 		mockMvc.perform(post("/comments/comment_001/like").contentType(MediaType.APPLICATION_JSON)
 				.content(new ObjectMapper().writeValueAsString(request))

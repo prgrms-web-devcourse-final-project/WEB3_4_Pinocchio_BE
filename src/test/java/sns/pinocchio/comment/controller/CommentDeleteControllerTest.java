@@ -75,8 +75,9 @@ class CommentDeleteControllerTest {
         CommentDeleteRequest.builder().commentId(commentId).postId(postId).build();
     Map<String, Object> response = Map.of("message", "댓글이 삭제되었습니다.");
 
-    when(commentService.deleteComment(any(CommentDeleteRequest.class))).thenReturn(response);
-    when(commentService.isInvalidComment(commentId, postId)).thenReturn(false);
+      when(commentService.isNotMyComment(member.getTsid(), commentId)).thenReturn(false);
+      when(commentService.isInvalidComment(commentId, postId)).thenReturn(false);
+      when(commentService.deleteComment(any(CommentDeleteRequest.class))).thenReturn(response);
 
     mockMvc
         .perform(
@@ -102,9 +103,13 @@ class CommentDeleteControllerTest {
     CommentDeleteRequest request =
         CommentDeleteRequest.builder().commentId(commentId).postId(postId).build();
 
-    when(commentService.isInvalidComment(commentId, postId)).thenReturn(true);
+      when(commentService.isNotMyComment(member.getTsid(), commentId)).thenReturn(false);
+      when(commentService.isInvalidComment(commentId, postId)).thenReturn(true);
 
-    mockMvc
+      // ❗️컨트롤러 내부 로직이 예외를 던지므로 deleteComment는 호출되지 않음
+
+
+      mockMvc
         .perform(
             delete("/comments")
                 .contentType(MediaType.APPLICATION_JSON)

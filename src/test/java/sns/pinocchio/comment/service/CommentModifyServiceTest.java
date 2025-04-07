@@ -17,6 +17,7 @@ import sns.pinocchio.application.comment.CommentService;
 import sns.pinocchio.domain.comment.Comment;
 import sns.pinocchio.domain.comment.CommentStatus;
 import sns.pinocchio.infrastructure.persistence.mongodb.CommentRepository;
+import sns.pinocchio.presentation.comment.exception.CommentException;
 
 @SpringBootTest
 public class CommentModifyServiceTest {
@@ -86,7 +87,7 @@ public class CommentModifyServiceTest {
 			.content(updatedContent)
 			.build();
 
-		NoSuchElementException thrownException = assertThrows(NoSuchElementException.class,
+		CommentException thrownException = assertThrows(CommentException.class,
 			() -> commentService.modifyComment(modifyRequest));
 
 		assertEquals("등록된 댓글을 찾을 수 없습니다.", thrownException.getMessage());

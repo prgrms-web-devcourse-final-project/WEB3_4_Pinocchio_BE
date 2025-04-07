@@ -19,6 +19,7 @@ import sns.pinocchio.domain.comment.Comment;
 import sns.pinocchio.domain.comment.CommentStatus;
 import sns.pinocchio.infrastructure.persistence.mongodb.CommentLikeRepository;
 import sns.pinocchio.infrastructure.persistence.mongodb.CommentRepository;
+import sns.pinocchio.presentation.comment.exception.CommentException;
 
 @SpringBootTest
 public class CommentLikeServiceTest {
@@ -127,7 +128,7 @@ public class CommentLikeServiceTest {
 		when(commentRepository.findByIdAndPostIdAndStatus(commentId, postId,CommentStatus.ACTIVE)).thenReturn(Optional.empty());
 
 		// When & Then
-		assertThrows(NoSuchElementException.class, () -> {
+		assertThrows(CommentException.class, () -> {
 			commentService.toggleCommentLike(likeRequest, commentId, loginUserId);
 		});
 

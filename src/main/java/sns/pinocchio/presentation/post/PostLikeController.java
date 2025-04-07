@@ -26,7 +26,7 @@ public class PostLikeController {
     @ApiResponse(responseCode = "404", description = "게시글이 존재하지 않음"),
     @ApiResponse(responseCode = "500", description = "서버 내부 오류")
   })
-  @PostMapping("/{postId}/toggle")
+  @PostMapping("/{postId}")
   public ResponseEntity<String> toggleLike(
       @PathVariable String postId,
       @RequestHeader("Authorization") String accessToken // JWT 토큰 (현재는 사용 안 함)

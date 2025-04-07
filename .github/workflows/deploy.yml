@@ -55,7 +55,7 @@ jobs:
               run: chmod +x gradlew
 
             - name: Run integration tests only
-              run: ./gradlew test -Dspring.profiles.active=ci --include-tag integration
+              run: ./gradlew test -Dspring.profiles.active=ci
               env:
                   SPRING_DATASOURCE_URL: jdbc:mysql://localhost:3306/test_db
                   SPRING_DATASOURCE_USERNAME: root

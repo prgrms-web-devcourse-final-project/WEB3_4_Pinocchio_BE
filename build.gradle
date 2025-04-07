@@ -78,6 +78,9 @@ dependencies {
 
     // TSID
     implementation 'com.github.f4b6a3:tsid-creator:5.2.4'
+
+    // Health Check
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
 }
 
 def querydslDir = "src/main/generated"

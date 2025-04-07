@@ -17,6 +17,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import sns.pinocchio.application.post.PostCreateRequest;
 import sns.pinocchio.application.post.PostModifyRequest;
 import sns.pinocchio.application.post.PostService;
@@ -43,13 +45,10 @@ public class PostController {
     })
     @PostMapping
     public ResponseEntity<String> createPost(
-            @RequestBody PostCreateRequest request
+            @RequestBody PostCreateRequest request,
+            @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
-        // 현재 인증된 사용자 정보 꺼내기
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
         String tsid = userDetails.getTsid();
-
         String postId = postService.createPost(request, tsid);
         return ResponseEntity.ok(postId);
     }
@@ -67,16 +66,12 @@ public class PostController {
             @ApiResponse(responseCode = "500", description = "서버 내부 오류")
     })
 
-    @PatchMapping
+    @PatchMapping("/modify")
     public ResponseEntity<String> modifyPost(
-            @RequestBody PostModifyRequest request
+            @RequestBody PostModifyRequest request,
+            @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
-        // SecurityContext에서 로그인 사용자 정보 추출
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
-        String tsid = userDetails.getTsid();
-
-        postService.modifyPost(request, tsid);
+        postService.modifyPost(request, userDetails.getTsid());
         return ResponseEntity.ok("게시글이 수정되었습니다.");
     }
 
@@ -92,15 +87,11 @@ public class PostController {
             @ApiResponse(responseCode = "500", description = "서버 내부 오류")
     })
     @DeleteMapping("/delete/{postId}")
-    public ResponseEntity<String> deletePost(@PathVariable String postId) {
-        //  인증된 사용자 정보에서 tsid 추출
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
-        String tsid = userDetails.getTsid();
-
-        //  서비스 호출 (작성자 확인 및 소프트 삭제 처리)
-        postService.deletePost(postId, tsid);
-
+    public ResponseEntity<String> deletePost(
+            @PathVariable String postId,
+            @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        postService.deletePost(postId, userDetails.getTsid());
         return ResponseEntity.ok("게시글이 삭제되었습니다.");
     }
 
@@ -115,16 +106,11 @@ public class PostController {
             @ApiResponse(responseCode = "500", description = "서버 내부 오류")
     })
     @GetMapping("/{postId}")
-    public ResponseEntity<?> getPostDetail(@PathVariable String postId) {
-        String tsid = null;
-
-        // 인증 정보가 있다면 tsid 추출
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication != null && authentication.isAuthenticated()
-                && authentication.getPrincipal() instanceof CustomUserDetails userDetails) {
-            tsid = userDetails.getTsid();
-        }
-
+    public ResponseEntity<?> getPostDetail(
+            @PathVariable String postId,
+            @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        String tsid = (userDetails != null) ? userDetails.getTsid() : null;
         return ResponseEntity.ok(postService.getPostDetail(postId, tsid));
     }
 

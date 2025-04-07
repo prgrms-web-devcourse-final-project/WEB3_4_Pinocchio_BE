@@ -8,6 +8,9 @@ plugins {
 
 group = 'sns'
 version = '0.0.1-SNAPSHOT'
+ext {
+    springAiVersion = "1.0.0-M6"
+}
 
 java {
     toolchain {
@@ -100,6 +103,10 @@ dependencies {
 
     //ollama
     implementation 'io.github.ollama4j:ollama4j:1.0.93'
+
+    //openai
+    implementation 'org.springframework.ai:spring-ai-openai-spring-boot-starter'
+
 }
 
 def querydslDir = "src/main/generated"
@@ -118,4 +125,10 @@ tasks.withType(JavaCompile).configureEach {
 
 tasks.named('test') {
     useJUnitPlatform()
+}
+
+dependencyManagement {
+    imports {
+        mavenBom("org.springframework.ai:spring-ai-bom:${property("springAiVersion")}")
+    }
 }

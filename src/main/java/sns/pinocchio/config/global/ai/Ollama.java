@@ -1,4 +1,4 @@
-package sns.pinocchio.config.global.ollama;
+package sns.pinocchio.config.global.ai;
 
 import java.io.IOException;
 import java.util.List;

@@ -1,12 +1,12 @@
-package sns.pinocchio.config.global.ollama;
+package sns.pinocchio.config.global.ai;
 
 public class Prompt {
 	private String memberPost;
-	private String answerEx = "anwer Ex:";
+	private String answerEx = "참고:";
 	private String basePrompt;
 
 	void setMemberPost(String memberPost) {
-		this.memberPost = "Member Post:" + memberPost;
+		this.memberPost = "작성글:" + memberPost;
 	}
 
 	void addAnswerEx(String answerEx) {
@@ -14,7 +14,7 @@ public class Prompt {
 	}
 
 	void setBasePrompt(String prompt) {
-		this.basePrompt = "Your writing format:" + prompt;
+		this.basePrompt = "해당 내용을 따라야한다:" + prompt;
 	}
 
 	@Override

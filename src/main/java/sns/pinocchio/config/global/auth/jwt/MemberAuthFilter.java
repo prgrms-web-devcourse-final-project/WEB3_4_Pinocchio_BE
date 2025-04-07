@@ -87,20 +87,18 @@ public class MemberAuthFilter extends OncePerRequestFilter {
     String method = request.getMethod();
     log.info("요청 경로: {}, 메서드: {}", path, method);
 
-    boolean shouldSkip =
-        (((method.equals("GET") && path.equals("/api/posts/search")
-            || path.startsWith("/actuator/health")))
-            || (method.equals("POST") && (path.startsWith("/auth") || path.startsWith("/api/auth")))
-            || (method.equals("POST")
-                && (path.startsWith("/user/password/reset")
-                    || path.startsWith("/api/user/password/reset")))
-            || path.startsWith("/swagger")
-            || path.startsWith("/v3/api-docs")
-            || path.startsWith("/swagger-ui")
-            || path.startsWith("/swagger-resources")
-            || path.startsWith("/webjars"));
-    log.info("필터 건너뛰기: {}", shouldSkip);
-    return shouldSkip;
+      boolean shouldSkip =
+              (method.equals("GET") && (path.equals("/api/posts/search") || path.equals("/actuator/health")))
+                      || (method.equals("POST") && (path.startsWith("/auth") || path.startsWith("/api/auth")))
+                      || (method.equals("POST") && (path.startsWith("/user/password/reset") || path.startsWith("/api/user/password/reset")))
+                      || path.startsWith("/swagger")
+                      || path.startsWith("/v3/api-docs")
+                      || path.startsWith("/swagger-ui")
+                      || path.startsWith("/swagger-resources")
+                      || path.startsWith("/webjars");
+
+      log.info("필터 건너뛰기: {}", shouldSkip);
+      return shouldSkip;
   }
 
   // SecurityContext에 인증 정보를 주입하는 메서드

@@ -1,13 +1,8 @@
 package sns.pinocchio.comment.controller;
 
-import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-
-import java.util.Map;
-import java.util.Optional;
-
+import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.transaction.Transactional;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,10 +13,6 @@ import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import jakarta.transaction.Transactional;
 import sns.pinocchio.application.comment.CommentService;
 import sns.pinocchio.application.comment.commentDto.CommentCreateRequest;
 import sns.pinocchio.domain.fixtures.TestFixture;
@@ -30,6 +21,16 @@ import sns.pinocchio.domain.post.Post;
 import sns.pinocchio.infrastructure.member.MemberRepository;
 import sns.pinocchio.infrastructure.persistence.mongodb.PostRepository;
 
+import java.util.Map;
+import java.util.Optional;
+
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+@Tag("integration")
 @SpringBootTest
 @AutoConfigureMockMvc
 @Transactional

@@ -152,6 +152,20 @@ resource "aws_security_group" "sg" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
+  ingress {
+    from_port = 8080
+    to_port = 8080
+    protocol = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    from_port = 3000
+    to_port = 3000
+    protocol = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
   # 아웃바운드 규칙 (나가는 트래픽)
   egress {
     from_port = 0

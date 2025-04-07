@@ -39,7 +39,7 @@ jobs:
                 image: redis:6
                 ports:
                     - 6379:6379
-                command: ["redis-server", "--requirepass", "root"]
+
 
         steps:
             - name: Checkout code
@@ -63,7 +63,7 @@ jobs:
                   SPRING_DATA_MONGODB_URI: mongodb://root:root@localhost:27017/test?authSource=admin
                   SPRING_REDIS_HOST: localhost
                   SPRING_REDIS_PORT: 6379
-                  SPRING_REDIS_PASSWORD: root
+
 
     build-and-push:
         runs-on: ubuntu-latest

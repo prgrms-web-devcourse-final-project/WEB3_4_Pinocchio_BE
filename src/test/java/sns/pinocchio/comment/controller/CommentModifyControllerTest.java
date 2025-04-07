@@ -85,7 +85,7 @@ public class CommentModifyControllerTest {
 			"updatedAt", LocalDateTime.now().toString());
 
 		when(commentService.modifyComment(any(CommentModifyRequest.class))).thenReturn(response);
-		mockMvc.perform(put("/comments/modify").contentType(MediaType.APPLICATION_JSON)
+		mockMvc.perform(put("/comments").contentType(MediaType.APPLICATION_JSON)
 				.content(new ObjectMapper().writeValueAsString(request))
 				.header("Authorization", accessToken))
 			.andExpect(status().isOk())
@@ -115,7 +115,7 @@ public class CommentModifyControllerTest {
 		when(commentService.modifyComment(any(CommentModifyRequest.class))).thenReturn(response);
 		when(commentService.isInvalidComment(commentId, postId)).thenReturn(true);
 
-		mockMvc.perform(put("/comments/modify").contentType(MediaType.APPLICATION_JSON)
+		mockMvc.perform(put("/comments").contentType(MediaType.APPLICATION_JSON)
 				.content(new ObjectMapper().writeValueAsString(request))
 				.header("Authorization", accessToken))
 			.andExpect(status().isNotFound())

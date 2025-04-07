@@ -1,6 +1,5 @@
 package sns.pinocchio.comment.controller;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.*;
@@ -24,11 +23,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.transaction.Transactional;
 import sns.pinocchio.application.comment.CommentService;
-import sns.pinocchio.application.comment.DeleteType;
 import sns.pinocchio.application.comment.commentDto.CommentCreateRequest;
-import sns.pinocchio.application.comment.commentDto.CommentDeleteRequest;
-import sns.pinocchio.domain.comment.Comment;
-import sns.pinocchio.domain.comment.CommentStatus;
 import sns.pinocchio.domain.fixtures.TestFixture;
 import sns.pinocchio.domain.member.Member;
 import sns.pinocchio.domain.post.Post;
@@ -90,7 +85,7 @@ public class CommentCreateControllerTest {
 			Optional.of(Post.builder().build()));
 		when(commentService.createComment(request, member.getTsid())).thenReturn(response);
 
-		mockMvc.perform(post("/comments/create").contentType(MediaType.APPLICATION_JSON)
+		mockMvc.perform(post("/comments").contentType(MediaType.APPLICATION_JSON)
 				.content(new ObjectMapper().writeValueAsString(request))
 				.header("Authorization", accessToken))
 			.andExpect(status().isOk())

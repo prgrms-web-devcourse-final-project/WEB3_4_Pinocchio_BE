@@ -55,7 +55,7 @@ jobs:
               run: chmod +x gradlew
 
             - name: Run tests with DB
-              run: ./gradlew test -Dspring.profiles.active=ci
+              run: ./gradlew test -Dspring.profiles.active=ci --debug
               env:
                   SPRING_DATASOURCE_URL: jdbc:mysql://localhost:3306/test_db
                   SPRING_DATASOURCE_USERNAME: root

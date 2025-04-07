@@ -79,7 +79,8 @@ public class MemberController {
       @Valid @RequestBody ChangePasswordRequestDto changePasswordRequestDto) {
     Member member = customUserDetails.getMember();
 
-    authService.validatePassword(changePasswordRequestDto.currentPassword(), changePasswordRequestDto.newPassword(), member);
+    authService.validatePassword(changePasswordRequestDto.currentPassword(), member);
+    authService.validateSamePassword(changePasswordRequestDto.currentPassword(), changePasswordRequestDto.newPassword());
 
     memberService.changePassword(member, changePasswordRequestDto.newPassword());
 

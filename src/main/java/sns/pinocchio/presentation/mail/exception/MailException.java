@@ -17,4 +17,8 @@ public class MailException extends RuntimeException {
   public String getCode() {
     return mailErrorCode.getCode();
   }
+
+  public MailErrorCode getMailErrorCode() {
+    return mailErrorCode;
+  }
 }

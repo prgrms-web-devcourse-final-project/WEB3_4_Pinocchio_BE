@@ -34,17 +34,17 @@ public class MemberService {
   @Transactional
   public Member createMember(SignupRequestDto signupRequestDto) {
     // 이메일 중복 체크
-    checkEmailDuplicate(signupRequestDto.email());
+    checkEmailDuplicate(signupRequestDto.getEmail());
 
-        // 닉네임 중복 체크
-        checkNicknameDuplicate(signupRequestDto.nickname());
+    // 닉네임 중복 체크
+    checkNicknameDuplicate(signupRequestDto.getNickname());
 
     Member member =
         Member.builder()
-            .email(signupRequestDto.email())
-            .name(signupRequestDto.name())
-            .nickname(signupRequestDto.nickname())
-            .password(passwordEncoder.encode(signupRequestDto.password()))
+            .email(signupRequestDto.getEmail())
+            .name(signupRequestDto.getName())
+            .nickname(signupRequestDto.getNickname())
+            .password(passwordEncoder.encode(signupRequestDto.getPassword()))
             .build();
 
     this.memberRepository.save(member);
@@ -79,6 +79,47 @@ public class MemberService {
     EmailUtil.sendEmail(member.getEmail(), temporaryPassword);
   }
 
+  public void checkEmailDuplicate(String email) {
+    memberRepository
+        .findByEmail(email)
+        .ifPresent(
+            member -> {
+              throw new MemberException(MemberErrorCode.EMAIL_DUPLICATED);
+            });
+  }
+
+  public void checkNicknameDuplicate(String nickname) {
+    memberRepository
+        .findByNickname(nickname)
+        .ifPresent(
+            member -> {
+              throw new MemberException(MemberErrorCode.NICKNAME_DUPLICATED);
+            });
+  }
+
+  // 리프레시 토큰 쿠키, 레디스 저장
+  public void saveRefreshToken(String refreshToken, Member member, HttpServletResponse response) {
+    cookieService.addRefreshTokenToCookie(
+        refreshToken, jwtUtil.getRefreshTokenExpirationTime(), response);
+    redisService.save(
+        refreshToken, String.valueOf(member.getId()), jwtUtil.getRefreshTokenExpirationTime());
+  }
+
+  public void tokenClear(HttpServletRequest request, HttpServletResponse response) {
+    String refreshToken = cookieService.getRefreshTokenFromCookie(request);
+
+    if (refreshToken == null) {
+      throw new AuthException(AuthErrorCode.INVALID_TOKEN);
+    }
+    cookieService.clearTokenFromCookie(response);
+    redisService.addBlackList(refreshToken, jwtUtil.getRefreshTokenExpirationTime());
+  }
+
+  @Transactional
+  public void deleteMember(Member member) {
+    memberRepository.deleteById(member.getId());
+  }
+
   @Transactional
   public void changePassword(Member member, String password) {
     member.updatePassword(passwordEncoder.encode(password));
@@ -105,50 +146,10 @@ public class MemberService {
         .orElseThrow(() -> new MemberException(MemberErrorCode.USER_NOT_FOUND));
   }
 
-  public void checkEmailDuplicate(String email) {
-    memberRepository
-        .findByEmail(email)
-        .ifPresent(
-            member -> {
-              throw new MemberException(MemberErrorCode.EMAIL_DUPLICATED);
-            });
-  }
-
-  public void checkNicknameDuplicate(String nickname) {
-    memberRepository
-        .findByNickname(nickname)
-        .ifPresent(
-            member -> {
-              throw new MemberException(MemberErrorCode.NICKNAME_DUPLICATED);
-            });
-  }
-
-  // 사용자 삭제
-  public void deleteMember(Member member) {
-    memberRepository.deleteById(member.getId());
-  }
-
-  // 리프레시 토큰 쿠키, 레디스 저장
-  public void saveRefreshToken(String refreshToken, Member member, HttpServletResponse response) {
-    cookieService.addRefreshTokenToCookie(
-        refreshToken, jwtUtil.getRefreshTokenExpirationTime(), response);
-    redisService.save(
-        refreshToken, String.valueOf(member.getId()), jwtUtil.getRefreshTokenExpirationTime());
-  }
-
-  public void tokenClear(HttpServletRequest request, HttpServletResponse response) {
-    String refreshToken = cookieService.getRefreshTokenFromCookie(request);
-
-    if (refreshToken == null) {
-      throw new AuthException(AuthErrorCode.INVALID_TOKEN);
-    }
-    cookieService.clearTokenFromCookie(response);
-    redisService.addBlackList(refreshToken, jwtUtil.getRefreshTokenExpirationTime());
-  }
-
+  @Transactional(readOnly = true)
   public Member findByTsid(String tsid) {
     return memberRepository
         .findByTsid(tsid)
-        .orElseThrow(() -> new IllegalArgumentException("해당 사용자를 찾을 수 없습니다."));
+        .orElseThrow(() -> new MemberException(MemberErrorCode.USER_NOT_FOUND));
   }
 }

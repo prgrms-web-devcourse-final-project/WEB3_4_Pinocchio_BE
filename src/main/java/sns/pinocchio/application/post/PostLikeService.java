@@ -2,7 +2,8 @@ package sns.pinocchio.application.post;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import sns.pinocchio.domain.post.LikeStatus;
+
+import sns.pinocchio.config.global.enums.CancellState;
 import sns.pinocchio.domain.post.Post;
 import sns.pinocchio.domain.post.PostLike;
 import sns.pinocchio.infrastructure.persistence.mongodb.PostLikeRepository;
@@ -39,7 +40,7 @@ public class PostLikeService {
                     .postId(postId)                        // 게시글 ID
                     .postTsid(post.getTsid())          // 게시글 작성자 TSID (자기 글인지 확인용)
                     .tsid(tsid)                    // 좋아요 누른 사용자 TSID
-                    .status(LikeStatus.ACTIVE)             // 상태: ACTIVE로 설정
+                    .status(CancellState.ACTIVE)             // 상태: ACTIVE로 설정
                     .likedAt(LocalDateTime.now())          // 최초 좋아요 누른 시각
                     .updatedAt(LocalDateTime.now())        // 최근 변경 시각
                     .build();
@@ -47,10 +48,10 @@ public class PostLikeService {
             postLikeRepository.save(newLike);              // MongoDB에 저장
         } else {
             // 5. 기존 기록이 있다면 상태 토글
-            if (postLike.getStatus() == LikeStatus.ACTIVE) {
-                postLike.setStatus(LikeStatus.CANCELLED);  // 취소
+            if (postLike.getStatus() == CancellState.ACTIVE) {
+                postLike.setStatus(CancellState.CANCELLED);  // 취소
             } else {
-                postLike.setStatus(LikeStatus.ACTIVE);     // 다시 좋아요
+                postLike.setStatus(CancellState.ACTIVE);     // 다시 좋아요
             }
             postLike.setUpdatedAt(LocalDateTime.now());    // 변경 시각 업데이트
 

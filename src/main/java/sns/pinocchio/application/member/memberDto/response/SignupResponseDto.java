@@ -9,13 +9,19 @@ import java.time.LocalDateTime;
 public record SignupResponseDto(String status, int statusCode, String message, UserData data) {
   @Builder
   public record UserData(
-      Long userId, String name, String nickname, String email, LocalDateTime createdAt) {
+      Long userId,
+      String name,
+      String nickname,
+      String email,
+      String tsid,
+      LocalDateTime createdAt) {
     public static UserData of(Member member) {
       return UserData.builder()
           .userId(member.getId())
           .name(member.getName())
           .nickname(member.getNickname())
           .email(member.getEmail())
+          .tsid(member.getTsid())
           .createdAt(member.getCreatedAt())
           .build();
     }

@@ -6,7 +6,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import sns.pinocchio.domain.post.LikeStatus;
+
+import sns.pinocchio.config.global.enums.CancellState;
 import sns.pinocchio.domain.post.PostLike;
 import sns.pinocchio.infrastructure.persistence.mongodb.PostLikeRepository;
 
@@ -20,17 +21,17 @@ public class PostLikeSearchService {
 
     // 게시글의 총 좋아요 수
     public long countLikes(String postId) {
-        return postLikeRepository.countByPostIdAndStatus(postId, LikeStatus.ACTIVE);
+        return postLikeRepository.countByPostIdAndStatus(postId, CancellState.ACTIVE);
     }
 
     // 특정 사용자가 누른 좋아요 목록
     public Page<PostLike> findLikesByUser(String userTsid,int page) {
         Pageable pageable = PageRequest.of(page, 15);
-        return postLikeRepository.findAllByTsidAndStatus(userTsid, LikeStatus.ACTIVE,pageable);
+        return postLikeRepository.findAllByTsidAndStatus(userTsid, CancellState.ACTIVE,pageable);
     }
 
     // 특정 게시글에 좋아요 누른 사용자 목록
     public List<PostLike> findUsersByPost(String postId) {
-        return postLikeRepository.findAllByPostIdAndStatus(postId, LikeStatus.ACTIVE);
+        return postLikeRepository.findAllByPostIdAndStatus(postId, CancellState.ACTIVE);
     }
 }

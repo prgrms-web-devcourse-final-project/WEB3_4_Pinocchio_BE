@@ -116,7 +116,7 @@ class CommentDeleteControllerTest {
                 .content(new ObjectMapper().writeValueAsString(request))
                 .header("Authorization", accessToken))
         .andExpect(status().isNotFound())
-        .andExpect(jsonPath("$.message").value("등록된 댓글을 찾을 수 없습니다."))
+        .andExpect(jsonPath("$.message").value("댓글을 찾을 수 없습니다."))
         .andDo(print());
     System.out.println("✅ 댓글 삭제 실패 성공");
   }

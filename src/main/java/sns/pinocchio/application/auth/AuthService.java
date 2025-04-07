@@ -16,8 +16,11 @@ public class AuthService {
   private final TokenProvider tokenProvider;
 
   // 패스워드 검증
-  public void validatePassword(String password, Member member) {
-    if (!passwordEncoder.matches(password, member.getPassword())) {
+  public void validatePassword(String currentPassword, String newPassword, Member member) {
+    if (!passwordEncoder.matches(currentPassword, member.getPassword())) {
+      throw new MemberException(MemberErrorCode.INVALID_PASSWORD);
+    }
+    if (currentPassword == newPassword) {
       throw new MemberException(MemberErrorCode.INVALID_PASSWORD);
     }
   }

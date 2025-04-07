@@ -38,4 +38,13 @@ public class Comment {
 	private LocalDateTime updatedAt;
 
 	private CommentStatus status; // active / deleted (Soft Delete)
+
+	public int updateLikes(boolean isLiked){
+		if(isLiked){
+			this.likes = this.likes +1;
+		} else{
+			this.likes = this.likes - 1;
+		}
+		return this.likes;
+	}
 }

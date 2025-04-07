@@ -40,12 +40,16 @@ public class MemberFollowService {
 			return Map.of("message", "팔로우에 성공하였습니다.", "followed", true);
 		} else {
 			UserFollow userFollow = optUserFollow.get();
-			boolean isActive = userFollow.getStatus() == UserFollowStatus.ACTIVE;
-			userFollow.setStatus(isActive ? UserFollowStatus.DELETE : UserFollowStatus.ACTIVE);
+			boolean isActive = userFollow.toggleFollowStatus();
 			userFollow.setUpdatedAt(LocalDateTime.now());
 			userFollowRepository.save(userFollow);
-			return Map.of("message", isActive ? "팔로우 취소에 성공하였습니다." : "팔로우에 성공하였습니다.",
-				"followed", isActive ? false : true);
+			if (isActive) {
+				return Map.of("message", "팔로우에 성공하였습니다.",
+					"followed", true);
+			}
+			return Map.of("message", "팔로우 취소에 성공하였습니다.",
+				"followed", false);
+
 		}
 	}
 

@@ -10,7 +10,6 @@ import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Optional;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -102,12 +101,16 @@ public class CommentService {
 		Optional<String> optCommentLikeId = commentLikeService.toggleCommentLike(commentId, authorId);
 		boolean isLiked = optCommentLikeId.isPresent();
 
-		int updatedLikes = comment.getLikes() + (isLiked ? 1 : -1);
-		comment.setLikes(updatedLikes);
+		int updatedLikes = comment.updateLikes(isLiked);
 		commentRepository.save(comment);
 
 		Map<String, Object> response = new HashMap<>();
-		response.put("message", isLiked ? "좋아요 요청에 성공했습니다." : "좋아요 취소 요청에 성공했습니다.");
+		if (isLiked) {
+			response.put("message", "좋아요 요청에 성공했습니다.");
+
+		} else {
+			response.put("message", "좋아요 취소 요청에 성공했습니다.");
+		}
 		response.put("userId", authorId);
 		response.put("liked", isLiked);
 		response.put("likes", updatedLikes);

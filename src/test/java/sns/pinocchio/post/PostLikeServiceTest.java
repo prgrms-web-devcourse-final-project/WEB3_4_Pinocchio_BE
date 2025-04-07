@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import sns.pinocchio.application.post.PostLikeService;
-import sns.pinocchio.domain.post.LikeStatus;
+import sns.pinocchio.config.global.enums.CancellState;
 import sns.pinocchio.domain.post.Post;
 import sns.pinocchio.domain.post.PostLike;
 import sns.pinocchio.domain.post.Visibility;
@@ -67,7 +67,7 @@ public class PostLikeServiceTest {
         Optional<PostLike> result = postLikeRepository.findByPostIdAndTsid(savedPost.getId(), "user_456");
 
         assertThat(result).isPresent();
-        assertThat(result.get().getStatus()).isEqualTo(LikeStatus.ACTIVE);
+        assertThat(result.get().getStatus()).isEqualTo(CancellState.ACTIVE);
     }
 
     @Test
@@ -81,7 +81,7 @@ public class PostLikeServiceTest {
         Optional<PostLike> result = postLikeRepository.findByPostIdAndTsid(savedPost.getId(), "user_456");
 
         assertThat(result).isPresent();
-        assertThat(result.get().getStatus()).isEqualTo(LikeStatus.CANCELLED);
+        assertThat(result.get().getStatus()).isEqualTo(CancellState.CANCELLED);
     }
 
     @Test
@@ -93,6 +93,6 @@ public class PostLikeServiceTest {
         Optional<PostLike> result = postLikeRepository.findByPostIdAndTsid(savedPost.getId(), "user_456");
 
         assertThat(result).isPresent();
-        assertThat(result.get().getStatus()).isEqualTo(LikeStatus.ACTIVE);
+        assertThat(result.get().getStatus()).isEqualTo(CancellState.ACTIVE);
     }
 }

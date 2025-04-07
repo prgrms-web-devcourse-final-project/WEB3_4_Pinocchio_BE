@@ -13,8 +13,8 @@ import org.springframework.stereotype.Service;
 
 import lombok.RequiredArgsConstructor;
 import sns.pinocchio.application.member.memberDto.MemberFollowRequest;
+import sns.pinocchio.config.global.enums.CancellState;
 import sns.pinocchio.domain.user.UserFollow;
-import sns.pinocchio.domain.user.UserFollowStatus;
 import sns.pinocchio.infrastructure.persistence.mongodb.UserFollowRepository;
 
 @Service
@@ -32,7 +32,7 @@ public class MemberFollowService {
 				.followingNickname(request.getFollowingNickname())
 				.followerId(authorId)
 				.followerNickname(authorNickname)
-				.status(UserFollowStatus.ACTIVE)
+				.status(CancellState.ACTIVE)
 				.createdAt(LocalDateTime.now())
 				.updatedAt(LocalDateTime.now())
 				.build();
@@ -56,7 +56,7 @@ public class MemberFollowService {
 	public Map<String, Object> findFollowers(String followingId, int page) {
 		Pageable pageable = PageRequest.of(page, 15);
 		Page<UserFollow> userFollowPage = userFollowRepository.findAllByFollowingIdAndStatusOrderByUpdatedAtDesc(
-			followingId, pageable, UserFollowStatus.ACTIVE);
+			followingId, pageable, CancellState.ACTIVE);
 		List<Map<String, Object>> followers = userFollowPage.getContent().stream().map(userFollow -> {
 			Map<String, Object> map = new HashMap<>();
 			map.put("userId", userFollow.getFollowerId());
@@ -76,7 +76,7 @@ public class MemberFollowService {
 	public Map<String, Object> findFollowings(String followerId, int page) {
 		Pageable pageable = PageRequest.of(page, 15);
 		Page<UserFollow> userFollowPage = userFollowRepository.findAllByFollowerIdAndStatusOrderByUpdatedAtDesc(
-			followerId, pageable, UserFollowStatus.ACTIVE);
+			followerId, pageable, CancellState.ACTIVE);
 		List<Map<String, Object>> followings = userFollowPage.getContent().stream().map(userFollow -> {
 			Map<String, Object> map = new HashMap<>();
 			map.put("userId", userFollow.getFollowingId());

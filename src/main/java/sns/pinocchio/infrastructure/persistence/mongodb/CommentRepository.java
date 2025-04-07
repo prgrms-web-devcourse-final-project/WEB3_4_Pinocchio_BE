@@ -7,11 +7,11 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.repository.MongoRepository;
 
+import sns.pinocchio.config.global.enums.CancellState;
 import sns.pinocchio.domain.comment.Comment;
-import sns.pinocchio.domain.comment.CommentStatus;
 
 public interface CommentRepository extends MongoRepository<Comment, String> {
-	Optional<Comment> findByIdAndPostIdAndStatus(String id, String postId, CommentStatus status);
-	List<Comment> findAllByPostIdAndStatus(String postId, CommentStatus status);
-	Page<Comment> findAllByUserIdAndStatus(String authorId, Pageable pageable, CommentStatus status);
+	Optional<Comment> findByIdAndPostIdAndStatus(String id, String postId, CancellState status);
+	List<Comment> findAllByPostIdAndStatus(String postId, CancellState status);
+	Page<Comment> findAllByUserIdAndStatus(String authorId, Pageable pageable, CancellState status);
 }

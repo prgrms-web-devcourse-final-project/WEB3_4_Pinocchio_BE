@@ -31,7 +31,7 @@ class CreatePostControllerTest {
     private ObjectMapper objectMapper;
 
     @Test
-    @DisplayName("POST /api/posts/create - 게시글 생성 성공")
+    @DisplayName("POST /api/posts - 게시글 생성 성공")
     void createPost_Success() throws Exception {
         // given
         PostCreateRequest request = PostCreateRequest.builder()
@@ -48,7 +48,7 @@ class CreatePostControllerTest {
                 .thenReturn("post_12345");
 
         // when & then
-        mockMvc.perform(post("/api/posts/create")
+        mockMvc.perform(post("/api/posts")
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization", "Bearer dummyToken")
                         .content(requestBody))

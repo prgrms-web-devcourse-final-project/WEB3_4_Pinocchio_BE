@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import java.time.LocalDateTime;
-import java.util.NoSuchElementException;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
@@ -12,11 +11,12 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import sns.pinocchio.application.comment.commentDto.CommentModifyRequest;
 import sns.pinocchio.application.comment.CommentService;
+import sns.pinocchio.application.comment.commentDto.CommentModifyRequest;
+import sns.pinocchio.config.global.enums.CancellState;
 import sns.pinocchio.domain.comment.Comment;
-import sns.pinocchio.domain.comment.CommentStatus;
 import sns.pinocchio.infrastructure.persistence.mongodb.CommentRepository;
+import sns.pinocchio.presentation.comment.exception.CommentException;
 
 @SpringBootTest
 public class CommentModifyServiceTest {
@@ -43,7 +43,7 @@ public class CommentModifyServiceTest {
 			.createdAt(createdAt)
 			.build();
 
-		when(commentRepository.findByIdAndPostIdAndStatus(commentId, postId, CommentStatus.ACTIVE)).thenReturn(
+		when(commentRepository.findByIdAndPostIdAndStatus(commentId, postId, CancellState.ACTIVE)).thenReturn(
 			Optional.of(mockComment));
 
 		when(commentRepository.save(any(Comment.class))).thenAnswer(invocation -> {
@@ -63,7 +63,7 @@ public class CommentModifyServiceTest {
 		assertEquals(updatedContent, mockComment.getContent());
 		assertNotNull(mockComment.getUpdatedAt());
 
-		verify(commentRepository, times(1)).findByIdAndPostIdAndStatus(commentId, postId, CommentStatus.ACTIVE);
+		verify(commentRepository, times(1)).findByIdAndPostIdAndStatus(commentId, postId, CancellState.ACTIVE);
 		verify(commentRepository, times(1)).save(mockComment);
 
 		System.out.println("✅ 댓글이 MongoDB에서 수정되었습니다.");
@@ -78,7 +78,7 @@ public class CommentModifyServiceTest {
 		String updatedContent = "수정할 댓글";
 
 		when(commentRepository.findByIdAndPostIdAndStatus(nonExistentCommentId, postId,
-			CommentStatus.ACTIVE)).thenReturn(Optional.empty());
+			CancellState.ACTIVE)).thenReturn(Optional.empty());
 
 		CommentModifyRequest modifyRequest = CommentModifyRequest.builder()
 			.commentId(nonExistentCommentId)
@@ -86,13 +86,13 @@ public class CommentModifyServiceTest {
 			.content(updatedContent)
 			.build();
 
-		NoSuchElementException thrownException = assertThrows(NoSuchElementException.class,
+		CommentException thrownException = assertThrows(CommentException.class,
 			() -> commentService.modifyComment(modifyRequest));
 
 		assertEquals("등록된 댓글을 찾을 수 없습니다.", thrownException.getMessage());
 
 		verify(commentRepository, times(1)).findByIdAndPostIdAndStatus(nonExistentCommentId, postId,
-			CommentStatus.ACTIVE);
+			CancellState.ACTIVE);
 		verify(commentRepository, times(0)).save(any());
 
 		System.out.println("✅ 댓글 수정 실패(없는댓글) 성공");

@@ -78,7 +78,7 @@ public class CommentLikeControllerTest {
 		when(commentService.toggleCommentLike(any(CommentLikeRequest.class), anyString(), anyString())).thenReturn(
 			response);
 		when(commentService.isInvalidComment(commentId, postId)).thenReturn(false);
-		mockMvc.perform(post("/comments/like/comment_001").contentType(MediaType.APPLICATION_JSON)
+		mockMvc.perform(post("/comments/comment_001/like").contentType(MediaType.APPLICATION_JSON)
 				.content(new ObjectMapper().writeValueAsString(request))
 				.header("Authorization", accessToken))
 			.andExpect(status().isOk())
@@ -106,7 +106,7 @@ public class CommentLikeControllerTest {
 			response);
 		when(commentService.isInvalidComment(commentId, postId)).thenReturn(true);
 
-		mockMvc.perform(post("/comments/like/comment_001").contentType(MediaType.APPLICATION_JSON)
+		mockMvc.perform(post("/comments/comment_001/like").contentType(MediaType.APPLICATION_JSON)
 				.content(new ObjectMapper().writeValueAsString(request))
 				.header("Authorization", accessToken))
 			.andExpect(status().isNotFound())

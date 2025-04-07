@@ -4,22 +4,22 @@ import org.springframework.http.HttpStatus;
 
 public class PostException extends RuntimeException {
 
-    private final PostErrorCode postErrorCode;
+  private final PostErrorCode postErrorCode;
 
-    public PostException(PostErrorCode postErrorCode) {
-        super(postErrorCode.getMessage());
-        this.postErrorCode = postErrorCode;
-    }
+  public PostException(PostErrorCode postErrorCode) {
+    super(postErrorCode.getMessage());
+    this.postErrorCode = postErrorCode;
+  }
 
-    public HttpStatus getStatus() {
-        return postErrorCode.getHttpStatus();
-    }
+  public PostErrorCode getPostErrorCode() {
+    return postErrorCode;
+  }
 
-    public String getCode() {
-        return postErrorCode.getCode();
-    }
+  public HttpStatus getStatus() {
+    return postErrorCode.getHttpStatus();
+  }
 
-    public PostErrorCode getPostErrorCode() {
-        return postErrorCode;
-    }
+  public String getCode() {
+    return postErrorCode.getCode();
+  }
 }

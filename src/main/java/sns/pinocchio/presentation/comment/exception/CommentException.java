@@ -2,25 +2,24 @@ package sns.pinocchio.presentation.comment.exception;
 
 import org.springframework.http.HttpStatus;
 
-// member 관련 예외 처리
 public class CommentException extends RuntimeException {
 
-  private final CommentErrorCode memberErrorCode;
+  private final CommentErrorCode commentErrorCode;
 
-  public CommentException(CommentErrorCode memberErrorCode) {
-    super(memberErrorCode.getMessage());
-    this.memberErrorCode = memberErrorCode;
+  public CommentException(CommentErrorCode commentErrorCode) {
+    super(commentErrorCode.getMessage());
+    this.commentErrorCode = commentErrorCode;
   }
 
-  public CommentErrorCode getMemberErrorCode() {
-    return memberErrorCode;
+  public CommentErrorCode getCommentErrorCode() {
+    return commentErrorCode;
   }
 
   public HttpStatus getStatus() {
-    return memberErrorCode.getHttpStatus();
+    return commentErrorCode.getHttpStatus();
   }
 
   public String getCode() {
-    return memberErrorCode.getCode();
+    return commentErrorCode.getCode();
   }
 }

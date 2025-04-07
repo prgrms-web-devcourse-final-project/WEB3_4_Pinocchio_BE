@@ -72,18 +72,16 @@ public class MemberController {
     return ResponseEntity.ok("임시 비밀번호가 이메일로 발송되었습니다. 로그인 후 반드시 비밀번호를 변경해 주세요.");
   }
 
-  // 비밀번호 변경
+  // 패스워드 변경
   @PutMapping("/password")
   public ResponseEntity<String> changePassword(
       @AuthenticationPrincipal CustomUserDetails customUserDetails,
       @Valid @RequestBody ChangePasswordRequestDto changePasswordRequestDto) {
-    // 유저 조회
     Member member = customUserDetails.getMember();
 
-    // 패스워드 검증
     authService.validatePassword(changePasswordRequestDto.currentPassword(), member);
+    authService.validateSamePassword(changePasswordRequestDto.currentPassword(), changePasswordRequestDto.newPassword());
 
-    // 패스워드 변경
     memberService.changePassword(member, changePasswordRequestDto.newPassword());
 
     return ResponseEntity.status(HttpStatus.OK).body("비밀번호가 성공적으로 변경되었습니다.");
@@ -96,16 +94,12 @@ public class MemberController {
       HttpServletRequest request,
       HttpServletResponse response,
       @Valid @RequestBody DeleteRequestDto deleteRequestDto) {
-    // 유저 조회
     Member member = customUserDetails.getMember();
 
-    // 패스워드 검증
     authService.validatePassword(deleteRequestDto.password(), member);
 
-    // 유저 삭제
     memberService.deleteMember(member);
 
-    // 쿠키 삭제
     memberService.tokenClear(request, response);
 
     return ResponseEntity.status(HttpStatus.OK).body("회원 탈퇴가 완료되었습니다. 그동안 이용해주셔서 감사합니다.");

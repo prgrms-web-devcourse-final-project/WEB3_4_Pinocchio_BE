@@ -155,7 +155,7 @@ public class MemberAuthFilter extends OncePerRequestFilter {
       return newAccessToken;
     } catch (MemberException e) {
       log.error("유효하지 않은 인증정보입니다.");
-      handleAuthError(response, AuthErrorCode.INVALID_TOKEN);
+      handleAuthError(response, AuthErrorCode.TOKEN_EXPIRED);
       throw e;
     } catch (Exception e) {
       log.error("토큰 갱신 중 오류 발생: {}", e.getMessage());

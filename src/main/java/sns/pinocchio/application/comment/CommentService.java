@@ -9,13 +9,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-
-import lombok.RequiredArgsConstructor;
 import sns.pinocchio.application.comment.commentDto.CommentCreateRequest;
 import sns.pinocchio.application.comment.commentDto.CommentDeleteRequest;
 import sns.pinocchio.application.comment.commentDto.CommentLikeRequest;
@@ -23,6 +21,7 @@ import sns.pinocchio.application.comment.commentDto.CommentModifyRequest;
 import sns.pinocchio.config.global.enums.CancellState;
 import sns.pinocchio.domain.comment.Comment;
 import sns.pinocchio.infrastructure.persistence.mongodb.CommentRepository;
+import sns.pinocchio.presentation.comment.exception.CommentErrorCode;
 import sns.pinocchio.presentation.comment.exception.CommentException;
 
 @Service
@@ -64,7 +63,7 @@ public class CommentService {
 			commentLikeService.deleteAllCommentlikes(request.getCommentId());
 			commentRepository.delete(comment);
 		} else {
-			throw new CommentException(INVALID_REQUEST);
+			throw new CommentException(CommentErrorCode.UNAUTHORIZED_COMMENT_ACCESS);
 		}
 
 		Map<String, Object> response = new HashMap<>();

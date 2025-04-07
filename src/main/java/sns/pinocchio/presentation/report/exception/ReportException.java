@@ -10,6 +10,10 @@ public class ReportException extends RuntimeException {
     this.reportErrorCode = reportErrorCode;
   }
 
+  public ReportErrorCode getReportErrorCode() {
+    return reportErrorCode;
+  }
+
   public HttpStatus getStatus() {
     return reportErrorCode.getHttpStatus();
   }

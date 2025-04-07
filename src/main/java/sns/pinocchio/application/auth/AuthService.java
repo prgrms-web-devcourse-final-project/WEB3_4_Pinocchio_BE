@@ -15,9 +15,16 @@ public class AuthService {
   private final PasswordEncoder passwordEncoder;
   private final TokenProvider tokenProvider;
 
-  // 패스워드 검증
-  public void validatePassword(String password, Member member) {
-    if (!passwordEncoder.matches(password, member.getPassword())) {
+  // 현재 비밀번호가 맞는지 확인
+  public void validatePassword(String currentPassword, Member member) {
+    if (!passwordEncoder.matches(currentPassword, member.getPassword())) {
+      throw new MemberException(MemberErrorCode.INVALID_PASSWORD);
+    }
+  }
+
+  // 새 비밀번호가 이전 비밀번호와 같은지 확인
+  public void validateSamePassword(String currentPassword, String newPassword) {
+    if (currentPassword.equals(newPassword)) {
       throw new MemberException(MemberErrorCode.INVALID_PASSWORD);
     }
   }

@@ -102,7 +102,7 @@ dependencies {
     implementation 'io.github.ollama4j:ollama4j:1.0.93'
 }
 
-def querydslDir = "src/main/generated"
+def querydslDir = "$buildDir/generated/querydsl"
 
 sourceSets {
     main {

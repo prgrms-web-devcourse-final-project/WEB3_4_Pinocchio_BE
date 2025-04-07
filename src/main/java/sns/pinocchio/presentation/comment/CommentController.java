@@ -44,7 +44,7 @@ public class CommentController {
 		@ApiResponse(responseCode = "401", description = "JWT 토큰 누락 또는 인증 실패"),
 		@ApiResponse(responseCode = "404", description = "댓글 조회 실패"),
 		@ApiResponse(responseCode = "500", description = "서버 내부 오류")})
-	@PutMapping("/create")
+	@PostMapping("/create")
 	public ResponseEntity<Map<String, Object>> updateComment(@AuthenticationPrincipal CustomUserDetails userDetails,
 		@RequestBody CommentCreateRequest request) {
 		Member authorMember = userDetails.getMember();

@@ -51,16 +51,16 @@ public class MemberFollowService {
 
 	public Map<String, Object> findFollowers(String followingId, int page) {
 		Pageable pageable = PageRequest.of(page, 15);
-		Page<UserFollow> userFollopwPage = userFollowRepository.findAllByFollowingIdAndStatusOrderByUpdatedAtDesc(
+		Page<UserFollow> userFollowPage = userFollowRepository.findAllByFollowingIdAndStatusOrderByUpdatedAtDesc(
 			followingId, pageable, UserFollowStatus.ACTIVE);
-		List<Map<String, Object>> followers = userFollopwPage.getContent().stream().map(userFollow -> {
+		List<Map<String, Object>> followers = userFollowPage.getContent().stream().map(userFollow -> {
 			Map<String, Object> map = new HashMap<>();
 			map.put("userId", userFollow.getFollowerId());
 			map.put("nickname", userFollow.getFollowerNickname());
 			return map;
 		}).toList();
-		long totalElements = userFollopwPage.getTotalElements();
-		long totalPages = userFollopwPage.getTotalPages();
+		long totalElements = userFollowPage.getTotalElements();
+		long totalPages = userFollowPage.getTotalPages();
 
 		return Map.of("message", "팔로워 조회에 성공하였습니다.",
 			"page", page,
@@ -71,23 +71,22 @@ public class MemberFollowService {
 
 	public Map<String, Object> findFollowings(String followerId, int page) {
 		Pageable pageable = PageRequest.of(page, 15);
-		Page<UserFollow> userFollopwPage = userFollowRepository.findAllByFollowerIdAndStatusOrderByUpdatedAtDesc(
+		Page<UserFollow> userFollowPage = userFollowRepository.findAllByFollowerIdAndStatusOrderByUpdatedAtDesc(
 			followerId, pageable, UserFollowStatus.ACTIVE);
-		List<Map<String, Object>> followings = userFollowRepository.findAllByFollowerIdAndStatusOrderByUpdatedAtDesc(
-			followerId, pageable, UserFollowStatus.ACTIVE).getContent().stream().map(userFollow -> {
+		List<Map<String, Object>> followings = userFollowPage.getContent().stream().map(userFollow -> {
 			Map<String, Object> map = new HashMap<>();
 			map.put("userId", userFollow.getFollowingId());
 			map.put("nickname", userFollow.getFollowingNickname());
 			return map;
 		}).toList();
 
-		long totalElements = userFollopwPage.getTotalElements();
-		long totalPages = userFollopwPage.getTotalPages();
+		long totalElements = userFollowPage.getTotalElements();
+		long totalPages = userFollowPage.getTotalPages();
 
-		return Map.of("message", "팔로워 조회에 성공하였습니다.",
+		return Map.of("message", "팔로잉 조회에 성공하였습니다.",
 			"page", page,
 			"totalElements", totalElements,
 			"totalPages", totalPages,
-			"followers", followings);
+			"followings", followings);
 	}
 }

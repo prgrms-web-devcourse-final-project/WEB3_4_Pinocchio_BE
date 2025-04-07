@@ -1,17 +1,18 @@
 package sns.pinocchio.comment.controller;
 
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import java.util.Map;
+import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
@@ -22,22 +23,31 @@ import org.springframework.test.web.servlet.ResultActions;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.transaction.Transactional;
-import sns.pinocchio.application.comment.commentDto.CommentLikeRequest;
 import sns.pinocchio.application.comment.CommentService;
+import sns.pinocchio.application.comment.DeleteType;
+import sns.pinocchio.application.comment.commentDto.CommentCreateRequest;
+import sns.pinocchio.application.comment.commentDto.CommentDeleteRequest;
+import sns.pinocchio.domain.comment.Comment;
+import sns.pinocchio.domain.comment.CommentStatus;
 import sns.pinocchio.domain.fixtures.TestFixture;
 import sns.pinocchio.domain.member.Member;
+import sns.pinocchio.domain.post.Post;
 import sns.pinocchio.infrastructure.member.MemberRepository;
-import sns.pinocchio.presentation.comment.CommentController;
+import sns.pinocchio.infrastructure.persistence.mongodb.PostRepository;
 
 @SpringBootTest
 @AutoConfigureMockMvc
 @Transactional
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)public class CommentLikeControllerTest {
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+public class CommentCreateControllerTest {
 	@Autowired
 	private MockMvc mockMvc;
 
 	@MockBean
 	private CommentService commentService;
+
+	@MockBean
+	private PostRepository postRepository;
 
 	@Autowired
 	private PasswordEncoder passwordEncoder;
@@ -53,7 +63,6 @@ import sns.pinocchio.presentation.comment.CommentController;
 			post("/auth/login").contentType(MediaType.APPLICATION_JSON).content(loginRequestJson));
 	}
 
-
 	public Member setUp() {
 		Member member =
 			Member.builder()
@@ -65,55 +74,28 @@ import sns.pinocchio.presentation.comment.CommentController;
 		return memberRepository.save(member);
 	}
 
-	//댓글 좋아요 테스트
+	//댓글 생성 테스트
 	@Test
-	public void 댓글_좋아요_테스트() throws Exception {
-		Member member =  setUp();
+	void 댓글_생성_테스트() throws Exception {
+		Member member = setUp();
 		ResultActions loginResponse = loginAndGetResponse();
 		String accessToken = loginResponse.andReturn().getResponse().getHeader("Authorization");
-		String postId = "post_001";
 		String commentId = "comment_001";
-		CommentLikeRequest request = CommentLikeRequest.builder().postId(postId).build();
-		Map<String, Object> response = Map.of("message", "좋아요 요청에 성공했습니다.", "userId", "user_001", "liked", true,
-			"likes", 1);
+		String postId = "post_001";
+		String content = "댓글";
+		CommentCreateRequest request = CommentCreateRequest.builder().postId(postId).content(content).build();
 
-		when(commentService.toggleCommentLike(any(CommentLikeRequest.class), anyString(), anyString())).thenReturn(
-			response);
-		when(commentService.isInvalidComment(commentId, postId)).thenReturn(false);
-		mockMvc.perform(post("/comments/comment_001/like").contentType(MediaType.APPLICATION_JSON)
+		Map<String, Object> response = Map.of("message", "댓글이 등록되었습니다.", "commentId", commentId);
+		when(postRepository.findByIdAndStatus(request.getPostId(), "active")).thenReturn(
+			Optional.of(Post.builder().build()));
+		when(commentService.createComment(request, member.getTsid())).thenReturn(response);
+
+		mockMvc.perform(post("/comments/create").contentType(MediaType.APPLICATION_JSON)
 				.content(new ObjectMapper().writeValueAsString(request))
 				.header("Authorization", accessToken))
 			.andExpect(status().isOk())
-			.andExpect(jsonPath("$.message").value("좋아요 요청에 성공했습니다."))
-			.andExpect(jsonPath("$.likes").value(1))
-			.andExpect(jsonPath("$.liked").value(true))
+			.andExpect(jsonPath("$.message").value("댓글이 등록되었습니다."))
 			.andDo(print());
-
-	}
-
-	//댓글 좋아요 실패 테스트
-	@Test
-	public void 댓글_좋아요_실패_테스트() throws Exception {
-		Member member =  setUp();
-		ResultActions loginResponse = loginAndGetResponse();
-		String accessToken = loginResponse.andReturn().getResponse().getHeader("Authorization");
-		String postId = "post_001";
-		String commentId = "comment_001";
-
-		CommentLikeRequest request = CommentLikeRequest.builder().postId(postId).build();
-		Map<String, Object> response = Map.of("message", "좋아요 요청에 성공했습니다.", "userId", "user_001", "liked", true,
-			"likes", 1);
-
-		when(commentService.toggleCommentLike(any(CommentLikeRequest.class), anyString(), anyString())).thenReturn(
-			response);
-		when(commentService.isInvalidComment(commentId, postId)).thenReturn(true);
-
-		mockMvc.perform(post("/comments/comment_001/like").contentType(MediaType.APPLICATION_JSON)
-				.content(new ObjectMapper().writeValueAsString(request))
-				.header("Authorization", accessToken))
-			.andExpect(status().isNotFound())
-			.andExpect(jsonPath("$.message").value("등록된 댓글을 찾을 수 없습니다."))
-			.andDo(print());
-
+		System.out.println("✅ 댓글 생성 성공");
 	}
 }

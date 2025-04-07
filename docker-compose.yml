@@ -76,7 +76,7 @@ services:
             SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/pino
             SPRING_DATASOURCE_USERNAME: dev
             SPRING_DATASOURCE_PASSWORD: devteam9
-            SPRING_DATA_MONGODB_URI: mongodb://dev:devteam9@mongodb:27017/pino
+            SPRING_DATA_MONGODB_URI: mongodb://dev:devteam9@mongodb:27017/pino?authSource=admin
             SPRING_REDIS_HOST: redis
         networks:
             - app-network

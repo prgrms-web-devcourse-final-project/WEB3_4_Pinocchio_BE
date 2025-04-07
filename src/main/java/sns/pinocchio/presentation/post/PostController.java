@@ -1,15 +1,22 @@
 package sns.pinocchio.presentation.post;
 
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.*;
 import sns.pinocchio.application.post.PostCreateRequest;
 import sns.pinocchio.application.post.PostModifyRequest;
 import sns.pinocchio.application.post.PostService;
@@ -34,7 +41,7 @@ public class PostController {
             @ApiResponse(responseCode = "500", description = "서버 내부 오류")
             // create 에는 404 필요없음
     })
-    @PostMapping("/create")
+    @PostMapping
     public ResponseEntity<String> createPost(
             @RequestBody PostCreateRequest request
     ) {
@@ -60,7 +67,7 @@ public class PostController {
             @ApiResponse(responseCode = "500", description = "서버 내부 오류")
     })
 
-    @PatchMapping("/modify")
+    @PatchMapping
     public ResponseEntity<String> modifyPost(
             @RequestBody PostModifyRequest request
     ) {

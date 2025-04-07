@@ -36,7 +36,7 @@ public class PostLikeControllerTest {
         doNothing().when(postLikeService).toggleLike(postId, "mockTsid");
 
         // when & then
-        mockMvc.perform(post("/api/posts/like/{postId}/toggle", postId)
+        mockMvc.perform(post("/api/posts/like/{postId}", postId)
                         .header("Authorization", accessToken)
                         .contentType(MediaType.APPLICATION_JSON)
                 )

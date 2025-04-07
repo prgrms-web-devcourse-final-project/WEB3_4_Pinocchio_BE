@@ -23,6 +23,7 @@ configurations {
 
 repositories {
     mavenCentral()
+    maven { url 'https://jitpack.io' }
 }
 
 dependencies {
@@ -33,6 +34,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-security'
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-websocket'
+    implementation 'org.springframework.security:spring-security-crypto:5.7.1'
 
     // 스웨거
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.6'
@@ -69,7 +71,24 @@ dependencies {
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.security:spring-security-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+    // Bill of Materials (BOM) to manage Java library versions
+    implementation platform('dev.langchain4j:langchain4j-bom:0.36.2')
+    // MongoDB Java Sync Driver v5.2.0 or later
+    implementation 'org.mongodb:mongodb-driver-sync:5.2.0'
+    // Java library for Hugging Face models
+    implementation 'dev.langchain4j:langchain4j-hugging-face'
+    // Java library for URL Document Loader
+    implementation 'dev.langchain4j:langchain4j'
+    // Java library for Apache PDFBox Document Parser
+    implementation 'dev.langchain4j:langchain4j-document-parser-apache-pdfbox'
     testImplementation 'org.assertj:assertj-core:3.24.2'
+
+    // Open Korean Text
+    implementation 'org.openkoreantext:open-korean-text:2.1.0'
+
+    implementation 'org.scala-lang:scala-library:2.12.4'
+    implementation 'com.twitter.penguin:korean-text:4.4.4'
 
     // Jwt
     implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
@@ -79,8 +98,8 @@ dependencies {
     // TSID
     implementation 'com.github.f4b6a3:tsid-creator:5.2.4'
 
-    // Health Check
-    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    //ollama
+    implementation 'io.github.ollama4j:ollama4j:1.0.93'
 }
 
 def querydslDir = "src/main/generated"
@@ -98,7 +117,5 @@ tasks.withType(JavaCompile).configureEach {
 }
 
 tasks.named('test') {
-    useJUnitPlatform {
-        includeTags 'integration' // CI에서는 통합 테스트만 실행
-    }
+    useJUnitPlatform()
 }

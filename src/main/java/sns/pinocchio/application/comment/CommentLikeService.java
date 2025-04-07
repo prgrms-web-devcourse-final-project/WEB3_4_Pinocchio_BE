@@ -7,8 +7,8 @@ import java.util.Optional;
 import org.springframework.stereotype.Service;
 
 import lombok.RequiredArgsConstructor;
+import sns.pinocchio.config.global.enums.CancellState;
 import sns.pinocchio.domain.comment.CommentLike;
-import sns.pinocchio.domain.comment.CommentLikeStatus;
 import sns.pinocchio.infrastructure.persistence.mongodb.CommentLikeRepository;
 
 @Service
@@ -20,33 +20,35 @@ public class CommentLikeService {
 	public Optional<String> toggleCommentLike(String commentId, String authorId) {
 		Optional<CommentLike> optCommentLike = commentLikeRepository.findByUserIdAndCommentId(authorId,
 			commentId);
+		String commentLikeId = null;
 		if (optCommentLike.isEmpty()) {
 			CommentLike commentLike = CommentLike.builder()
 				.commentId(commentId)
 				.userId(authorId)
 				.createdAt(LocalDateTime.now())
-				.status(CommentLikeStatus.ACTIVE)
+				.status(CancellState.ACTIVE)
 				.build();
-			String commentLikeId = commentLikeRepository.save(commentLike).getId();
-			return Optional.ofNullable(commentLikeId);
+			commentLikeId = commentLikeRepository.save(commentLike).getId();
 		} else {
 			CommentLike commentLike = optCommentLike.get();
-			CommentLikeStatus status = commentLike.getStatus();
-			boolean isActive = status == CommentLikeStatus.ACTIVE;
-			commentLike.setStatus(isActive ? CommentLikeStatus.DELETE : CommentLikeStatus.ACTIVE);
-			String commentLikeId = commentLikeRepository.save(commentLike).getId();
-			return isActive ?  Optional.empty():Optional.ofNullable(commentLikeId);
+			boolean isActivity =  commentLike.toggleCommentLike();
+			if(isActivity){
+				commentLikeId = commentLikeRepository.save(commentLike).getId();
+			} else{
+				commentLikeRepository.save(commentLike);
+			}
 		}
+		return Optional.ofNullable(commentLikeId);
 	}
 
 	//댓글에 달린 모든 좋아요 삭제
-	public void deleteAllCommentlikes(String commentId){
+	public void deleteAllCommentlikes(String commentId) {
 		commentLikeRepository.deleteByCommentId(commentId);
 	}
 
 	//유저의 좋아요 리스트 가져오기
 	public Map<String, Object> findLikesByUsers(String likeId) {
 		return Map.of("CommentLikeList",
-			commentLikeRepository.findAllByUserIdAndStatus(likeId, CommentLikeStatus.ACTIVE));
+			commentLikeRepository.findAllByUserIdAndStatus(likeId, CancellState.ACTIVE));
 	}
 }

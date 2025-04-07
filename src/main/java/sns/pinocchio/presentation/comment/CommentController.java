@@ -1,5 +1,7 @@
 package sns.pinocchio.presentation.comment;
 
+import static sns.pinocchio.presentation.comment.exception.CommentErrorCode.*;
+
 import java.util.Map;
 import java.util.Optional;
 
@@ -30,6 +32,7 @@ import sns.pinocchio.config.global.auth.model.CustomUserDetails;
 import sns.pinocchio.domain.member.Member;
 import sns.pinocchio.domain.post.Post;
 import sns.pinocchio.infrastructure.persistence.mongodb.PostRepository;
+import sns.pinocchio.presentation.comment.exception.CommentException;
 
 @Tag(name = "댓글", description = "댓글 관련 API")
 @RestController
@@ -44,7 +47,7 @@ public class CommentController {
 		@ApiResponse(responseCode = "401", description = "JWT 토큰 누락 또는 인증 실패"),
 		@ApiResponse(responseCode = "404", description = "댓글 조회 실패"),
 		@ApiResponse(responseCode = "500", description = "서버 내부 오류")})
-	@PutMapping("/create")
+	@PostMapping
 	public ResponseEntity<Map<String, Object>> updateComment(@AuthenticationPrincipal CustomUserDetails userDetails,
 		@RequestBody CommentCreateRequest request) {
 		Member authorMember = userDetails.getMember();
@@ -64,18 +67,17 @@ public class CommentController {
 		@ApiResponse(responseCode = "401", description = "JWT 토큰 누락 또는 인증 실패"),
 		@ApiResponse(responseCode = "404", description = "댓글 조회 실패"),
 		@ApiResponse(responseCode = "500", description = "서버 내부 오류")})
-	@PutMapping("/modify")
+	@PutMapping
 	public ResponseEntity<Map<String, Object>> updateComment(@AuthenticationPrincipal CustomUserDetails userDetails,
 		@RequestBody CommentModifyRequest request) {
 		Member authorMember = userDetails.getMember();
 
 		if (commentService.isNotMyComment(authorMember.getTsid(), request.getCommentId())) {
-			return ResponseEntity.status(HttpStatus.FORBIDDEN)
-				.body(Map.of("message", "이 댓글을 수정할 권한이 없습니다. 작성자만 수정할 수 있습니다."));
+			throw new CommentException(UNAUTHORIZED_ACCESS);
 		}
 
 		if (commentService.isInvalidComment(request.getCommentId(), request.getPostId())) {
-			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("message", "등록된 댓글을 찾을 수 없습니다."));
+			throw new CommentException(COMMENT_NOT_FOUND);
 		}
 
 		Map<String, Object> response = commentService.modifyComment(request);
@@ -94,12 +96,11 @@ public class CommentController {
 		Member authorMember = userDetails.getMember();
 
 		if (commentService.isMyComment(authorMember.getTsid(), commentId)) {
-			return ResponseEntity.status(HttpStatus.FORBIDDEN)
-				.body(Map.of("message", "스스로 좋아요는 불가능합니다."));
+			throw new CommentException(UNAUTHORIZED_ACCESS);
 		}
 
 		if (commentService.isInvalidComment(commentId, request.getPostId())) {
-			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("message", "등록된 댓글을 찾을 수 없습니다."));
+			throw new CommentException(COMMENT_NOT_FOUND);
 		}
 
 		Map<String, Object> response = commentService.toggleCommentLike(request, commentId, authorMember.getTsid());
@@ -117,12 +118,11 @@ public class CommentController {
 		Member authorMember = userDetails.getMember();
 
 		if (commentService.isNotMyComment(authorMember.getTsid(), request.getCommentId())) {
-			return ResponseEntity.status(HttpStatus.FORBIDDEN)
-				.body(Map.of("message", "권한이 없습니다."));
+			throw new CommentException(UNAUTHORIZED_ACCESS);
 		}
 
 		if (commentService.isInvalidComment(request.getCommentId(), request.getPostId())) {
-			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("message", "등록된 댓글을 찾을 수 없습니다."));
+			throw new CommentException(COMMENT_NOT_FOUND);
 		}
 
 		Map<String, Object> response = commentService.deleteComment(request);

@@ -11,6 +11,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import sns.pinocchio.config.global.enums.CancellState;
 
 @Document(collection = "comments")
 @Getter
@@ -37,5 +38,14 @@ public class Comment {
 
 	private LocalDateTime updatedAt;
 
-	private CommentStatus status; // active / deleted (Soft Delete)
+	private CancellState status; // active / deleted (Soft Delete)
+
+	public int updateLikes(boolean isLiked){
+		if(isLiked){
+			this.likes = this.likes +1;
+		} else{
+			this.likes = this.likes - 1;
+		}
+		return this.likes;
+	}
 }

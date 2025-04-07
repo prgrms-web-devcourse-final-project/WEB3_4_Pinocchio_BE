@@ -100,6 +100,9 @@ dependencies {
 
     //ollama
     implementation 'io.github.ollama4j:ollama4j:1.0.93'
+
+    // Actuator
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
 }
 
 def querydslDir = "$buildDir/generated/querydsl"

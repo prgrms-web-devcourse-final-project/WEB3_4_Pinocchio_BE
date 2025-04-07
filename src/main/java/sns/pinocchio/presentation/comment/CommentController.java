@@ -120,8 +120,8 @@ public class CommentController {
 		}
 
 		if (commentService.isInvalidComment(request.getCommentId(), request.getPostId())) {
-			throw new CommentException(CommentErrorCode.UNAUTHORIZED_COMMENT_ACCESS);
-		}
+            throw new CommentException(CommentErrorCode.COMMENT_NOT_FOUND);
+        }
 
 		Map<String, Object> response = commentService.deleteComment(request);
 		return ResponseEntity.status(HttpStatus.OK).body(response);

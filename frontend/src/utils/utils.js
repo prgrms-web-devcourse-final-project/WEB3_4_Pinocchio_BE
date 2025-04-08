@@ -197,3 +197,7 @@ export const groupQuillLists = (htmlContent) => {
 
   return doc.body.innerHTML;
 };
+
+export const getRandomInt = (min, max) => {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}

@@ -1,4 +1,4 @@
-package sns.pinocchio.infrastructure.ai;
+package sns.pinocchio.infrastructure.ai.vectorDB;
 
 import dev.langchain4j.data.embedding.Embedding;
 import dev.langchain4j.data.segment.TextSegment;

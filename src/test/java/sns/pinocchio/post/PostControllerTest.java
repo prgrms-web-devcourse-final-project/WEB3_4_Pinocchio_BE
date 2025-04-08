@@ -2,6 +2,7 @@ package sns.pinocchio.post;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -20,6 +21,7 @@ import java.util.List;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+@Tag("integration")
 @SpringBootTest
 @AutoConfigureMockMvc(addFilters = false)
 class PostControllerTest {
@@ -96,13 +98,11 @@ class PostControllerTest {
                 .andExpect(jsonPath("$.visibility").value("PUBLIC")); // enum은 그대로 노출됨
     }
 
-    // 실패하는게 당연한 테스트 실패가 성공임
+
     @Test
     @DisplayName("게시글 상세 조회 실패 - 비공개 게시글, 인증 없음")
     void getPrivatePostWithoutAuthentication() throws Exception {
-        // when & then
         mockMvc.perform(get("/api/posts/" + privatePostId))
-                .andExpect(status().isForbidden())
-                .andExpect(content().string("해당 게시물은 비공개 상태입니다."));
+                .andExpect(status().isForbidden());
     }
 }

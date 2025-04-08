@@ -1,12 +1,12 @@
 import {useLocation, useNavigate} from "react-router-dom";
-import TabLayout from "../../shared/TabLayout";
+import TabLayout from "../../../shared/TabLayout";
 
 const tabMenu = [
     { key: "like", title: "좋아요 목록" }
     , { key: "comment", title: "내 댓글" }
-    , { key: "follow", title: "팔로우 목록" }
-    , { key: "mention", title: "멘션 조회" }
-    , { key: "ban", title: "차단 목록" }
+    , { key: "follower", title: "팔로우 목록" }
+    , { key: "mentions", title: "멘션 조회" }
+    , { key: "block", title: "차단 목록" }
 ]
 const MyPageTabLayout = ({ children, currentTabKey }) => {
     const navigate = useNavigate();

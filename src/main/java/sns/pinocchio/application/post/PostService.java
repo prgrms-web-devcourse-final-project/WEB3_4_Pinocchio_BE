@@ -13,6 +13,8 @@ import sns.pinocchio.domain.post.Post;
 import sns.pinocchio.domain.post.Visibility;
 import sns.pinocchio.infrastructure.persistence.mongodb.PostRepository;
 import sns.pinocchio.infrastructure.persistence.mysql.HashtagRepository;
+import sns.pinocchio.presentation.post.exception.PostErrorCode;
+import sns.pinocchio.presentation.post.exception.PostException;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -121,7 +123,7 @@ public class PostService {
 
         // 2. 비공개 게시글이면 작성자 본인만 볼 수 있음
         if (post.getVisibility() == Visibility.PRIVATE && !post.getTsid().equals(loginTsid)) {
-            throw new IllegalAccessError("해당 게시물은 비공개 상태입니다.");
+            throw new PostException(PostErrorCode.UNAUTHORIZED_ACCESS);
         }
 
         // 3. 조회수 +1 처리

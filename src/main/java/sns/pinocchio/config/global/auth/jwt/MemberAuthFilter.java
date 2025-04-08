@@ -5,9 +5,6 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
@@ -25,6 +22,10 @@ import sns.pinocchio.config.global.redis.redisService.RedisService;
 import sns.pinocchio.domain.member.Member;
 import sns.pinocchio.presentation.auth.exception.AuthErrorCode;
 import sns.pinocchio.presentation.member.exception.MemberException;
+
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 @Component
 @RequiredArgsConstructor
@@ -86,19 +87,18 @@ public class MemberAuthFilter extends OncePerRequestFilter {
     String method = request.getMethod();
     log.info("요청 경로: {}, 메서드: {}", path, method);
 
-    boolean shouldSkip =
-        ((method.equals("GET") && path.equals("/api/posts/search"))
-            || (method.equals("POST") && (path.startsWith("/auth") || path.startsWith("/api/auth")))
-            || (method.equals("POST")
-                && (path.startsWith("/user/password/reset")
-                    || path.startsWith("/api/user/password/reset")))
-            || path.startsWith("/swagger")
-            || path.startsWith("/v3/api-docs")
-            || path.startsWith("/swagger-ui")
-            || path.startsWith("/swagger-resources")
-            || path.startsWith("/webjars"));
-    log.info("필터 건너뛰기: {}", shouldSkip);
-    return shouldSkip;
+      boolean shouldSkip =
+              (method.equals("GET") && (path.equals("/api/posts/search") || path.startsWith("/actuator/health") || path.startsWith("/api/actuator/health")))
+                      || (method.equals("POST") && (path.startsWith("/auth") || path.startsWith("/api/auth")))
+                      || (method.equals("POST") && (path.startsWith("/user/password/reset") || path.startsWith("/api/user/password/reset")))
+                      || path.startsWith("/swagger")
+                      || path.startsWith("/v3/api-docs")
+                      || path.startsWith("/swagger-ui")
+                      || path.startsWith("/swagger-resources")
+                      || path.startsWith("/webjars");
+
+      log.info("필터 건너뛰기: {}", shouldSkip);
+      return shouldSkip;
   }
 
   // SecurityContext에 인증 정보를 주입하는 메서드
@@ -155,7 +155,7 @@ public class MemberAuthFilter extends OncePerRequestFilter {
       return newAccessToken;
     } catch (MemberException e) {
       log.error("유효하지 않은 인증정보입니다.");
-      handleAuthError(response, AuthErrorCode.INVALID_TOKEN);
+      handleAuthError(response, AuthErrorCode.TOKEN_EXPIRED);
       throw e;
     } catch (Exception e) {
       log.error("토큰 갱신 중 오류 발생: {}", e.getMessage());

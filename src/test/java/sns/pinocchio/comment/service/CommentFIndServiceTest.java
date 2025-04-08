@@ -1,27 +1,26 @@
 package sns.pinocchio.comment.service;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
-
-import java.util.List;
-import java.util.Map;
-
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-
 import sns.pinocchio.application.comment.CommentService;
 import sns.pinocchio.config.global.enums.CancellState;
 import sns.pinocchio.domain.comment.Comment;
 import sns.pinocchio.infrastructure.persistence.mongodb.CommentRepository;
 
+import java.util.List;
+import java.util.Map;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.*;
+
+@Tag("unit")
 @SpringBootTest
 public class CommentFIndServiceTest {
 	@InjectMocks

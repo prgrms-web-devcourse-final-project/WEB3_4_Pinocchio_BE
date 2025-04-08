@@ -2,11 +2,11 @@ package sns.pinocchio.config.global.ai;
 
 public class Prompt {
 	private String memberPost;
-	private String answerEx = "참고:";
+	private String answerEx = "예시:";
 	private String basePrompt;
 
 	void setMemberPost(String memberPost) {
-		this.memberPost = "작성글:" + memberPost;
+		this.memberPost = "게시글:" + memberPost;
 	}
 
 	void addAnswerEx(String answerEx) {
@@ -20,7 +20,7 @@ public class Prompt {
 	@Override
 	public String toString() {
 		return String.format(
-			"%s %s %s",
+			"%s. %s. %s.",
 			memberPost,
 			answerEx,
 			basePrompt

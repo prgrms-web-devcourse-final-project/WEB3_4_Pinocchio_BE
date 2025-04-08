@@ -43,8 +43,10 @@ public class SecurityConfig {
                                 "/auth/signup",
                                 "/auth/login",
                                 "/auth/logout",
-                                "/posts/search"
+                                "/posts/search",
+                                "/actuator/health"
                         ).permitAll()
+
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(memberAuthFilter, UsernamePasswordAuthenticationFilter.class);

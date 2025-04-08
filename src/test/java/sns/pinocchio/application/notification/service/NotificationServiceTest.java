@@ -1,12 +1,7 @@
 package sns.pinocchio.application.notification.service;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
-
-import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -19,6 +14,14 @@ import sns.pinocchio.domain.notification.NotificationException;
 import sns.pinocchio.domain.notification.NotificationException.NotificationBadRequestException;
 import sns.pinocchio.infrastructure.persistence.mysql.NotificationRepository;
 
+import java.util.Optional;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
+
+@Tag("unit")
 @ExtendWith(MockitoExtension.class)
 class NotificationServiceTest {
 

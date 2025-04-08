@@ -1,11 +1,6 @@
 package sns.pinocchio.MemberFollow.service;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
-
-import java.util.List;
-import java.util.Map;
-
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -14,12 +9,18 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-
 import sns.pinocchio.application.member.MemberFollowService;
 import sns.pinocchio.config.global.enums.CancellState;
 import sns.pinocchio.domain.user.UserFollow;
 import sns.pinocchio.infrastructure.persistence.mongodb.UserFollowRepository;
 
+import java.util.List;
+import java.util.Map;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.*;
+
+@Tag("unit")
 @SpringBootTest
 public class MemberFollowFindServiceTest {
 	@Mock

@@ -12,7 +12,7 @@ import sns.pinocchio.config.global.auth.service.cookieService.CookieService;
 import sns.pinocchio.config.global.auth.util.EmailUtil;
 import sns.pinocchio.config.global.auth.util.JwtUtil;
 import sns.pinocchio.config.global.auth.util.PasswordUtil;
-import sns.pinocchio.config.global.redis.redisService.RedisService;
+import sns.pinocchio.infrastructure.redis.redisService.RedisService;
 import sns.pinocchio.domain.member.Member;
 import sns.pinocchio.infrastructure.member.MemberRepository;
 import sns.pinocchio.presentation.auth.exception.AuthErrorCode;
@@ -30,13 +30,9 @@ public class MemberService {
   private final RedisService redisService;
   private final JwtUtil jwtUtil;
 
-  // 계정 생성
   @Transactional
   public Member createMember(SignupRequestDto signupRequestDto) {
-    // 이메일 중복 체크
     checkEmailDuplicate(signupRequestDto.getEmail());
-
-    // 닉네임 중복 체크
     checkNicknameDuplicate(signupRequestDto.getNickname());
 
     Member member =
@@ -46,36 +42,34 @@ public class MemberService {
             .nickname(signupRequestDto.getNickname())
             .password(passwordEncoder.encode(signupRequestDto.getPassword()))
             .build();
-
-    this.memberRepository.save(member);
+    memberRepository.save(member);
 
     return member;
   }
 
-  // 사용자 프로필 수정
   @Transactional
   public Member updateProfile(Long memberId, UpdateRequestDto updateRequestDto) {
-    // 유저 확인
     Member member = findById(memberId);
-
-    // 닉네임 중복 체크
     checkNicknameDuplicate(updateRequestDto.nickname());
 
-    member.updateProfile(updateRequestDto);
+    member.updateProfile(
+        updateRequestDto.name(),
+        updateRequestDto.nickname(),
+        updateRequestDto.bio(),
+        updateRequestDto.website(),
+        updateRequestDto.profileImageUrl(),
+        updateRequestDto.isActive());
+
     return member;
   }
 
-  // 임시 비밀번호 발송
   @Transactional
   public void sendTemporaryPassword(String email) {
-    // 회원 조회
     Member member = findByEmail(email);
 
-    // 임시 비밀번호 생성 / 패스워드 암호화 / 비밀번호 변경
     String temporaryPassword = PasswordUtil.generateTemporaryPassword();
     member.updatePassword(passwordEncoder.encode(temporaryPassword));
 
-    // 이메일 발송
     EmailUtil.sendEmail(member.getEmail(), temporaryPassword);
   }
 
@@ -97,7 +91,6 @@ public class MemberService {
             });
   }
 
-  // 리프레시 토큰 쿠키, 레디스 저장
   public void saveRefreshToken(String refreshToken, Member member, HttpServletResponse response) {
     cookieService.addRefreshTokenToCookie(
         refreshToken, jwtUtil.getRefreshTokenExpirationTime(), response);
@@ -114,6 +107,7 @@ public class MemberService {
     cookieService.clearTokenFromCookie(response);
     redisService.addBlackList(refreshToken, jwtUtil.getRefreshTokenExpirationTime());
   }
+
 
   @Transactional
   public void deleteMember(Member member) {

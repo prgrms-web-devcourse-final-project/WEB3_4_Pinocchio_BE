@@ -32,7 +32,7 @@ public class CookieUtil {
             .secure(true)
             .path("/")
             .sameSite("Strict")
-            .maxAge(0) // 쿠키 즉시 삭제
+            .maxAge(0)
             .build();
 
     response.addHeader("Set-Cookie", expiredCookie.toString());

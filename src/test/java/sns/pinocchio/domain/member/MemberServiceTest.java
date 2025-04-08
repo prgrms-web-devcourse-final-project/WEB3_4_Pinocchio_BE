@@ -89,7 +89,13 @@ public class MemberServiceTest {
     UpdateRequestDto updateRequestDto =
         new UpdateRequestDto("nana", "Nick", "안녕하세요", "youtube", "", false);
     Member member = memberService.findByEmail("example@naver.com");
-    member.updateProfile(updateRequestDto);
+    member.updateProfile(
+        updateRequestDto.name(),
+        updateRequestDto.nickname(),
+        updateRequestDto.bio(),
+        updateRequestDto.website(),
+        updateRequestDto.profileImageUrl(),
+        updateRequestDto.isActive());
 
     Member result = memberService.findByEmail("example@naver.com");
 

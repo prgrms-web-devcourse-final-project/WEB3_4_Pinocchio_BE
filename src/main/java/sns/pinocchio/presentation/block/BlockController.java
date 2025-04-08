@@ -36,6 +36,7 @@ public class BlockController {
     Member member = customUserDetails.getMember();
 
     blockedUserService.deleteBlock(member.getId(), userId);
+
     return ResponseEntity.ok("해당 회원의 계정 차단이 해제되었습니다.");
   }
 
@@ -43,7 +44,6 @@ public class BlockController {
   @GetMapping
   public ResponseEntity<BlockedUserResponse> getBlockedMembers(
       @AuthenticationPrincipal CustomUserDetails customUserDetails) {
-
     Member member = customUserDetails.getMember();
     List<BlockedUserResponse.UserData> blockedUsers =
         blockedUserService.getBlockedUsers(member.getId());

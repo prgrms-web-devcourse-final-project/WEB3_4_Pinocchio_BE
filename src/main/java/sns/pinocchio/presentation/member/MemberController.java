@@ -34,7 +34,6 @@ public class MemberController {
   public ResponseEntity<ProfileResponseDto> getProfile(@PathVariable Long userId) {
     Member member = memberService.findById(userId);
 
-    // 응답 DTO 변환
     ProfileResponseDto profileResponseDto =
         new ProfileResponseDto(
             "success",
@@ -50,10 +49,8 @@ public class MemberController {
   public ResponseEntity<ProfileResponseDto> updateMemberInfo(
       @AuthenticationPrincipal CustomUserDetails customUserDetails,
       @Valid @RequestBody UpdateRequestDto updateRequestDto) {
-    // 유저 프로필 수정
     Member member = memberService.updateProfile(customUserDetails.getUserId(), updateRequestDto);
 
-    // 응답 DTO 변환
     ProfileResponseDto profileResponseDto =
         new ProfileResponseDto(
             "success",
@@ -99,7 +96,6 @@ public class MemberController {
     authService.validatePassword(deleteRequestDto.password(), member);
 
     memberService.deleteMember(member);
-
     memberService.tokenClear(request, response);
 
     return ResponseEntity.status(HttpStatus.OK).body("회원 탈퇴가 완료되었습니다. 그동안 이용해주셔서 감사합니다.");
@@ -110,13 +106,9 @@ public class MemberController {
   public ResponseEntity<String> reportMember(
       @AuthenticationPrincipal CustomUserDetails customUserDetails,
       @Valid @RequestBody ReportRequestDto reportRequestDto) {
-    // 신고자 조회 (사용자 조회)
     Member reporter = customUserDetails.getMember();
-
-    // 신고 대상 조회 (닉네임 유니크)
     Member reported = memberService.findByNickname(reportRequestDto.reportedNickname());
 
-    // 신고 내역 저장
     reportService.createReport(
         reporter.getId(),
         reported.getId(),

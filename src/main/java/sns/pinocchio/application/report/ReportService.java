@@ -15,7 +15,6 @@ public class ReportService {
 
   private final ReportRepository reportRepository;
 
-  // 신고 내역 저장
   @Transactional
   public void createReport(
       Long reporterId, Long reportedId, ReportedType reportedType, String reason) {

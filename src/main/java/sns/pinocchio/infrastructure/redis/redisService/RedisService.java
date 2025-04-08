@@ -1,8 +1,8 @@
-package sns.pinocchio.config.global.redis.redisService;
+package sns.pinocchio.infrastructure.redis.redisService;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import sns.pinocchio.config.global.redis.redisDao.RedisDao;
+import sns.pinocchio.infrastructure.redis.redisDao.RedisDao;
 
 @RequiredArgsConstructor
 @Service

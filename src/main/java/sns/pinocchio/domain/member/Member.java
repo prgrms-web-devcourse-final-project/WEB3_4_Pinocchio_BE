@@ -6,7 +6,6 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import sns.pinocchio.application.member.memberDto.request.UpdateRequestDto;
 
 import java.time.LocalDateTime;
 
@@ -37,7 +36,7 @@ public class Member {
   @Column(columnDefinition = "TEXT")
   private String profileImageUrl;
 
-  private Boolean isActive; // 기본값을 FALSE 로 설정
+  private Boolean isActive;
 
   @Column(nullable = false)
   private LocalDateTime createdAt;
@@ -48,7 +47,6 @@ public class Member {
   @Column(nullable = false, unique = true)
   private String tsid;
 
-  // 회원가입
   @Builder
   public Member(String email, String name, String nickname, String password) {
     this.email = email;
@@ -61,18 +59,22 @@ public class Member {
     this.tsid = TsidCreator.getTsid().toString();
   }
 
-  // 프로필 수정
-  public void updateProfile(UpdateRequestDto dto) {
-    if (dto.name() != null) this.name = dto.name();
-    if (dto.nickname() != null) this.nickname = dto.nickname();
-    if (dto.bio() != null) this.bio = dto.bio();
-    if (dto.website() != null) this.website = dto.website();
-    if (dto.profileImageUrl() != null) this.profileImageUrl = dto.profileImageUrl();
-    if (dto.isActive() != null) this.isActive = dto.isActive();
+  public void updateProfile(
+      String name,
+      String nickname,
+      String bio,
+      String website,
+      String profileImageUrl,
+      Boolean isActive) {
+    if (name != null) this.name = name;
+    if (nickname != null) this.nickname = nickname;
+    if (bio != null) this.bio = bio;
+    if (website != null) this.website = website;
+    if (profileImageUrl != null) this.profileImageUrl = profileImageUrl;
+    if (isActive != null) this.isActive = isActive;
     this.updatedAt = LocalDateTime.now();
   }
 
-  // 비밀번호 변경
   public void updatePassword(String password) {
     this.password = password;
   }

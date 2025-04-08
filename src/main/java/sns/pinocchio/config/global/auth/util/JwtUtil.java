@@ -44,7 +44,6 @@ public class JwtUtil {
     return key;
   }
 
-  // 토큰 검증 메서드
   public static TokenStatus validateToken(String token) {
     try {
       Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
@@ -58,13 +57,11 @@ public class JwtUtil {
     }
   }
 
-  // 토큰으로 유저 정보 가져오기
   public static Long getMember(String token) {
     Claims claims = parseToken(token);
     return claims.get("id", Long.class);
   }
 
-  // JWT 검증 및 정보 추출
   public static Claims parseToken(String token) {
     return Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody();
   }

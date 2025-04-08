@@ -26,11 +26,11 @@ public class SecurityConfig {
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .cors(Customizer.withDefaults())
-                .csrf(AbstractHttpConfigurer::disable) // CSRF 비활성화
+                .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // 상태 없는 세션 정책 설정
-                .httpBasic(AbstractHttpConfigurer::disable) // 기본 HTTP 인증 비활성화
-                .formLogin(AbstractHttpConfigurer::disable) // 폼 로그인 비활성화
-                .logout(AbstractHttpConfigurer::disable) // 로그아웃 비활성화
+                .httpBasic(AbstractHttpConfigurer::disable)
+                .formLogin(AbstractHttpConfigurer::disable)
+                .logout(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 "/swagger-ui/**",

@@ -28,14 +28,11 @@ public class AuthController {
   private final AuthService authService;
   private final TokenProvider tokenProvider;
 
-  // 회원가입
   @PostMapping("/signup")
   public ResponseEntity<SignupResponseDto> signup(
       @RequestBody @Valid SignupRequestDto signupRequestDto) {
-    // 계정 생성
     Member member = memberService.createMember(signupRequestDto);
 
-    // 응답 DTO 변환
     SignupResponseDto signupResponseDto =
         new SignupResponseDto(
             "success",
@@ -46,24 +43,17 @@ public class AuthController {
     return ResponseEntity.status(HttpStatus.CREATED).body(signupResponseDto);
   }
 
-  // 로그인
   @PostMapping("/login")
   public ResponseEntity<SignupResponseDto> login(
       @RequestBody @Valid LoginRequestDto loginRequestDto, HttpServletResponse response) {
-    // 이메일 검증
     Member member = memberService.findByEmail(loginRequestDto.email());
-
-    // 패스워드 검증
     authService.validatePassword(loginRequestDto.password(), member);
 
-    // 토콘 생성
     String accessToken = authService.generateAndSaveToken(member);
     String refreshToken = tokenProvider.generateRefreshToken();
 
-    // 리프레시 토큰 쿠키 및 레디스 저장
     memberService.saveRefreshToken(refreshToken, member, response);
 
-    // 응답 DTO 변환
     SignupResponseDto signupResponseDto =
         new SignupResponseDto(
             "success",
@@ -76,7 +66,6 @@ public class AuthController {
         .body(signupResponseDto);
   }
 
-  // 로그아웃
   @PostMapping("/logout")
   public ResponseEntity<String> logout(HttpServletRequest request, HttpServletResponse response) {
     memberService.tokenClear(request, response);

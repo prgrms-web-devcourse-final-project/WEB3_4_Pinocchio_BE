@@ -1,4 +1,4 @@
-package sns.pinocchio.config.global.redis.redisDao;
+package sns.pinocchio.infrastructure.redis.redisDao;
 
 import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;

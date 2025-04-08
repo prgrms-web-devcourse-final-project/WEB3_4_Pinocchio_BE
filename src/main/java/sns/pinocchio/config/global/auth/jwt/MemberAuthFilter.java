@@ -18,7 +18,7 @@ import sns.pinocchio.config.global.auth.service.CustomUserDetailService;
 import sns.pinocchio.config.global.auth.service.cookieService.CookieService;
 import sns.pinocchio.config.global.auth.util.JwtUtil;
 import sns.pinocchio.config.global.auth.util.TokenProvider;
-import sns.pinocchio.config.global.redis.redisService.RedisService;
+import sns.pinocchio.infrastructure.redis.redisService.RedisService;
 import sns.pinocchio.domain.member.Member;
 import sns.pinocchio.presentation.auth.exception.AuthErrorCode;
 import sns.pinocchio.presentation.member.exception.MemberException;
@@ -46,7 +46,6 @@ public class MemberAuthFilter extends OncePerRequestFilter {
     final String accessToken = getTokenFromHeader(request, HttpHeaders.AUTHORIZATION);
     final String refreshToken = cookieService.getRefreshTokenFromCookie(request);
 
-    // 토큰이 없는 경우 바로 다음 필터로 진행
     if (accessToken == null) {
       log.debug("인증 토큰이 없습니다.");
       handleAuthError(response, AuthErrorCode.INVALID_TOKEN);
@@ -79,7 +78,6 @@ public class MemberAuthFilter extends OncePerRequestFilter {
     filterChain.doFilter(request, response);
   }
 
-  // 사용자 권한이 필요한 api 경로만 필터링을 하는 메서드
   @Override
   protected boolean shouldNotFilter(HttpServletRequest request) {
 
@@ -87,21 +85,25 @@ public class MemberAuthFilter extends OncePerRequestFilter {
     String method = request.getMethod();
     log.info("요청 경로: {}, 메서드: {}", path, method);
 
-      boolean shouldSkip =
-              (method.equals("GET") && (path.equals("/api/posts/search") || path.startsWith("/actuator/health") || path.startsWith("/api/actuator/health")))
-                      || (method.equals("POST") && (path.startsWith("/auth") || path.startsWith("/api/auth")))
-                      || (method.equals("POST") && (path.startsWith("/user/password/reset") || path.startsWith("/api/user/password/reset")))
-                      || path.startsWith("/swagger")
-                      || path.startsWith("/v3/api-docs")
-                      || path.startsWith("/swagger-ui")
-                      || path.startsWith("/swagger-resources")
-                      || path.startsWith("/webjars");
+    boolean shouldSkip =
+        (method.equals("GET")
+                && (path.equals("/api/posts/search")
+                    || path.startsWith("/actuator/health")
+                    || path.startsWith("/api/actuator/health")))
+            || (method.equals("POST") && (path.startsWith("/auth") || path.startsWith("/api/auth")))
+            || (method.equals("POST")
+                && (path.startsWith("/user/password/reset")
+                    || path.startsWith("/api/user/password/reset")))
+            || path.startsWith("/swagger")
+            || path.startsWith("/v3/api-docs")
+            || path.startsWith("/swagger-ui")
+            || path.startsWith("/swagger-resources")
+            || path.startsWith("/webjars");
 
-      log.info("필터 건너뛰기: {}", shouldSkip);
-      return shouldSkip;
+    log.info("필터 건너뛰기: {}", shouldSkip);
+    return shouldSkip;
   }
 
-  // SecurityContext에 인증 정보를 주입하는 메서드
   private void setAuthenticationInContext(String accessToken) {
     CustomUserDetails customUserDetails =
         customUserDetailService.loadUserByAccessToken(accessToken);
@@ -111,7 +113,6 @@ public class MemberAuthFilter extends OncePerRequestFilter {
     SecurityContextHolder.getContext().setAuthentication(authenticationToken);
   }
 
-  // 인증 오류를 직접 HTTP 응답으로 처리하는 메서드 (예외를 던지지 않음)
   private void handleAuthError(HttpServletResponse response, AuthErrorCode errorCode)
       throws IOException {
     SecurityContextHolder.clearContext();
@@ -120,18 +121,15 @@ public class MemberAuthFilter extends OncePerRequestFilter {
     response.setContentType("application/json");
     response.setCharacterEncoding("UTF-8");
 
-    // 에러 응답 JSON 생성
     Map<String, Object> errorResponse = new HashMap<>();
     errorResponse.put("status", errorCode.getHttpStatus().value());
     errorResponse.put("error", errorCode.getHttpStatus().getReasonPhrase());
     errorResponse.put("message", errorCode.getMessage());
 
-    // JSON 문자열로 변환하여 응답
     ObjectMapper objectMapper = new ObjectMapper();
     response.getWriter().write(objectMapper.writeValueAsString(errorResponse));
   }
 
-  // 헤더에서 토큰 가져오는 메서드
   private String getTokenFromHeader(HttpServletRequest request, String headerName) {
     String token = request.getHeader(headerName);
     if (token != null && token.startsWith("Bearer ")) {
@@ -140,7 +138,6 @@ public class MemberAuthFilter extends OncePerRequestFilter {
     return null;
   }
 
-  // 엑세스 토큰 재발급
   private String reissueToken(
       String refreshToken, HttpServletRequest request, HttpServletResponse response)
       throws IOException {

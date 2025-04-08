@@ -10,6 +10,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import sns.pinocchio.config.global.enums.CancellState;
 
 @Document(collection = "follows")
 @Getter
@@ -29,18 +30,18 @@ public class UserFollow {
 
 	private String followingNickname;
 
-	private UserFollowStatus status;
+	private CancellState status;
 
 	private LocalDateTime createdAt;
 
 	private LocalDateTime updatedAt;
 
 	public boolean toggleFollowStatus() {
-		if (this.status == UserFollowStatus.ACTIVE) {
-			this.status = UserFollowStatus.DELETE;
+		if (this.status == CancellState.ACTIVE) {
+			this.status = CancellState.CANCELLED;
 			return false;
 		} else{
-			this.status = UserFollowStatus.ACTIVE;
+			this.status =CancellState.ACTIVE;
 			return true;
 		}
 	}

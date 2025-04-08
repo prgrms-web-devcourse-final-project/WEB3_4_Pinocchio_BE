@@ -1,25 +1,26 @@
 package sns.pinocchio.comment.service;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
-
-import java.util.Map;
-import java.util.NoSuchElementException;
-import java.util.Optional;
-
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.boot.test.context.SpringBootTest;
-
-import sns.pinocchio.application.comment.commentDto.CommentLikeRequest;
 import sns.pinocchio.application.comment.CommentLikeService;
 import sns.pinocchio.application.comment.CommentService;
+import sns.pinocchio.application.comment.commentDto.CommentLikeRequest;
+import sns.pinocchio.config.global.enums.CancellState;
 import sns.pinocchio.domain.comment.Comment;
-import sns.pinocchio.domain.comment.CommentStatus;
 import sns.pinocchio.infrastructure.persistence.mongodb.CommentLikeRepository;
 import sns.pinocchio.infrastructure.persistence.mongodb.CommentRepository;
+import sns.pinocchio.presentation.comment.exception.CommentException;
 
+import java.util.Map;
+import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
+@Tag("unit")
 @SpringBootTest
 public class CommentLikeServiceTest {
 	@InjectMocks
@@ -48,14 +49,15 @@ public class CommentLikeServiceTest {
 			.userId(userId)
 			.postId(postId)
 			.content("댓글이지롱")
-			.status(CommentStatus.ACTIVE)
+			.status(CancellState.ACTIVE)
 			.likes(0)
 			.build();
 
 		when(commentLikeService.toggleCommentLike(commentId, loginUserId)).thenReturn(
 			Optional.of(commentLikeId)); // 좋아요 추가됨
 
-		when(commentRepository.findByIdAndPostIdAndStatus(commentId, postId,CommentStatus.ACTIVE)).thenReturn(Optional.of(mockComment));
+		when(commentRepository.findByIdAndPostIdAndStatus(commentId, postId, CancellState.ACTIVE)).thenReturn(
+			Optional.of(mockComment));
 
 		when(commentRepository.save(any())).thenAnswer(invocation -> {
 			Comment savedComment = invocation.getArgument(0);
@@ -71,7 +73,7 @@ public class CommentLikeServiceTest {
 		assertEquals(1, response.get("likes"));
 
 		verify(commentRepository, times(1)).save(any());
-		verify(commentRepository, times(1)).findByIdAndPostIdAndStatus(commentId, postId,CommentStatus.ACTIVE);
+		verify(commentRepository, times(1)).findByIdAndPostIdAndStatus(commentId, postId, CancellState.ACTIVE);
 
 		System.out.println("✅ 댓글 좋아요 테스트 성공");
 	}
@@ -88,13 +90,14 @@ public class CommentLikeServiceTest {
 			.userId(userId)
 			.postId(postId)
 			.content("댓글이지롱")
-			.status(CommentStatus.ACTIVE)
+			.status(CancellState.ACTIVE)
 			.likes(1)
 			.build();
 
 		when(commentLikeService.toggleCommentLike(commentId, loginUserId)).thenReturn(Optional.empty());
 
-		when(commentRepository.findByIdAndPostIdAndStatus(commentId, postId,CommentStatus.ACTIVE)).thenReturn(Optional.of(mockComment));
+		when(commentRepository.findByIdAndPostIdAndStatus(commentId, postId, CancellState.ACTIVE)).thenReturn(
+			Optional.of(mockComment));
 
 		when(commentRepository.save(any())).thenAnswer(invocation -> {
 			Comment savedComment = invocation.getArgument(0);
@@ -110,7 +113,7 @@ public class CommentLikeServiceTest {
 		assertEquals(0, response.get("likes"));
 
 		verify(commentRepository, times(1)).save(any());
-		verify(commentRepository, times(1)).findByIdAndPostIdAndStatus(commentId, postId,CommentStatus.ACTIVE);
+		verify(commentRepository, times(1)).findByIdAndPostIdAndStatus(commentId, postId, CancellState.ACTIVE);
 
 		System.out.println("✅ 댓글 좋아요 취소 성공");
 	}
@@ -124,14 +127,15 @@ public class CommentLikeServiceTest {
 		String commentId = "comment_001";
 		CommentLikeRequest likeRequest = CommentLikeRequest.builder().postId(postId).build();
 
-		when(commentRepository.findByIdAndPostIdAndStatus(commentId, postId,CommentStatus.ACTIVE)).thenReturn(Optional.empty());
+		when(commentRepository.findByIdAndPostIdAndStatus(commentId, postId, CancellState.ACTIVE)).thenReturn(
+			Optional.empty());
 
 		// When & Then
-		assertThrows(NoSuchElementException.class, () -> {
+		assertThrows(CommentException.class, () -> {
 			commentService.toggleCommentLike(likeRequest, commentId, loginUserId);
 		});
 
-		verify(commentRepository, times(1)).findByIdAndPostIdAndStatus(commentId, postId,CommentStatus.ACTIVE);
+		verify(commentRepository, times(1)).findByIdAndPostIdAndStatus(commentId, postId, CancellState.ACTIVE);
 
 		System.out.println("✅ 댓글 좋아요 실패 (없는댓글)");
 	}

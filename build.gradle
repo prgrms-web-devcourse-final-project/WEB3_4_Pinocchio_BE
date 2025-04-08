@@ -100,9 +100,12 @@ dependencies {
 
     //ollama
     implementation 'io.github.ollama4j:ollama4j:1.0.93'
+
+    // Actuator
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
 }
 
-def querydslDir = "src/main/generated"
+def querydslDir = "$buildDir/generated/querydsl"
 
 sourceSets {
     main {
@@ -117,5 +120,17 @@ tasks.withType(JavaCompile).configureEach {
 }
 
 tasks.named('test') {
+
+    useJUnitPlatform {
+        includeTags 'integration'
+    }
+    systemProperty "spring.data.redis.host", System.getenv("SPRING_REDIS_HOST") ?: "localhost"
+    systemProperty "spring.data.redis.port", System.getenv("SPRING_REDIS_PORT") ?: "6379"
+    systemProperty "spring.datasource.url", System.getenv("SPRING_DATASOURCE_URL") ?: "jdbc:mysql://localhost:3306/test_db"
+    systemProperty "spring.datasource.username", System.getenv("SPRING_DATASOURCE_USERNAME") ?: "root"
+    systemProperty "spring.datasource.password", System.getenv("SPRING_DATASOURCE_PASSWORD") ?: "root"
+    systemProperty "spring.data.mongodb.uri", System.getenv("SPRING_DATA_MONGODB_URI") ?: "mongodb://root:root@localhost:27017/test?authSource=admin"
+
     useJUnitPlatform()
+
 }

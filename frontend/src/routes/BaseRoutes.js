@@ -5,7 +5,12 @@ import NewPost from "../pages/board/NewPost";
 import Error404 from "../pages/error/Error404";
 import MainBoardList from "../pages/board/MainBoardList";
 import Signup from "../pages/login/Signup";
-import MyPage from "../pages/board/MyPage";
+import MyPageLike from "../pages/board/mypage/MyPageLike";
+import MyPageComment from "../pages/board/mypage/MyPageComment";
+import MyPageFollower from "../pages/board/mypage/MyPageFollower";
+import MyPageMentions from "../pages/board/mypage/MyPageMentions";
+import MyPageBlock from "../pages/board/mypage/MyPageBlock";
+import MyPageModify from "../pages/board/mypage/MyPageModify";
 
 const BaseRoutes = () => {
     return (
@@ -17,7 +22,12 @@ const BaseRoutes = () => {
                 <Route path="" element={<Navigate to="login" replace />} />
                 <Route path="board/list" element={<MainBoardList />} />
                 <Route path="board/new" element={<NewPost />} />
-                <Route path="board/mypage" element={<MyPage />} />
+                <Route path="board/mypage/like" element={<MyPageLike />} />
+                <Route path="board/mypage/comment" element={<MyPageComment />} />
+                <Route path="board/mypage/follower" element={<MyPageFollower />} />
+                <Route path="board/mypage/mentions" element={<MyPageMentions />} />
+                <Route path="board/mypage/block" element={<MyPageBlock />} />
+                <Route path="board/mypage/modify" element={<MyPageModify />} />
             </Route>
             {/* 에러페이지 */}
             <Route path={"*"} element={<Error404 />} />

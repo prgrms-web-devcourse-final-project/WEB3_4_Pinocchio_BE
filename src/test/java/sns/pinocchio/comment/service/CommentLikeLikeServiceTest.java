@@ -1,21 +1,22 @@
 package sns.pinocchio.comment.service;
 
-import static org.mockito.Mockito.*;
-
-import java.time.LocalDateTime;
-import java.util.Optional;
-
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.boot.test.context.SpringBootTest;
-
 import sns.pinocchio.application.comment.CommentLikeService;
+import sns.pinocchio.config.global.enums.CancellState;
 import sns.pinocchio.domain.comment.CommentLike;
-import sns.pinocchio.domain.comment.CommentLikeStatus;
 import sns.pinocchio.infrastructure.persistence.mongodb.CommentLikeRepository;
 
+import java.time.LocalDateTime;
+import java.util.Optional;
+
+import static org.mockito.Mockito.*;
+
+@Tag("unit")
 @SpringBootTest
 public class CommentLikeLikeServiceTest {
 	@InjectMocks
@@ -62,7 +63,7 @@ public class CommentLikeLikeServiceTest {
 			.id(commentLikeId)
 			.commentId(commentId)
 			.userId(authorId)
-			.status(CommentLikeStatus.ACTIVE)
+			.status(CancellState.ACTIVE)
 			.createdAt(LocalDateTime.now())
 			.build();
 
@@ -70,7 +71,7 @@ public class CommentLikeLikeServiceTest {
 			.id(commentLikeId)
 			.commentId(commentId)
 			.userId(authorId)
-			.status(CommentLikeStatus.DELETE)
+			.status(CancellState.CANCELLED)
 			.createdAt(LocalDateTime.now())
 			.build();
 

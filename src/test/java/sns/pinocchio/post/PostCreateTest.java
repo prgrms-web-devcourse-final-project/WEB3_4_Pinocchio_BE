@@ -1,5 +1,6 @@
 package sns.pinocchio.post;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -10,6 +11,7 @@ import sns.pinocchio.domain.post.Visibility;
 import java.time.LocalDateTime;
 import java.util.List;
 
+@Tag("integration")
 @SpringBootTest
 public class PostCreateTest {
 

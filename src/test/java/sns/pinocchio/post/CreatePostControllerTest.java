@@ -2,6 +2,7 @@ package sns.pinocchio.post;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -18,6 +19,7 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+@Tag("unit")
 @WebMvcTest(PostController.class)
 class CreatePostControllerTest {
 
@@ -31,7 +33,7 @@ class CreatePostControllerTest {
     private ObjectMapper objectMapper;
 
     @Test
-    @DisplayName("POST /api/posts/create - 게시글 생성 성공")
+    @DisplayName("POST /api/posts - 게시글 생성 성공")
     void createPost_Success() throws Exception {
         // given
         PostCreateRequest request = PostCreateRequest.builder()
@@ -48,7 +50,7 @@ class CreatePostControllerTest {
                 .thenReturn("post_12345");
 
         // when & then
-        mockMvc.perform(post("/api/posts/create")
+        mockMvc.perform(post("/api/posts")
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization", "Bearer dummyToken")
                         .content(requestBody))

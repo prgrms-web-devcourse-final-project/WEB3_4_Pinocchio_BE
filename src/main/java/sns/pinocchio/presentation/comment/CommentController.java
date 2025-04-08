@@ -1,38 +1,30 @@
 package sns.pinocchio.presentation.comment;
 
-import static sns.pinocchio.presentation.comment.exception.CommentErrorCode.*;
-
-import java.util.Map;
-import java.util.Optional;
-
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.*;
 import sns.pinocchio.application.comment.CommentService;
 import sns.pinocchio.application.comment.commentDto.CommentCreateRequest;
 import sns.pinocchio.application.comment.commentDto.CommentDeleteRequest;
 import sns.pinocchio.application.comment.commentDto.CommentLikeRequest;
 import sns.pinocchio.application.comment.commentDto.CommentModifyRequest;
-import sns.pinocchio.application.post.PostService;
 import sns.pinocchio.config.global.auth.model.CustomUserDetails;
 import sns.pinocchio.domain.member.Member;
 import sns.pinocchio.domain.post.Post;
 import sns.pinocchio.infrastructure.persistence.mongodb.PostRepository;
+import sns.pinocchio.presentation.comment.exception.CommentErrorCode;
 import sns.pinocchio.presentation.comment.exception.CommentException;
+
+import java.util.Map;
+import java.util.Optional;
+
+import static sns.pinocchio.presentation.comment.exception.CommentErrorCode.COMMENT_NOT_FOUND;
 
 @Tag(name = "댓글", description = "댓글 관련 API")
 @RestController
@@ -73,7 +65,7 @@ public class CommentController {
 		Member authorMember = userDetails.getMember();
 
 		if (commentService.isNotMyComment(authorMember.getTsid(), request.getCommentId())) {
-			throw new CommentException(UNAUTHORIZED_ACCESS);
+			throw new CommentException(CommentErrorCode.UNAUTHORIZED_COMMENT_ACCESS);
 		}
 
 		if (commentService.isInvalidComment(request.getCommentId(), request.getPostId())) {
@@ -89,14 +81,14 @@ public class CommentController {
 		@ApiResponse(responseCode = "401", description = "JWT 토큰 누락 또는 인증 실패"),
 		@ApiResponse(responseCode = "404", description = "댓글 조회 실패"),
 		@ApiResponse(responseCode = "500", description = "서버 내부 오류")})
-	@PostMapping("/like/{commentId}")
+	@PostMapping("/{commentId}/like")
 	public ResponseEntity<Map<String, Object>> toggleCommentLike(@AuthenticationPrincipal CustomUserDetails userDetails,
 		@PathVariable String commentId,
 		@RequestBody CommentLikeRequest request) {
 		Member authorMember = userDetails.getMember();
 
 		if (commentService.isMyComment(authorMember.getTsid(), commentId)) {
-			throw new CommentException(UNAUTHORIZED_ACCESS);
+			throw new CommentException(CommentErrorCode.UNAUTHORIZED_COMMENT_ACCESS);
 		}
 
 		if (commentService.isInvalidComment(commentId, request.getPostId())) {
@@ -118,12 +110,12 @@ public class CommentController {
 		Member authorMember = userDetails.getMember();
 
 		if (commentService.isNotMyComment(authorMember.getTsid(), request.getCommentId())) {
-			throw new CommentException(UNAUTHORIZED_ACCESS);
+			throw new CommentException(CommentErrorCode.UNAUTHORIZED_COMMENT_ACCESS);
 		}
 
 		if (commentService.isInvalidComment(request.getCommentId(), request.getPostId())) {
-			throw new CommentException(COMMENT_NOT_FOUND);
-		}
+            throw new CommentException(CommentErrorCode.COMMENT_NOT_FOUND);
+        }
 
 		Map<String, Object> response = commentService.deleteComment(request);
 		return ResponseEntity.status(HttpStatus.OK).body(response);

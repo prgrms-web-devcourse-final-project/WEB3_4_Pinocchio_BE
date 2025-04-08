@@ -1,12 +1,8 @@
 package sns.pinocchio.application.search.service;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.when;
-
-import java.time.LocalDateTime;
-import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -20,6 +16,13 @@ import sns.pinocchio.domain.search.SearchSortType;
 import sns.pinocchio.domain.search.SearchType;
 import sns.pinocchio.infrastructure.persistence.mongodb.SearchRepositoryCustom;
 
+import java.time.LocalDateTime;
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.when;
+
+@Tag("unit")
 @ExtendWith(MockitoExtension.class)
 class SearchServiceTest {
 

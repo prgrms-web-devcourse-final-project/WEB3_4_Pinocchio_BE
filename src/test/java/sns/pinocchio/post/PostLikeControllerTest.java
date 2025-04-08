@@ -1,6 +1,7 @@
 package sns.pinocchio.post;
 
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -15,6 +16,7 @@ import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+@Tag("unit")
 @WebMvcTest(PostLikeController.class)
 public class PostLikeControllerTest {
 
@@ -34,7 +36,7 @@ public class PostLikeControllerTest {
         doNothing().when(postLikeService).toggleLike(postId, "mockTsid");
 
         // when & then
-        mockMvc.perform(post("/api/posts/like/{postId}/toggle", postId)
+        mockMvc.perform(post("/api/posts/like/{postId}", postId)
                         .header("Authorization", accessToken)
                         .contentType(MediaType.APPLICATION_JSON)
                 )

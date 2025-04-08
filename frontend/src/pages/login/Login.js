@@ -43,7 +43,6 @@ const Login = () => {
         try {
             setIsLoading(true);
             const response = await axios.post('/auth/login', sendData);
-            console.log(response.data);
             // localStorage.setItem("token", response.data);
             navigate('/board/list')
         } catch (error) {

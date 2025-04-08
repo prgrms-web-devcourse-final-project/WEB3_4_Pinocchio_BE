@@ -7,8 +7,8 @@ import java.util.Optional;
 import org.springframework.stereotype.Service;
 
 import lombok.RequiredArgsConstructor;
+import sns.pinocchio.config.global.enums.CancellState;
 import sns.pinocchio.domain.comment.CommentLike;
-import sns.pinocchio.domain.comment.CommentLikeStatus;
 import sns.pinocchio.infrastructure.persistence.mongodb.CommentLikeRepository;
 
 @Service
@@ -26,7 +26,7 @@ public class CommentLikeService {
 				.commentId(commentId)
 				.userId(authorId)
 				.createdAt(LocalDateTime.now())
-				.status(CommentLikeStatus.ACTIVE)
+				.status(CancellState.ACTIVE)
 				.build();
 			commentLikeId = commentLikeRepository.save(commentLike).getId();
 		} else {
@@ -49,6 +49,6 @@ public class CommentLikeService {
 	//유저의 좋아요 리스트 가져오기
 	public Map<String, Object> findLikesByUsers(String likeId) {
 		return Map.of("CommentLikeList",
-			commentLikeRepository.findAllByUserIdAndStatus(likeId, CommentLikeStatus.ACTIVE));
+			commentLikeRepository.findAllByUserIdAndStatus(likeId, CancellState.ACTIVE));
 	}
 }

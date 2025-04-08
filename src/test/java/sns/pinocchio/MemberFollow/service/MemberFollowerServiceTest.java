@@ -1,23 +1,24 @@
 package sns.pinocchio.MemberFollow.service;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
-
-import java.util.Map;
-import java.util.Optional;
-
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.boot.test.context.SpringBootTest;
-
-import sns.pinocchio.application.member.memberDto.MemberFollowRequest;
 import sns.pinocchio.application.member.MemberFollowService;
+import sns.pinocchio.application.member.memberDto.MemberFollowRequest;
+import sns.pinocchio.config.global.enums.CancellState;
 import sns.pinocchio.domain.user.UserFollow;
-import sns.pinocchio.domain.user.UserFollowStatus;
 import sns.pinocchio.infrastructure.persistence.mongodb.UserFollowRepository;
 
+import java.util.Map;
+import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
+
+@Tag("unit")
 @SpringBootTest
 public class MemberFollowerServiceTest {
 	@InjectMocks
@@ -34,7 +35,7 @@ public class MemberFollowerServiceTest {
 		String authorNickname = "홍길동";
 		MemberFollowRequest request = MemberFollowRequest.builder().followingNickname("고길동").build();
 
-		UserFollow userFollow = UserFollow.builder().followingId(userId).followerId(authorId).status(UserFollowStatus.ACTIVE).build();
+		UserFollow userFollow = UserFollow.builder().followingId(userId).followerId(authorId).status(CancellState.ACTIVE).build();
 
 
 		when(userFollowRepository.save(any(UserFollow.class))).thenReturn(userFollow);
@@ -61,8 +62,8 @@ public class MemberFollowerServiceTest {
 		String authorNickname = "홍길동";
 		MemberFollowRequest request = MemberFollowRequest.builder().followingNickname("고길동").build();
 
-		UserFollow userFollow = UserFollow.builder().followingId(userId).followerId(authorId).status(UserFollowStatus.ACTIVE).build();
-		UserFollow userFollowCancel = UserFollow.builder().followingId(userId).followerId(authorId).status(UserFollowStatus.DELETE).build();
+		UserFollow userFollow = UserFollow.builder().followingId(userId).followerId(authorId).status(CancellState.ACTIVE).build();
+		UserFollow userFollowCancel = UserFollow.builder().followingId(userId).followerId(authorId).status(CancellState.CANCELLED).build();
 
 
 

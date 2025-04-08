@@ -154,15 +154,15 @@ resource "aws_security_group" "sg" {
 
   ingress {
     from_port = 8080
-    to_port = 8080
-    protocol = "tcp"
+    to_port   = 8080
+    protocol  = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
 
   ingress {
     from_port = 3000
-    to_port = 3000
-    protocol = "tcp"
+    to_port   = 3000
+    protocol  = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
 
@@ -282,90 +282,113 @@ mkdir -p ~/app && cd ~/app
 
 cat <<EOF2 > docker-compose.yml
 version: "3.8"
+
 services:
-  mysql:
-    image: mysql:8.0
-    container_name: mysql-container
-    restart: always
-    environment:
-      MYSQL_ROOT_PASSWORD: devteam9
-      MYSQL_DATABASE: pino
-      MYSQL_USER: dev
-      MYSQL_PASSWORD: devteam9
-    ports:
-      - "3306:3306"
-    volumes:
-      - /data/mysql:/var/lib/mysql
-    networks:
-      - app-network
+    mysql:
+        image: mysql:8.0
+        container_name: mysql-container
+        restart: always
+        environment:
+            MYSQL_ROOT_PASSWORD: devteam9
+            MYSQL_DATABASE: pino
+            MYSQL_USER: dev
+            MYSQL_PASSWORD: devteam9
+        ports:
+            - "3306:3306"
+        volumes:
+            - /data/mysql:/var/lib/mysql
+        networks:
+            - app-network
+        healthcheck:
+            test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+            interval: 10s
+            timeout: 5s
+            retries: 5
 
-  mongodb:
-    image: mongo:6.0
-    container_name: mongodb-container
-    restart: always
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: dev
-      MONGO_INITDB_ROOT_PASSWORD: devteam9
-      MONGO_INITDB_DATABASE: pino
-    ports:
-      - "27017:27017"
-    volumes:
-      - /data/mongodb:/data/db
-    networks:
-      - app-network
+    mongodb:
+        image: mongo:6.0
+        container_name: mongodb-container
+        restart: always
+        environment:
+            MONGO_INITDB_ROOT_USERNAME: dev
+            MONGO_INITDB_ROOT_PASSWORD: devteam9
+            MONGO_INITDB_DATABASE: pino
+        ports:
+            - "27017:27017"
+        volumes:
+            - /data/mongodb:/data/db
+        networks:
+            - app-network
+        healthcheck:
+            test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+            interval: 10s
+            timeout: 5s
+            retries: 5
 
-  redis:
-    image: redis:7
-    container_name: redis-container
-    restart: always
-    ports:
-      - "6379:6379"
-    command: ["redis-server", "--requirepass", "devteam9"]
-    volumes:
-      - /data/redis:/data
-    networks:
-      - app-network
+    redis:
+        image: redis:7
+        container_name: redis-container
+        restart: always
+        ports:
+            - "6379:6379"
+        command: ["redis-server", "--requirepass", "devteam9"]
+        volumes:
+            - /data/redis:/data
+        networks:
+            - app-network
+        healthcheck:
+            test: ["CMD", "redis-cli", "-a", "devteam9", "ping"]
+            interval: 10s
+            timeout: 5s
+            retries: 5
 
-  spring:
-    image: jeong6/spring-app:latest
-    container_name: spring-app-container
-    restart: always
-    ports:
-      - "8080:8080"
-    depends_on:
-      mysql:
-        condition: service_healthy
-      mongodb:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-    environment:
-      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/pino
-      SPRING_DATASOURCE_USERNAME: dev
-      SPRING_DATASOURCE_PASSWORD: devteam9
-      SPRING_DATA_MONGODB_URI: mongodb://dev:devteam9@mongodb:27017/pino
-      SPRING_REDIS_HOST: redis
-    networks:
-      - app-network
+    spring:
+        image: jeong6/spring-app:latest
+        container_name: spring-app-container
+        restart: always
+        ports:
+            - "8080:8080"
+        depends_on:
+            mysql:
+                condition: service_healthy
+            mongodb:
+                condition: service_healthy
+            redis:
+                condition: service_healthy
+        environment:
+            SPRING_DATASOURCE_URL: jdbc:mysql://mysql-container:3306/pino
+            SPRING_DATASOURCE_USERNAME: dev
+            SPRING_DATASOURCE_PASSWORD: devteam9
+            SPRING_DATA_MONGODB_URI: mongodb://dev:devteam9@mongodb-container:27017/pino?authSource=admin
+            SPRING_REDIS_HOST: redis-container
+            SPRING_REDIS_PORT: 6379
+            SPRING_REDIS_PASSWORD: devteam9
+        networks:
+            - app-network
+        healthcheck:
+            test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+            interval: 15s
+            timeout: 5s
+            retries: 5
 
-  nginx:
-    image: nginx:latest
-    container_name: nginx-container
-    restart: always
-    ports:
-      - "80:80"
-    volumes:
-      - ./nginx/conf.d:/etc/nginx/conf.d
-      - ./nginx/html:/usr/share/nginx/html
-    depends_on:
-      spring:
-        condition: service_healthy
-    networks:
-      - app-network
+    nginx:
+        image: nginx:latest
+        container_name: nginx-container
+        restart: always
+        ports:
+            - "80:80"
+        volumes:
+            - ./nginx/conf.d:/etc/nginx/conf.d
+            - ./nginx/html:/usr/share/nginx/html
+        depends_on:
+            spring:
+                condition: service_healthy
+        networks:
+            - app-network
 
 networks:
-  app-network:
-    driver: bridge
+    app-network:
+        driver: bridge
 EOF2
 
 docker-compose pull
@@ -475,7 +498,7 @@ resource "aws_volume_attachment" "ebs_attach" {
 # S3 버킷 - 이미지 저장용
 # ----------------------------------------
 resource "aws_s3_bucket" "image_bucket" {
-  bucket = "${var.tagValue}-image-bucket"
+  bucket        = "${var.tagValue}-image-bucket"
   force_destroy = true
 
   tags = {

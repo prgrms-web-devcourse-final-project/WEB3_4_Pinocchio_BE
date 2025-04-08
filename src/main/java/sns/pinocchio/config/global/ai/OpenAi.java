@@ -1,19 +1,17 @@
 package sns.pinocchio.config.global.ai;
 
-import java.io.IOException;
 import java.util.List;
 
 import org.springframework.ai.openai.OpenAiChatModel;
 import org.springframework.stereotype.Component;
 
-import io.github.ollama4j.exceptions.OllamaBaseException;
-import io.github.ollama4j.models.response.OllamaResult;
+
 import io.github.ollama4j.utils.Options;
 import io.github.ollama4j.utils.OptionsBuilder;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import sns.pinocchio.config.global.aiMemberLoad.AiMember;
-import sns.pinocchio.infrastructure.ai.VectorQuery;
+import sns.pinocchio.infrastructure.ai.vectorDB.VectorQuery;
 
 @Slf4j
 @RequiredArgsConstructor

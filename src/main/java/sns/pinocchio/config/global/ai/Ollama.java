@@ -15,7 +15,7 @@ import io.github.ollama4j.utils.OptionsBuilder;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import sns.pinocchio.config.global.aiMemberLoad.AiMember;
-import sns.pinocchio.infrastructure.ai.VectorQuery;
+import sns.pinocchio.infrastructure.ai.vectorDB.VectorQuery;
 
 @Slf4j
 @RequiredArgsConstructor

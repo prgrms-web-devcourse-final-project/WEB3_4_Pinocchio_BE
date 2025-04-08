@@ -83,11 +83,12 @@ public class MemberAuthFilter extends OncePerRequestFilter {
   @Override
   protected boolean shouldNotFilter(HttpServletRequest request) {
 
-    String path = request.getRequestURI();
-    String method = request.getMethod();
-    log.info("요청 경로: {}, 메서드: {}", path, method);
+      String path = request.getRequestURI();
+      String method = request.getMethod();
+      log.info("요청 경로: {}, 메서드: {}", path, method);
 
       boolean shouldSkip =
+              //  API 예외 처리 경로
               (method.equals("GET") && (path.equals("/api/posts/search") || path.startsWith("/actuator/health") || path.startsWith("/api/actuator/health")))
                       || (method.equals("POST") && (path.startsWith("/auth") || path.startsWith("/api/auth")))
                       || (method.equals("POST") && (path.startsWith("/user/password/reset") || path.startsWith("/api/user/password/reset")))
@@ -95,7 +96,16 @@ public class MemberAuthFilter extends OncePerRequestFilter {
                       || path.startsWith("/v3/api-docs")
                       || path.startsWith("/swagger-ui")
                       || path.startsWith("/swagger-resources")
-                      || path.startsWith("/webjars");
+                      || path.startsWith("/webjars")
+
+                      //  React 정적 리소스 경로 제외
+                      || path.equals("/")
+                      || path.equals("/index.html")
+                      || path.startsWith("/static/")
+                      || path.startsWith("/favicon.ico")
+                      || path.startsWith("/manifest.json")
+                      || path.startsWith("/asset-manifest.json")
+                      || path.startsWith("/logo");
 
       log.info("필터 건너뛰기: {}", shouldSkip);
       return shouldSkip;

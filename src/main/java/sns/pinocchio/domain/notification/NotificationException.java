@@ -12,9 +12,9 @@ public class NotificationException {
     }
   }
 
-  public static class NotificationInternalServerErrorException extends BaseException {
-    public NotificationInternalServerErrorException(String message) {
-      super(message, 500);
+  public static class NotificationUnauthorizedException extends BaseException {
+    public NotificationUnauthorizedException(String message) {
+      super(message, 401);
     }
   }
 }

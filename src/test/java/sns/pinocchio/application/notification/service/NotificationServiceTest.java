@@ -6,16 +6,19 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import java.util.Optional;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 import sns.pinocchio.application.notification.dto.NotificationRequestDto.UpdateNotifications;
 import sns.pinocchio.application.notification.dto.NotificationResponseDto.NotificationInfo;
+import sns.pinocchio.config.global.auth.model.CustomUserDetails;
+import sns.pinocchio.domain.member.Member;
 import sns.pinocchio.domain.notification.Notification;
-import sns.pinocchio.domain.notification.NotificationException;
 import sns.pinocchio.domain.notification.NotificationException.NotificationBadRequestException;
 import sns.pinocchio.infrastructure.persistence.mysql.NotificationRepository;
 
@@ -26,7 +29,26 @@ class NotificationServiceTest {
 
   @Mock private NotificationRepository notificationRepository;
 
+  @Mock private CustomUserDetails userDetails;
+
   private final String userId = "test_user_123";
+
+  private Member mockMember;
+
+  @BeforeEach
+  void setUp() {
+
+    mockMember =
+        Member.builder()
+            .email("example@naver.com")
+            .password("testPassword!")
+            .name("testName")
+            .nickname("testNickname")
+            .build();
+
+    // tsid 수동 설정
+    ReflectionTestUtils.setField(mockMember, "tsid", userId);
+  }
 
   @Test
   @DisplayName("알림 설정 Success: 기존 설정이 없는 경우")
@@ -44,9 +66,11 @@ class NotificationServiceTest {
 
     when(notificationRepository.findByUserId(userId)).thenReturn(Optional.empty());
     when(notificationRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+    when(userDetails.getTsid()).thenReturn(userId);
+    when(userDetails.getMember()).thenReturn(mockMember);
 
     // when
-    NotificationInfo updated = notificationService.updateNotifications(userId, update);
+    NotificationInfo updated = notificationService.updateNotifications(userDetails, update);
 
     // then
     assertThat(updated).isNotNull();
@@ -66,7 +90,6 @@ class NotificationServiceTest {
     Notification existed =
         Notification.builder()
             .id(1L)
-            .userId(userId)
             .messageAlert(false)
             .likeAlert(false)
             .commentAlert(false)
@@ -85,9 +108,11 @@ class NotificationServiceTest {
 
     when(notificationRepository.findByUserId(userId)).thenReturn(Optional.of(existed));
     when(notificationRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+    when(userDetails.getTsid()).thenReturn(userId);
+    when(userDetails.getMember()).thenReturn(mockMember);
 
     // when
-    NotificationInfo updated = notificationService.updateNotifications(userId, update);
+    NotificationInfo updated = notificationService.updateNotifications(userDetails, update);
 
     // then
     assertThat(updated).isNotNull();
@@ -100,53 +125,15 @@ class NotificationServiceTest {
   }
 
   @Test
-  @DisplayName("알림 설정 Fail: 설정한 알림을 DB에 수정하는 동안 문제가 발생했을 경우")
-  void updateNotificationsInternalServerErrorTest() {
-
-    // given
-    String errorMsg = "서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.";
-
-    Notification existed =
-        Notification.builder()
-            .id(1L)
-            .userId(userId)
-            .messageAlert(false)
-            .likeAlert(false)
-            .commentAlert(false)
-            .followAlert(false)
-            .mentionAlert(false)
-            .build();
-
-    UpdateNotifications update =
-        UpdateNotifications.builder()
-            .message(true)
-            .like(true)
-            .comment(true)
-            .follow(true)
-            .mention(true)
-            .build();
-
-    when(notificationRepository.findByUserId(userId)).thenReturn(Optional.of(existed));
-
-    // when
-    NotificationException.NotificationInternalServerErrorException exception =
-        assertThrows(
-            NotificationException.NotificationInternalServerErrorException.class,
-            () -> notificationService.updateNotifications(userId, update));
-
-    // then
-    assertThat(exception.getMessage()).isEqualTo(errorMsg);
-  }
-
-  @Test
   @DisplayName("알림 설정 조회 Success: 기존 알람 설정이 존재하지 않을 경우")
   void getNotificationsNotExistTest() {
 
     // given
     when(notificationRepository.findByUserId(userId)).thenReturn(Optional.empty());
+    when(userDetails.getTsid()).thenReturn(userId);
 
     // when
-    NotificationInfo info = notificationService.getNotifications(userId);
+    NotificationInfo info = notificationService.getNotifications(userDetails);
 
     // then
     assertThat(info).isNotNull();
@@ -166,7 +153,6 @@ class NotificationServiceTest {
     Notification existed =
         Notification.builder()
             .id(1L)
-            .userId(userId)
             .messageAlert(false)
             .likeAlert(true)
             .commentAlert(false)
@@ -175,9 +161,10 @@ class NotificationServiceTest {
             .build();
 
     when(notificationRepository.findByUserId(userId)).thenReturn(Optional.of(existed));
+    when(userDetails.getTsid()).thenReturn(userId);
 
     // when
-    NotificationInfo info = notificationService.getNotifications(userId);
+    NotificationInfo info = notificationService.getNotifications(userDetails);
 
     // then
     assertThat(info).isNotNull();

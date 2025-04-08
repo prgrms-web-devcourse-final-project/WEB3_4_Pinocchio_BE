@@ -6,8 +6,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import sns.pinocchio.application.notification.dto.NotificationRequestDto.UpdateNotifications;
 import sns.pinocchio.application.notification.dto.NotificationResponseDto.NotificationInfo;
+import sns.pinocchio.config.global.auth.model.CustomUserDetails;
+import sns.pinocchio.domain.member.Member;
 import sns.pinocchio.domain.notification.Notification;
 import sns.pinocchio.domain.notification.NotificationException.NotificationBadRequestException;
+import sns.pinocchio.domain.notification.NotificationException.NotificationUnauthorizedException;
 import sns.pinocchio.infrastructure.persistence.mysql.NotificationRepository;
 
 @Service
@@ -20,14 +23,23 @@ public class NotificationService {
   /**
    * 입력받은 사용자의 알림 설정을 업데이트
    *
-   * @implNote 현재는 임시로 userId를 하드코딩하고 있으며, 실제 서비스 적용 시 JWT 인증을 통해 사용자 ID를 추출하도록 변경 필요
+   * @param userDetails 로그인한 유저 정보
    * @param updateNotifications 변경할 알림 설정 값들을 담은 DTO
    * @return NotificationInfo 변경된 알림 설정 정보를 담은 응답 DTO
+   * @throws NotificationUnauthorizedException 사용자가 인증되지 않았을 경우
    * @throws NotificationBadRequestException 입력값이 유효하지 않을 경우
    */
   @Transactional
   public NotificationInfo updateNotifications(
-      String userId, UpdateNotifications updateNotifications) {
+      CustomUserDetails userDetails, UpdateNotifications updateNotifications) {
+
+    // 로그인한 유저 정보가 존재하지 않을 경우, 401에러 반환
+    if (userDetails == null || userDetails.getTsid().isEmpty()) {
+      log.error("No authenticated user found.");
+      throw new NotificationUnauthorizedException("사용자가 인증되지 않았습니다. 로그인 후 다시 시도해주세요.");
+    }
+
+    Member member = userDetails.getMember();
 
     // 설정 정보가 존재하지 않을 경우, 400에러 반환
     if (!updateNotifications.checkNotifications()) {
@@ -38,15 +50,15 @@ public class NotificationService {
     // 회원의 알림 설정 조회
     Notification notification =
         notificationRepository
-            .findByUserId(userId)
+            .findByUserId(member.getTsid())
             .orElse(
                 Notification.builder()
-                    .userId(userId)
                     .messageAlert(updateNotifications.message())
                     .likeAlert(updateNotifications.like())
                     .commentAlert(updateNotifications.comment())
                     .followAlert(updateNotifications.follow())
                     .mentionAlert(updateNotifications.mention())
+                    .users(member)
                     .build());
 
     // 요청받은 알림 변경 사항들로 알림 수정
@@ -58,7 +70,7 @@ public class NotificationService {
     log.info("Notification settings updated: {}", updated);
 
     return NotificationInfo.builder()
-        .userId(userId)
+        .userId(member.getTsid())
         .message(updated.isMessageAlert())
         .like(updated.isLikeAlert())
         .comment(updated.isCommentAlert())
@@ -70,26 +82,25 @@ public class NotificationService {
   /**
    * 입력 받은 사용자의 알림 설정을 조회
    *
-   * @implNote 현재는 임시로 userId를 하드코딩하고 있으며, 실제 서비스 적용 시 JWT 인증을 통해 사용자 ID를 추출하도록 변경 필요. 해당 사용자가 최초로
-   *     알림 설정 시, 모든 알림 설정은 false로 반환
-   * @param userId 알림 설정을 확인할 사용자 ID
+   * @implNote 해당 사용자가 최초로 알림 설정 시, 모든 알림 설정은 false로 반환
+   * @param userDetails 로그인한 사용자 정보
    * @return NotificationInfo 변경된 알림 설정 정보를 담은 응답 DTO
-   * @throws NotificationBadRequestException userId 정보가 존재하지 않을 경우
+   * @throws NotificationBadRequestException 로그인한 user 정보가 존재하지 않을 경우
    */
   @Transactional(readOnly = true)
-  public NotificationInfo getNotifications(String userId) {
+  public NotificationInfo getNotifications(CustomUserDetails userDetails) {
 
-    if (userId == null) {
+    // 로그인한 유저 정보가 존재하지 않을 경우, 400에러 반환
+    if (userDetails == null || userDetails.getTsid().isEmpty()) {
       log.error("[userId] is null. Can't get notifications.");
       throw new NotificationBadRequestException("[userId] 정보가 존재하지 않습니다.");
     }
 
     Notification notification =
         notificationRepository
-            .findByUserId(userId)
+            .findByUserId(userDetails.getTsid())
             .orElse(
                 Notification.builder()
-                    .userId(userId)
                     .messageAlert(false)
                     .likeAlert(false)
                     .commentAlert(false)
@@ -100,7 +111,7 @@ public class NotificationService {
     log.info("Notification settings: {}", notification);
 
     return NotificationInfo.builder()
-        .userId(userId)
+        .userId(userDetails.getTsid())
         .message(notification.isMessageAlert())
         .like(notification.isLikeAlert())
         .comment(notification.isCommentAlert())

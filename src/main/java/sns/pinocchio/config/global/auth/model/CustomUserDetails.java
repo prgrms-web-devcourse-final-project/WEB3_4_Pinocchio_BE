@@ -38,10 +38,6 @@ public class CustomUserDetails implements UserDetails {
     return member.getId(); // 유저 ID 반환
   }
 
-  public String getUserTsid() {
-    return member.getTsid();
-  }
-
   public String getEmail() {
     return member.getEmail(); // 이메일 반환
   }

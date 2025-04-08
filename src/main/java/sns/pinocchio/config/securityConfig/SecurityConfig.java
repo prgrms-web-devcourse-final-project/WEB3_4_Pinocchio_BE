@@ -46,7 +46,11 @@ public class SecurityConfig {
                                 "/posts/search",
                                 "/actuator/health"
                         ).permitAll()
-
+                        //  정적 리소스 (React 빌드 파일들) 허용
+                        .requestMatchers(
+                                "/", "/index.html", "/static/**", "/favicon.ico",
+                                "/asset-manifest.json", "/manifest.json", "/logo192.png", "/logo512.png"
+                        ).permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(memberAuthFilter, UsernamePasswordAuthenticationFilter.class);

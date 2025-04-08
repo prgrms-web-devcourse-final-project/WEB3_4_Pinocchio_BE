@@ -91,7 +91,7 @@ jobs:
               working-directory: ./frontend
               run: |
                   npm ci
-                  npm run build
+                  CI=false npm run build
 
             # 빌드된 정적 파일을 Spring Boot 프로젝트에 복사
             - name: React 빌드 결과물을 Spring static 폴더로 복사

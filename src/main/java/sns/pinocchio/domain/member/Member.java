@@ -7,6 +7,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import sns.pinocchio.application.member.memberDto.request.UpdateRequestDto;
+import sns.pinocchio.domain.notification.Notification;
 
 import java.time.LocalDateTime;
 
@@ -47,6 +48,9 @@ public class Member {
 
   @Column(nullable = false, unique = true)
   private String tsid;
+
+  @OneToOne(mappedBy = "users")
+  private Notification notification;
 
   // 회원가입
   @Builder

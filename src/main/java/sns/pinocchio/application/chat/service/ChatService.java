@@ -8,15 +8,18 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import sns.pinocchio.application.chat.dto.ChatRequestDto.SendMessage;
 import sns.pinocchio.application.chat.dto.ChatResponseDto.*;
+import sns.pinocchio.config.global.auth.model.CustomUserDetails;
 import sns.pinocchio.domain.chat.Chat;
 import sns.pinocchio.domain.chat.ChatException.ChatBadRequestException;
 import sns.pinocchio.domain.chat.ChatException.ChatInternalServerErrorException;
 import sns.pinocchio.domain.chat.ChatException.ChatNotFoundException;
+import sns.pinocchio.domain.chat.ChatException.ChatUnauthorizedException;
 import sns.pinocchio.domain.chat.ChatStatus;
 import sns.pinocchio.domain.chatroom.ChatRoom;
 import sns.pinocchio.domain.chatroom.ChatRoomSortType;
 import sns.pinocchio.domain.chatroom.ChatRoomStatus;
 import sns.pinocchio.domain.chatroom.LastMessage;
+import sns.pinocchio.domain.member.Member;
 import sns.pinocchio.infrastructure.persistence.mongodb.ChatRepository;
 import sns.pinocchio.infrastructure.persistence.mongodb.ChatRoomRepository;
 import sns.pinocchio.infrastructure.persistence.mongodb.ChatRoomRepositoryCustom;
@@ -36,20 +39,24 @@ public class ChatService {
   /**
    * 해당 채팅방에 메시지 전송
    *
-   * @param senderTsid 발신자 TSID
+   * @param senderDetails 발신자 정보
    * @param sendMessage 메시지 전송 정보
    * @return SendMessageInfo 전송된 메시지 정보
+   * @throws ChatUnauthorizedException 사용자가 인증되지 않았을 경우
    * @throws ChatBadRequestException 입력 값이 유효하지 않을 경우
    * @throws ChatInternalServerErrorException 메시지 전송 또는 메시지 알림 전송이 실패했을 경우
    */
   @Transactional
-  public SendMessageInfo sendMessageToChatroom(String senderTsid, SendMessage sendMessage) {
+  public SendMessageInfo sendMessageToChatroom(
+      CustomUserDetails senderDetails, SendMessage sendMessage) {
 
-    // 송신자 ID가 존재하지 않을 경우, 400에러 반환
-    if (senderTsid == null) {
-      log.error("Sender ID is null: {}", sendMessage);
-      throw new ChatBadRequestException("입력값이 유효하지 않습니다.");
+    // 로그인한 유저 정보가 존재하지 않을 경우, 401에러 반환
+    if (senderDetails == null || senderDetails.getTsid().isEmpty()) {
+      log.error("No authenticated user found: {}", sendMessage);
+      throw new ChatUnauthorizedException("사용자가 인증되지 않았습니다. 로그인 후 다시 시도해주세요.");
     }
+
+    String senderTsid = senderDetails.getTsid();
 
     // 요청 값에 대한 유효성 체크가 실패 했을 경우, 400에러 반환
     if (sendMessage == null || !sendMessage.validateRequest()) {
@@ -71,11 +78,21 @@ public class ChatService {
       throw new ChatInternalServerErrorException("메시지 전송에 실패했습니다. 다시 시도해주세요.");
     }
 
-    // todo: Notification 합칠 때 같이 구현 (message 변경 필요)
-    // 메시지 알림 설정이 되어 있을 경우, 알림 전송
-    if (!webSocketHandler.sendNotificationToUser(sendMessage.receiverId(), "새로운 메시지 도착")) {
-      log.error("Failed to send Notification: {}", sendMessage);
-      throw new ChatInternalServerErrorException("메시지 알림 전송에 실패했습니다.");
+    Member loginUser = senderDetails.getMember();
+
+    // 메시지 알림 설정 여부에 따라 알림 전송 (실패 시, 500에러 반환)
+    if (loginUser != null
+        && loginUser.getNotification() != null
+        && loginUser.getNotification().isMessageAlert()) {
+      if (!webSocketHandler.sendNotificationToUser(sendMessage.receiverId(), "새로운 메시지 도착")) {
+        log.error("Failed to send Notification: {}", sendMessage);
+        throw new ChatInternalServerErrorException("메시지 알림 전송에 실패했습니다.");
+      }
+
+    } else {
+      log.info(
+          "Message Notifications are not setting. Skipping notification: {}",
+          sendMessage.receiverId());
     }
 
     // Chat 저장
@@ -154,7 +171,7 @@ public class ChatService {
   /**
    * 채팅방 조회
    *
-   * @param userTsid 조회할 유저의 Tsid
+   * @param userDetails 로그인한 유저 정보
    * @param limit 최대 결과 개수
    * @param sortBy 정렬 기준 (latest / oldest)
    * @param cursor 페이징 커서 (생성 날짜 기준)
@@ -162,12 +179,16 @@ public class ChatService {
    * @throws ChatNotFoundException 등록된 사용자를 찾을 수 없을 경우
    */
   @Transactional
-  public ChatRoomsInfo getChatRooms(String userTsid, int limit, String sortBy, String cursor) {
+  public ChatRoomsInfo getChatRooms(
+      CustomUserDetails userDetails, int limit, String sortBy, String cursor) {
 
-    if (userTsid == null) {
+    // 조회할 유저의 ID가 존재하지 않을 경우, 400에러 반환
+    if (userDetails == null || userDetails.getTsid().isEmpty()) {
       log.error("userTsid is null. Fail to get ChatRooms.");
       throw new ChatNotFoundException("등록된 사용자를 찾을 수 없습니다.");
     }
+
+    String userTsid = userDetails.getTsid();
 
     // 정렬 방식 설정
     ChatRoomSortType sortType = ChatRoomSortType.from(sortBy);
@@ -198,16 +219,26 @@ public class ChatService {
   /**
    * 채팅방 내 메시지 조회
    *
+   * @param userDetails 로그인한 유저 정보
    * @param chatId 채팅방 TSID
    * @param limit 최대 결과 개수
    * @param sortBy 정렬 기준 (latest / oldest)
    * @param cursor 페이징 커서 (생성 날짜 기준)
    * @return ChatMessagesInfo 채팅방 내 메시지 정보들
+   * @throws ChatUnauthorizedException 사용자가 인증되지 않았을 경우
    * @throws ChatNotFoundException 등록된 채팅방을 찾을 수 없을 경우
    */
   @Transactional
-  public ChatMessagesInfo getMessages(String chatId, int limit, String sortBy, String cursor) {
+  public ChatMessagesInfo getMessages(
+      CustomUserDetails userDetails, String chatId, int limit, String sortBy, String cursor) {
 
+    // 로그인한 유저 정보가 존재하지 않을 경우, 401에러 반환
+    if (userDetails == null || userDetails.getTsid().isEmpty()) {
+      log.error("No authenticated user found.");
+      throw new ChatUnauthorizedException("사용자가 인증되지 않았습니다. 로그인 후 다시 시도해주세요.");
+    }
+
+    // 채팅방을 찾을 수 없을 경우, 404에러 반환
     if (chatId == null) {
       log.error("chatId is null. Fail to get Chat Messages in ChatRoom.");
       throw new ChatNotFoundException("등록된 채팅방을 찾을 수 없습니다.");

@@ -147,21 +147,13 @@ public class CommentService {
 	public boolean isMyComment(String authorId, String commentId) {
 		Comment comment = commentRepository.findById(commentId)
 			.orElseThrow(() -> new CommentException(COMMENT_NOT_FOUND));
-		if (Objects.equals(comment.getUserId(), authorId)) {
-			return true;
-		} else {
-			return false;
-		}
+		return Objects.equals(comment.getUserId(), authorId);
 	}
 
 	//자기 댓글아닌거 확인
 	public boolean isNotMyComment(String authorId, String commentId) {
 		Comment comment = commentRepository.findById(commentId)
 			.orElseThrow(() -> new CommentException(COMMENT_NOT_FOUND));
-		if (Objects.equals(comment.getUserId(), authorId)) {
-			return false;
-		} else {
-			return true;
-		}
+		return !Objects.equals(comment.getUserId(), authorId);
 	}
 }

@@ -63,6 +63,12 @@ jobs:
                   SPRING_REDIS_HOST: localhost
                   SPRING_REDIS_PORT: 6379
 
+                  #  S3 더미 설정 추가
+                  CLOUD_AWS_CREDENTIALS_ACCESS_KEY: dummy
+                  CLOUD_AWS_CREDENTIALS_SECRET_KEY: dummy
+                  CLOUD_AWS_S3_BUCKET: dummy-bucket
+
+
     build-and-push: # 빌드 및 Docker Hub 푸시 작업
         runs-on: ubuntu-latest
         needs: test-with-dbs # 위의 잡이 성공해야 실행됨

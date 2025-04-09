@@ -37,11 +37,9 @@ public class OpenAi {
 
 	public String convertPrompt(String content, AiMember aiMember) {
 		Prompt prompt = new Prompt();
+		List<VectorQuery.SimilarityResult> results = VectorQuery.searchSimilarDocuments(content, 10);
 		prompt.setMemberPost(content);
-		List<VectorQuery.SimilarityResult> results = VectorQuery.searchSimilarDocuments(content, 5);
-		for (VectorQuery.SimilarityResult r : results) {
-			prompt.addAnswerEx(r.getUtterance());
-		}
+		prompt.setAnswerEx(results);
 		prompt.setBasePrompt(aiMember.getPrompt());
 		log.error(prompt.toString());
 

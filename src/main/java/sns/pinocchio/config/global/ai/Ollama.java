@@ -46,11 +46,9 @@ public class Ollama {
 
 	public String convertPrompt(String content, AiMember aiMember) {
 		Prompt prompt = new Prompt();
-		prompt.setMemberPost(content);
 		List<VectorQuery.SimilarityResult> results = VectorQuery.searchSimilarDocuments(content, 5);
-		for (VectorQuery.SimilarityResult r : results) {
-			prompt.addAnswerEx(r.getUtterance());
-		}
+		prompt.setMemberPost(content);
+		prompt.setAnswerEx(results);
 		prompt.setBasePrompt(aiMember.getPrompt());
 		return prompt.toString();
 	}

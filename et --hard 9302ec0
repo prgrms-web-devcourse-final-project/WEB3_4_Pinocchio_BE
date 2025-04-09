@@ -1,0 +1,196 @@
+[33ma7d47ca[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mdev-main[m[33m)[m HEAD@{0}: rebase (finish): returning to refs/heads/dev-main
+[33ma7d47ca[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mdev-main[m[33m)[m HEAD@{1}: rebase (pick): chore : url 수정
+[33m404798d[m[33m ([m[1;31morigin/main[m[33m, [m[1;31morigin/feat-post-jwt[m[33m, [m[1;31morigin/HEAD[m[33m, [m[1;32mmain[m[33m)[m HEAD@{2}: rebase (start): checkout origin/main
+[33m9302ec0[m HEAD@{3}: checkout: moving from main to dev-main
+[33m404798d[m[33m ([m[1;31morigin/main[m[33m, [m[1;31morigin/feat-post-jwt[m[33m, [m[1;31morigin/HEAD[m[33m, [m[1;32mmain[m[33m)[m HEAD@{4}: rebase: checkout main
+[33m9302ec0[m HEAD@{5}: checkout: moving from main to dev-main
+[33m404798d[m[33m ([m[1;31morigin/main[m[33m, [m[1;31morigin/feat-post-jwt[m[33m, [m[1;31morigin/HEAD[m[33m, [m[1;32mmain[m[33m)[m HEAD@{6}: rebase (finish): returning to refs/heads/main
+[33m404798d[m[33m ([m[1;31morigin/main[m[33m, [m[1;31morigin/feat-post-jwt[m[33m, [m[1;31morigin/HEAD[m[33m, [m[1;32mmain[m[33m)[m HEAD@{7}: rebase (start): checkout origin
+[33mf71584c[m HEAD@{8}: rebase: checkout main
+[33m9302ec0[m HEAD@{9}: rebase: checkout dev-main
+[33mf71584c[m HEAD@{10}: rebase (finish): returning to refs/heads/main
+[33mf71584c[m HEAD@{11}: rebase (start): checkout origin
+[33m9302ec0[m HEAD@{12}: checkout: moving from feat-oauth2-login to dev-main
+[33m4d74a79[m[33m ([m[1;32mfeat-oauth2-login[m[33m)[m HEAD@{13}: checkout: moving from dev-main to feat-oauth2-login
+[33m9302ec0[m HEAD@{14}: rebase: checkout dev-main
+[33m9302ec0[m HEAD@{15}: rebase: checkout dev-main
+[33m9302ec0[m HEAD@{16}: rebase (finish): returning to refs/heads/dev-main
+[33m9302ec0[m HEAD@{17}: rebase (pick): chore : url 수정
+[33mf71584c[m HEAD@{18}: rebase (start): checkout origin
+[33md0eed96[m HEAD@{19}: checkout: moving from feat-oauth2-login to dev-main
+[33m4d74a79[m[33m ([m[1;32mfeat-oauth2-login[m[33m)[m HEAD@{20}: commit: feat : Comment Exception
+[33m78346c6[m HEAD@{21}: commit: feat : GlobalExceptionHandler
+[33m4814d6e[m HEAD@{22}: commit: feat : Search Exception
+[33m901b247[m HEAD@{23}: commit: feat : Post Exception
+[33m831eb78[m HEAD@{24}: commit: feat : Notification Exception
+[33mb97bcc6[m HEAD@{25}: commit: feat : Chat Exception
+[33m07e82f2[m HEAD@{26}: commit: refactor : 토큰 만료시 응답 메시지 수정
+[33md6c55b3[m HEAD@{27}: commit: refactor : 패스워드 검증로직 책임 분리
+[33mf16d762[m HEAD@{28}: commit: refactor : 패스워드 검증 추가
+[33m02c6c96[m HEAD@{29}: commit: refactor : 로그인 시 tsid 반환
+[33m4f81d49[m HEAD@{30}: commit: refactor : 삭제 로직 트랜잭션 추가
+[33m24d877e[m[33m ([m[1;31morigin/feat-oauth2-login[m[33m)[m HEAD@{31}: checkout: moving from dev-main to feat-oauth2-login
+[33md0eed96[m HEAD@{32}: rebase: checkout dev-main
+[33md0eed96[m HEAD@{33}: rebase: checkout dev-main
+[33md0eed96[m HEAD@{34}: rebase (finish): returning to refs/heads/dev-main
+[33md0eed96[m HEAD@{35}: rebase (pick): chore : url 수정
+[33m233a962[m HEAD@{36}: rebase (start): checkout origin
+[33m4ac2309[m HEAD@{37}: checkout: moving from main to dev-main
+[33mb84c12e[m HEAD@{38}: commit: chore : MemberAuthFilter 수정
+[33m27b5bfb[m HEAD@{39}: rebase (finish): returning to refs/heads/main
+[33m27b5bfb[m HEAD@{40}: rebase (start): checkout origin
+[33m1a9110f[m HEAD@{41}: rebase (finish): returning to refs/heads/main
+[33m1a9110f[m HEAD@{42}: rebase (start): checkout origin
+[33m052d9b9[m HEAD@{43}: rebase (finish): returning to refs/heads/main
+[33m052d9b9[m HEAD@{44}: rebase (start): checkout origin/main
+[33m36e0f7b[m HEAD@{45}: checkout: moving from dev-main to main
+[33m4ac2309[m HEAD@{46}: rebase (finish): returning to refs/heads/dev-main
+[33m4ac2309[m HEAD@{47}: rebase (start): checkout origin/dev-main
+[33m6c462bd[m HEAD@{48}: checkout: moving from refactor-url to dev-main
+[33m271e9ed[m[33m ([m[1;31morigin/refactor-url[m[33m, [m[1;32mrefactor-url[m[33m)[m HEAD@{49}: commit: chore : url 수정
+[33m9d98b0b[m HEAD@{50}: checkout: moving from dev-main to refactor-url
+[33m6c462bd[m HEAD@{51}: rebase (finish): returning to refs/heads/dev-main
+[33m6c462bd[m HEAD@{52}: rebase (start): checkout origin/dev-main
+[33m6d59bfe[m HEAD@{53}: rebase (finish): returning to refs/heads/dev-main
+[33m6d59bfe[m HEAD@{54}: rebase (start): checkout origin/dev-main
+[33mf19b2a2[m HEAD@{55}: checkout: moving from refactor-url to dev-main
+[33m9d98b0b[m HEAD@{56}: commit: refactor : member -> user 수정
+[33mf19b2a2[m HEAD@{57}: checkout: moving from dev-main to refactor-url
+[33mf19b2a2[m HEAD@{58}: rebase (finish): returning to refs/heads/dev-main
+[33mf19b2a2[m HEAD@{59}: rebase (start): checkout origin/dev-main
+[33ma320678[m HEAD@{60}: rebase (finish): returning to refs/heads/dev-main
+[33ma320678[m HEAD@{61}: rebase (start): checkout origin/dev-main
+[33m8a9c250[m HEAD@{62}: checkout: moving from feat-user-block to dev-main
+[33me2e698e[m[33m ([m[1;32mfeat-user-block[m[33m)[m HEAD@{63}: commit: chore :
+[33m212d8f7[m HEAD@{64}: commit (merge): Merge remote-tracking branch 'origin/feat-user-block' into feat-user-block
+[33mab232fd[m HEAD@{65}: rebase (finish): returning to refs/heads/feat-user-block
+[33mab232fd[m HEAD@{66}: rebase (continue): chore : 충돌 해결
+[33mbfec509[m HEAD@{67}: rebase (continue): chore : 충돌 해결
+[33m1aec9da[m HEAD@{68}: rebase (pick): feat : BlockController 통합 테스트
+[33mf7907a7[m HEAD@{69}: rebase (pick): feat : 차단 관련 로직 (service)
+[33mc62b3c7[m HEAD@{70}: rebase (pick): feat : BlockController
+[33m70e417f[m HEAD@{71}: rebase (pick): feat : 토큰 인증 후 유저 정보 사용
+[33mf24275a[m HEAD@{72}: rebase (pick): feat : MemberController 통합 테스트
+[33m070b5ab[m HEAD@{73}: rebase (pick): feat : block 컨트롤러
+[33m4b17d8d[m HEAD@{74}: rebase (pick): refactor : 테스트 코드 패키지 변경
+[33m2f53803[m HEAD@{75}: rebase (pick): refactor : 자잘한 코드 수정
+[33mf04c39d[m HEAD@{76}: rebase (pick): feat : AuthController API 테스트
+[33m0b8e818[m HEAD@{77}: rebase (pick): refactor : 에러 코드 jsnon 형태 반환
+[33m3856ff9[m HEAD@{78}: rebase (pick): refactor : 순환참조 해결
+[33m987e3d2[m HEAD@{79}: rebase (continue): chore :
+[33mf8f7267[m HEAD@{80}: rebase (pick): refactor : 패키지 변경
+[33m5e5f977[m HEAD@{81}: rebase (pick): feat : 리프레시토큰 검증 및 재발급 로직
+[33mcedb349[m HEAD@{82}: rebase (continue): chore : memberService 수정
+[33me6307ce[m HEAD@{83}: rebase (pick): feat : 리프레시토큰 검증 및 레디스 설정
+[33m91dd4c2[m HEAD@{84}: rebase (pick): feat : 리프레시토큰 쿠키 저장
+[33m7d118ab[m HEAD@{85}: rebase (pick): chore : 피드백 반영
+[33m1d73620[m HEAD@{86}: rebase (continue): chore : 충돌 해결
+[33m8a9c250[m HEAD@{87}: rebase (start): checkout origin/dev-main
+[33m2f09c28[m HEAD@{88}: checkout: moving from dev-main to feat-user-block
+[33m8a9c250[m HEAD@{89}: rebase (finish): returning to refs/heads/dev-main
+[33m8a9c250[m HEAD@{90}: rebase (start): checkout origin/dev-main
+[33m17b4bd9[m HEAD@{91}: checkout: moving from feat-user-block to dev-main
+[33m2f09c28[m HEAD@{92}: rebase (abort): returning to refs/heads/feat-user-block
+[33m17b4bd9[m HEAD@{93}: rebase (start): checkout dev-main
+[33m2f09c28[m HEAD@{94}: checkout: moving from dev-main to feat-user-block
+[33m17b4bd9[m HEAD@{95}: pull origin dev-main: Fast-forward
+[33mecf08cc[m HEAD@{96}: checkout: moving from feat-user-block to dev-main
+[33m2f09c28[m HEAD@{97}: rebase (abort): returning to refs/heads/feat-user-block
+[33m8ff4dd2[m[33m ([m[1;31morigin/dev-feat[m[33m, [m[1;32mdev-feat[m[33m)[m HEAD@{98}: pull origin dev-feat --rebase (start): checkout 8ff4dd22342b053bc948c64cab152087b8b3d044
+[33m2f09c28[m HEAD@{99}: checkout: moving from dev-feat to feat-user-block
+[33m8ff4dd2[m[33m ([m[1;31morigin/dev-feat[m[33m, [m[1;32mdev-feat[m[33m)[m HEAD@{100}: pull origin dev-feat --rebase: Fast-forward
+[33m229331d[m HEAD@{101}: checkout: moving from feat-user-block to dev-feat
+[33m2f09c28[m HEAD@{102}: commit: chore :
+[33m030840d[m HEAD@{103}: commit: refactor : 구글 포맷팅 적용
+[33m04a4ee9[m HEAD@{104}: commit: feat : BlockController 통합 테스트
+[33m00ffdde[m HEAD@{105}: commit: feat : 차단 관련 로직 (service)
+[33me0174fb[m HEAD@{106}: commit: feat : BlockController
+[33m3125091[m HEAD@{107}: commit: feat : 토큰 인증 후 유저 정보 사용
+[33m7e0868e[m HEAD@{108}: commit: feat : MemberController 통합 테스트
+[33mb018294[m HEAD@{109}: commit: feat : block 컨트롤러
+[33mdc122cb[m HEAD@{110}: commit: refactor : 테스트 코드 패키지 변경
+[33m029348d[m HEAD@{111}: commit: refactor : 자잘한 코드 수정
+[33m2441d13[m HEAD@{112}: commit: feat : AuthController API 테스트
+[33m8cc6c60[m HEAD@{113}: commit: refactor : 에러 코드 jsnon 형태 반환
+[33mf0378a7[m HEAD@{114}: commit: refactor : 순환참조 해결
+[33m4dc1ab6[m HEAD@{115}: commit: chore :
+[33m6434edb[m HEAD@{116}: commit: refactor : 패키지 변경
+[33m2773c83[m HEAD@{117}: commit: feat : 리프레시토큰 검증 및 재발급 로직
+[33mc81632c[m HEAD@{118}: commit: feat : 리프레시토큰 생성
+[33m7770ab0[m HEAD@{119}: commit: feat : 리프레시토큰 검증 및 레디스 설정
+[33m06511f7[m HEAD@{120}: commit: feat : 리프레시토큰 쿠키 저장
+[33mde37c84[m HEAD@{121}: commit: chore : 피드백 반영
+[33m88f34d5[m HEAD@{122}: commit: refactor : google format 적용
+[33m229331d[m HEAD@{123}: checkout: moving from feat-user-setting to feat-user-block
+[33me8a9338[m[33m ([m[1;31morigin/feat-user-setting[m[33m, [m[1;32mfeat-user-setting[m[33m)[m HEAD@{124}: checkout: moving from dev-feat to feat-user-setting
+[33m229331d[m HEAD@{125}: checkout: moving from feat-user-setting to dev-feat
+[33me8a9338[m[33m ([m[1;31morigin/feat-user-setting[m[33m, [m[1;32mfeat-user-setting[m[33m)[m HEAD@{126}: commit: chore :
+[33m211bba9[m HEAD@{127}: commit: chore : 매핑 오류 해결
+[33m4404dee[m HEAD@{128}: commit: chore : 테스트 수정
+[33mddb6816[m HEAD@{129}: commit: feat : 토큰 헤더 방식 변경
+[33mcff860c[m HEAD@{130}: commit: feat : 신고 접수 테스트
+[33ma031d04[m HEAD@{131}: commit: feat : 신고 관련 예외처리 코드
+[33m2a96f89[m HEAD@{132}: commit: chore : 패키지 구조 변경
+[33mded0e02[m HEAD@{133}: commit: feat : 유저 신고 로직
+[33mfa9d62d[m HEAD@{134}: commit: chore : 코드 반영
+[33m50d8827[m HEAD@{135}: commit: feat : MemberServiceTest
+[33m1a9b814[m HEAD@{136}: commit: feat : MemberController API 관련 메서드
+[33m3c381a9[m HEAD@{137}: commit: feat : MemberController API
+[33m4a90ba0[m HEAD@{138}: commit: feat : 중복 닉네임 에러 코드
+[33m6cfb98c[m HEAD@{139}: commit: feat : EmailUtil
+[33m613aaf5[m HEAD@{140}: commit: feat : 이메일 관련 에러 코드
+[33me4420e8[m HEAD@{141}: commit: chore : 자잘한 코드 수정
+[33mf5f986c[m HEAD@{142}: commit: feat : Member 관련 Dto
+[33m7b43259[m HEAD@{143}: commit: feat : 코드 변경 반영
+[33m21c69e6[m HEAD@{144}: commit: feat : Member 엔티티 프로필 수정
+[33m44041de[m HEAD@{145}: commit: chore : 클래스명 변경
+[33mfd6ccf0[m HEAD@{146}: commit: feat : AuthService 생성
+[33ma375c1c[m HEAD@{147}: commit: chore : 패키지 경로 수정
+[33m936b95a[m HEAD@{148}: commit: refactor : authController 응답 일괄 처리
+[33m658f99c[m HEAD@{149}: checkout: moving from feat-user-management to feat-user-setting
+[33md6b5351[m[33m ([m[1;32mfeat-user-management[m[33m)[m HEAD@{150}: commit (merge): Merge remote-tracking branch 'origin/feat-user-management' into feat-user-management
+[33m9962415[m HEAD@{151}: checkout: moving from dev-main to feat-user-management
+[33mecf08cc[m HEAD@{152}: checkout: moving from feat-user-management to dev-main
+[33m9962415[m HEAD@{153}: reset: moving to HEAD
+[33m9962415[m HEAD@{154}: pull origin dev-main --rebase (finish): returning to refs/heads/feat-user-management
+[33m9962415[m HEAD@{155}: pull origin dev-main --rebase (pick): feat : 회원 탈퇴 로직
+[33mab2ca0a[m HEAD@{156}: pull origin dev-main --rebase (pick): refactor : 중복 코드 제거 및 수정
+[33m76622da[m HEAD@{157}: pull origin dev-main --rebase (pick): feat : 비밀번호 변경 로직
+[33m59307e5[m HEAD@{158}: pull origin dev-main --rebase (pick): feat : 비밀번호 변경 dto
+[33m0c74a66[m HEAD@{159}: pull origin dev-main --rebase (pick): refactor : 일관된 응답 처리
+[33m80f90a9[m HEAD@{160}: pull origin dev-main --rebase (pick): refactor : 일관된 응답 처리
+[33m203eeed[m HEAD@{161}: pull origin dev-main --rebase (pick): chore :
+[33m0677e20[m HEAD@{162}: pull origin dev-main --rebase (pick): refactor : api 명세서에 따른 응답 처리
+[33m675b290[m HEAD@{163}: pull origin dev-main --rebase (pick): feat : EmailUtil 구현
+[33md44bab4[m HEAD@{164}: pull origin dev-main --rebase (pick): feat : 패스워드 변경 및 저장 로직
+[33mf46b504[m HEAD@{165}: pull origin dev-main --rebase (pick): feat : 메일 발송 관련 에러코드
+[33m11074e7[m HEAD@{166}: pull origin dev-main --rebase (pick): feat : 프로필 수정 테스트
+[33mef19b2c[m HEAD@{167}: pull origin dev-main --rebase (pick): feat : 프로필 수정 로직
+[33m53c1a40[m HEAD@{168}: pull origin dev-main --rebase (pick): feat : 프로필 수정 Dto
+[33mc5c59e0[m HEAD@{169}: pull origin dev-main --rebase (pick): feat : tsid 컬럼 추가
+[33md1240b9[m HEAD@{170}: pull origin dev-main --rebase (pick): feat : 닉네임 중복 여부
+[33m94787ea[m HEAD@{171}: pull origin dev-main --rebase (pick): feat : 스웨거 수정
+[33m7268650[m HEAD@{172}: pull origin dev-main --rebase (pick): refactor : memberService 책임 분리
+[33mf485729[m HEAD@{173}: pull origin dev-main --rebase (pick): feat : 사용자 정보 조회 DTO
+[33m7056291[m HEAD@{174}: pull origin dev-main --rebase (pick): 테스트 1
+[33mcce98a3[m HEAD@{175}: pull origin dev-main --rebase (pick): chore :
+[33m0a9a583[m HEAD@{176}: pull origin dev-main --rebase (pick): 테스트 2
+[33maa25992[m HEAD@{177}: pull origin dev-main --rebase (pick): 수정4차
+[33mcf6aa5d[m HEAD@{178}: pull origin dev-main --rebase (pick): 수정 3차
+[33mbfe5a46[m HEAD@{179}: pull origin dev-main --rebase (pick): 수정 2차
+[33m2be6d85[m HEAD@{180}: pull origin dev-main --rebase (pick): postLikesearchservice 제작
+[33mf95d97f[m HEAD@{181}: pull origin dev-main --rebase (pick): ãpostlike 컨트롤러 테스트 작성
+[33mad391ee[m HEAD@{182}: pull origin dev-main --rebase (pick): postlike 작성 및 테스트 코드
+[33m506955d[m HEAD@{183}: pull origin dev-main --rebase (pick): db 수정으로 인한 피드백 처리 userId -> userTsid 로 변경
+[33m9fe9fc4[m HEAD@{184}: pull origin dev-main --rebase (pick): post 수정 컨트롤러 및 스웨거 등록 api 테스트 시 PostModifyRequest 참조
+[33m7fc2ea2[m HEAD@{185}: pull origin dev-main --rebase (pick): post ì»create 컨트ë롤러 및 스웨거 적용
+[33m8e9d7a4[m HEAD@{186}: pull origin dev-main --rebase (pick): ãpost 해시태그 생성 및 추가 카운팅 테스트 완료
+[33md9764b4[m HEAD@{187}: pull origin dev-main --rebase (pick): post 수정 로직 및 수정 테스트 작성 í
+[33m2692d37[m HEAD@{188}: pull origin dev-main --rebase (pick): post 생성 test 코드 작동 확인
+[33mfd03867[m HEAD@{189}: pull origin dev-main --rebase (pick): ãpost 로직 생성 리퀘스트, 리포지터리 서비스
+[33m2fed4b8[m[33m ([m[1;32mnew-main[m[33m)[m HEAD@{190}: pull origin dev-main --rebase (start): checkout ecf08cc0e7c709accb6921e976a81d22746521ac
+[33mb3f4add[m HEAD@{191}: rebase (finish): returning to refs/heads/feat-user-management
+[33mb3f4add[m HEAD@{192}: rebase (pick): feat : 회원 탈퇴 로직
+[33m3ed375d[m HEAD@{193}: rebase (pick): refactor : 중복 코드 제거 및 수정
+[33me22a559[m HEAD@{194}: rebase (pick): feat : 비밀번호 변경 로직
+[33md5d20c5[m HEAD@{195}: rebase (pick): feat : 비밀번호 변경 dto

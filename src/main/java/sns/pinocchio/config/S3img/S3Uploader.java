@@ -34,7 +34,6 @@ public class S3Uploader {
                         .bucket(bucket)
                         .key(fileName)
                         .contentType(file.getContentType())
-                        .acl("public-read")
                         .build(),
                 RequestBody.fromBytes(file.getBytes()));
 

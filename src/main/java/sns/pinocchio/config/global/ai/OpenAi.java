@@ -43,6 +43,8 @@ public class OpenAi {
 			prompt.addAnswerEx(r.getUtterance());
 		}
 		prompt.setBasePrompt(aiMember.getPrompt());
+		log.error(prompt.toString());
+
 		return prompt.toString();
 	}
 }

@@ -1,12 +1,12 @@
 package sns.pinocchio.config.global.ai;
 
 public class Prompt {
-	private String memberPost;
-	private String answerEx = "예시:";
-	private String basePrompt;
+	private String memberPost ="";
+	private String answerEx ="";
+	private String basePrompt ="";
 
 	void setMemberPost(String memberPost) {
-		this.memberPost = "게시글:" + memberPost;
+		this.memberPost = memberPost;
 	}
 
 	void addAnswerEx(String answerEx) {
@@ -14,13 +14,13 @@ public class Prompt {
 	}
 
 	void setBasePrompt(String prompt) {
-		this.basePrompt = "해당 내용을 따라야한다:" + prompt;
+		this.basePrompt =  prompt;
 	}
 
 	@Override
 	public String toString() {
 		return String.format(
-			"%s. %s. %s.",
+			"게시글:%s, 주어진대사:[%s], 지침:[%s]",
 			memberPost,
 			answerEx,
 			basePrompt

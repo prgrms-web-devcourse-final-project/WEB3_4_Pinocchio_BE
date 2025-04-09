@@ -111,7 +111,7 @@ public class VectorQuery {
 
       // 2. 전처리된 쿼리 문자열에 대한 임베딩 생성
       EmbeddingProvider embeddingProvider = new EmbeddingProvider();
-      BsonArray embeddingBsonArray = embeddingProvider.getEmbedding(processedQuery);
+      BsonArray embeddingBsonArray = embeddingProvider.getEmbedding(processedQuery,0);
 
       List<Double> queryEmbedding = embeddingBsonArray.stream()
               .map(bsonValue -> bsonValue.asDouble().getValue())

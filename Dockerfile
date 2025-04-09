@@ -8,4 +8,4 @@ WORKDIR /app
 COPY build/libs/*.jar app.jar
 
 # 4. 컨테이너 실행 시 JAR 실행
-ENTRYPOINT ["java", "-jar", "/app/app.jar"]
+ENTRYPOINT ["java", "-Dspring.profiles.active=dev", "-jar", "/app/app.jar"]

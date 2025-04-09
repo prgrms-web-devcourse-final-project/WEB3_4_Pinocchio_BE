@@ -1,12 +1,8 @@
 package sns.pinocchio.comment.controller;
 
-import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-
-import java.util.Map;
-
+import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.transaction.Transactional;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,16 +13,23 @@ import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import jakarta.transaction.Transactional;
 import sns.pinocchio.application.comment.CommentService;
 import sns.pinocchio.application.comment.commentDto.CommentDeleteRequest;
 import sns.pinocchio.domain.fixtures.TestFixture;
 import sns.pinocchio.domain.member.Member;
 import sns.pinocchio.infrastructure.member.MemberRepository;
 
+import java.util.Map;
+
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+@Tag("integration")
 @SpringBootTest
 @AutoConfigureMockMvc
 @Transactional
@@ -72,8 +75,9 @@ class CommentDeleteControllerTest {
         CommentDeleteRequest.builder().commentId(commentId).postId(postId).build();
     Map<String, Object> response = Map.of("message", "댓글이 삭제되었습니다.");
 
-    when(commentService.deleteComment(any(CommentDeleteRequest.class))).thenReturn(response);
-    when(commentService.isInvalidComment(commentId, postId)).thenReturn(false);
+      when(commentService.isNotMyComment(member.getTsid(), commentId)).thenReturn(false);
+      when(commentService.isInvalidComment(commentId, postId)).thenReturn(false);
+      when(commentService.deleteComment(any(CommentDeleteRequest.class))).thenReturn(response);
 
     mockMvc
         .perform(
@@ -99,16 +103,20 @@ class CommentDeleteControllerTest {
     CommentDeleteRequest request =
         CommentDeleteRequest.builder().commentId(commentId).postId(postId).build();
 
-    when(commentService.isInvalidComment(commentId, postId)).thenReturn(true);
+      when(commentService.isNotMyComment(member.getTsid(), commentId)).thenReturn(false);
+      when(commentService.isInvalidComment(commentId, postId)).thenReturn(true);
 
-    mockMvc
+      // ❗️컨트롤러 내부 로직이 예외를 던지므로 deleteComment는 호출되지 않음
+
+
+      mockMvc
         .perform(
             delete("/comments")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(new ObjectMapper().writeValueAsString(request))
                 .header("Authorization", accessToken))
         .andExpect(status().isNotFound())
-        .andExpect(jsonPath("$.message").value("등록된 댓글을 찾을 수 없습니다."))
+        .andExpect(jsonPath("$.message").value("댓글을 찾을 수 없습니다."))
         .andDo(print());
     System.out.println("✅ 댓글 삭제 실패 성공");
   }

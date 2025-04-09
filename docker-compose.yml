@@ -1,28 +1,28 @@
-version: "3.8"
+version: "3.8"  # Docker Compose 파일의 버전 (3.8은 최신 기능들을 잘 지원함)
 
 services:
-    mysql:
-        image: mysql:8.0
-        container_name: mysql-container
-        restart: always
-        environment:
-            MYSQL_ROOT_PASSWORD: devteam9
-            MYSQL_DATABASE: pino
-            MYSQL_USER: dev
-            MYSQL_PASSWORD: devteam9
+    mysql:  # MySQL 데이터베이스 컨테이너
+        image: mysql:8.0  # 사용할 MySQL 이미지 (버전 8.0)
+        container_name: mysql-container  # 컨테이너 이름
+        restart: always  # 컨테이너가 중단되면 항상 재시작
+        environment:  # MySQL 환경 변수
+            MYSQL_ROOT_PASSWORD: devteam9  # root 사용자 비밀번호
+            MYSQL_DATABASE: pino           # 초기 생성할 데이터베이스 이름
+            MYSQL_USER: dev                # 사용자 계정
+            MYSQL_PASSWORD: devteam9       # 사용자 비밀번호
         ports:
-            - "3306:3306"
+            - "3306:3306"  # 호스트 포트 3306 → 컨테이너 포트 3306
         volumes:
-            - /data/mysql:/var/lib/mysql
+            - /data/mysql:/var/lib/mysql  # 호스트의 /data/mysql → 컨테이너 내부 데이터 저장 경로
         networks:
-            - app-network
-        healthcheck:
+            - app-network  # 같은 네트워크 그룹에 소속
+        healthcheck:  # 컨테이너 헬스 체크 (상태 확인)
             test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
             interval: 10s
             timeout: 5s
             retries: 5
 
-    mongodb:
+    mongodb:  # MongoDB 컨테이너
         image: mongo:6.0
         container_name: mongodb-container
         restart: always
@@ -31,7 +31,7 @@ services:
             MONGO_INITDB_ROOT_PASSWORD: devteam9
             MONGO_INITDB_DATABASE: pino
         ports:
-            - "27017:27017"
+            - "27017:27017"  # 호스트 27017 → 컨테이너 27017
         volumes:
             - /data/mongodb:/data/db
         networks:
@@ -42,13 +42,13 @@ services:
             timeout: 5s
             retries: 5
 
-    redis:
+    redis:  # Redis 컨테이너
         image: redis:7
         container_name: redis-container
         restart: always
         ports:
-            - "6379:6379"
-        command: ["redis-server", "--requirepass", "devteam9"]
+            - "6379:6379"  # 호스트 6379 → 컨테이너 6379
+        command: ["redis-server", "--requirepass", "devteam9"]  # Redis 비밀번호 설정
         volumes:
             - /data/redis:/data
         networks:
@@ -59,20 +59,22 @@ services:
             timeout: 5s
             retries: 5
 
-    spring:
-        image: jeong6/spring-app:latest
+    spring:  # Spring Boot 애플리케이션 컨테이너
+        image: jeong6/spring-app:latest  # 빌드된 이미지 이름 (DockerHub 또는 로컬)
         container_name: spring-app-container
         restart: always
         ports:
-            - "8080:8080"
-        depends_on:
+            - "8080:8080"  # 호스트 8080 → 컨테이너 8080
+        depends_on:  # 종속 서비스가 먼저 실행되고 정상 상태일 때 실행됨
             mysql:
                 condition: service_healthy
             mongodb:
                 condition: service_healthy
             redis:
                 condition: service_healthy
+        # env_file: [삭제됨] - AWS 자격 증명을 env로부터 주입하지 않음
         environment:
+            SPRING_PROFILES_ACTIVE: dev  # Spring에 dev 프로파일을 활성화함
             SPRING_DATASOURCE_URL: jdbc:mysql://mysql-container:3306/pino
             SPRING_DATASOURCE_USERNAME: dev
             SPRING_DATASOURCE_PASSWORD: devteam9
@@ -83,26 +85,26 @@ services:
         networks:
             - app-network
         healthcheck:
-            test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+            test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]  # Spring Actuator로 상태 체크
             interval: 15s
             timeout: 5s
             retries: 5
 
-    nginx:
+    nginx:  # 웹 서버 역할 (Reverse Proxy)
         image: nginx:latest
         container_name: nginx-container
         restart: always
         ports:
-            - "80:80"
+            - "80:80"  # 호스트 80 → 컨테이너 80
         volumes:
-            - ./nginx/conf.d:/etc/nginx/conf.d
-            - ./nginx/html:/usr/share/nginx/html
+            - ./nginx/conf.d:/etc/nginx/conf.d  # nginx 설정 파일 마운트
+            - ./nginx/html:/usr/share/nginx/html  # 정적 리소스 마운트
         depends_on:
             spring:
-                condition: service_healthy
+                condition: service_healthy  # Spring이 건강해야 nginx 시작
         networks:
             - app-network
 
 networks:
     app-network:
-        driver: bridge
+        driver: bridge  # 브릿지 네트워크 사용

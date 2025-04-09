@@ -14,8 +14,6 @@ const fetchMyPageLikeList = async () => {
 };
 
 const MyPageModify = () => {
-    const navigate = useNavigate();
-
     return (
         <PageLayout>
             <ProfileEditCard />

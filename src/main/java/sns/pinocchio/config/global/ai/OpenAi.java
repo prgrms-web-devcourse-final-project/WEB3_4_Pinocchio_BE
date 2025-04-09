@@ -3,8 +3,9 @@ package sns.pinocchio.config.global.ai;
 import java.util.List;
 
 import org.springframework.ai.openai.OpenAiChatModel;
+import org.springframework.ai.retry.NonTransientAiException;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-
 
 import io.github.ollama4j.utils.Options;
 import io.github.ollama4j.utils.OptionsBuilder;
@@ -19,10 +20,19 @@ import sns.pinocchio.infrastructure.ai.vectorDB.VectorQuery;
 public class OpenAi {
 	private final OpenAiChatModel chatClient;
 
-	public String getAnswer(String prompt) {
-		Options option = new OptionsBuilder().build();
-			String result = chatClient.call(prompt);
-			return result;
+	@Value("${ai.response.fail.delayTime}")
+	private int delay;
+
+	public String getAnswer(String prompt, int retryCount) throws InterruptedException {
+		try {
+			return chatClient.call(prompt);
+		} catch (NonTransientAiException e) {
+			if (retryCount >= 10) {
+				return "";
+			}
+			Thread.sleep(delay * 1000L);
+			return getAnswer(prompt, retryCount + 1);
+		}
 	}
 
 	public String convertPrompt(String content, AiMember aiMember) {

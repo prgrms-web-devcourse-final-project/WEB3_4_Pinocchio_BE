@@ -15,7 +15,7 @@ import sns.pinocchio.config.global.event.eventRunner.PostEventRunner;
 public class PostEventListener {
 	private final PostEventRunner postEventRunner;
 
-	@Async
+	@Async("taskExecutor")
 	@EventListener
 	public void postCreateEvent(PostEvent event) {
 		try {

@@ -22,12 +22,12 @@ public class PostEventRunner {
 	private final CommentService commentService;
 	private final OpenAi openAi;
 
-	public void createAiComment(PostEvent event) {
+	public void createAiComment(PostEvent event) throws InterruptedException {
 		List<AiMember> aiMemberList = memberLoader.getMemberList();
 		for (AiMember aiMember : aiMemberList) {
 			Member member = aiMember.getMember();
 			String prompt = openAi.convertPrompt(event.getContent(), aiMember);
-			String answer = openAi.getAnswer(prompt);
+			String answer = openAi.getAnswer(prompt,0);
 			if (!Objects.equals(answer, "")) {
 				CommentCreateRequest request = CommentCreateRequest.builder()
 					.content(answer)

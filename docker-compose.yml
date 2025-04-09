@@ -76,6 +76,9 @@ services:
             - docker.env  # 환경 변수 파일에서 AWS 관련 설정 불러옴
         environment:
             SPRING_PROFILES_ACTIVE: dev  #  Spring에 dev 프로파일을 활성화함
+            AWS_ACCESS_KEY: ${AWS_ACCESS_KEY}
+            AWS_SECRET_KEY: ${AWS_SECRET_KEY}
+            AWS_S3_BUCKET: ${AWS_S3_BUCKET}
             SPRING_DATASOURCE_URL: jdbc:mysql://mysql-container:3306/pino
             SPRING_DATASOURCE_USERNAME: dev
             SPRING_DATASOURCE_PASSWORD: devteam9

@@ -5,6 +5,7 @@ import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.search.VectorSearchOptions;
 import org.bson.BsonArray;
 import org.bson.Document;
@@ -117,7 +118,7 @@ public class VectorQuery {
               .map(bsonValue -> bsonValue.asDouble().getValue())
               .collect(Collectors.toList());
 
-
+      System.out.println(embeddingBsonArray);
       // 3. 벡터 검색 파이프라인 설정
       String indexName = "korean_multilingual_vector_index";
       String embeddingFieldPath = "embedding";
@@ -129,12 +130,13 @@ public class VectorQuery {
                       indexName,
                       limit,
                       VectorSearchOptions.exactVectorSearchOptions()
-                      // .filter(Filters.eq("some_field", "some_value")) // 필요시 메타데이터 필터 추가
+//                       .filter(Filters.eq("emotion", "some_value")) // 필요시 메타데이터 필터 추가
               ),
               project( // 결과 필드 프로젝션 수정
                       fields(
                               excludeId(),
                               include("utterance"),
+                              include("weight"),
                               metaVectorSearchScore("score")
                       )
               )
@@ -144,9 +146,14 @@ public class VectorQuery {
       List<Document> results = collection.aggregate(pipeline).into(new ArrayList<>());
 
       for (Document doc : results) {
+        double baseScore = doc.getDouble("score");
+        int weight = doc.getInteger("weight", 1);
+        double adjustedScore = baseScore * weight;
+
         similarityResults.add(new SimilarityResult(
                 doc.getString("utterance"),
-                doc.getDouble("score")
+                adjustedScore,
+                doc.getList("embedding", Double.class)
         ));
       }
 
@@ -165,10 +172,12 @@ public class VectorQuery {
   public static class SimilarityResult {
     private final String utterance;
     private final double score;
+    private final List<Double> embedding;
 
-    public SimilarityResult(String utterance, double score) {
+    public SimilarityResult(String utterance, double score, List<Double> embedding) {
       this.utterance = utterance;
       this.score = score;
+      this.embedding = embedding;
     }
 
     public String getUtterance() {
@@ -178,12 +187,16 @@ public class VectorQuery {
     public double getScore() {
       return score;
     }
+    public List<Double> getEmbedding() {
+      return embedding;
+    }
 
     @Override
     public String toString() {
       return "SimilarityResult{" +
               "utterance='" + utterance + '\'' +
               ", score=" + score +
+              ", embedding=" + embedding +
               '}';
     }
   }
@@ -191,8 +204,8 @@ public class VectorQuery {
   // 사용 예시 메서드
   public static void main(String[] args) {
     // 예시 쿼리 문자열
-    String queryString = "정의";
-    int limit = 1;
+    String queryString = "그걸 왜 말을 못해? 병신이야?!";
+    int limit = 10;
 
     try {
       List<SimilarityResult> results = searchSimilarDocuments(queryString, limit);
@@ -203,7 +216,8 @@ public class VectorQuery {
         System.out.println("\n찾은 문서들:");
         for (SimilarityResult result : results) {
           System.out.println("Utterance: " + result.getUtterance());
-          System.out.println("Similarity Score: " + result.getScore());
+          System.out.println("Adjusted Score: " + result.getScore());
+//          System.out.println("Embedding: " + result.getEmbedding());
           System.out.println("---");
         }
       }

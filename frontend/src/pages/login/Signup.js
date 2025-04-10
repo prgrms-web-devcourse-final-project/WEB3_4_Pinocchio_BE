@@ -64,19 +64,34 @@ const Signup = () => {
         try {
             setIsLoading(true);
             const response = await axios.post('/auth/signup', sendData);
-            // localStorage.setItem("token", response.data);
-            navigate('/login')
+            // 회원가입 성공 → 로그인 페이지로 이동
+            navigate('/login');
         } catch (error) {
             console.log("error login api: ", error);
+
+            // 백엔드에서 내려준 유효성 검증 오류 포함 응답 처리
+            const errorResponse = error.response?.data;
+            const baseMessage = errorResponse?.message || "에러: 관리자에게 문의바랍니다.";
+            const fieldErrors = errorResponse?.errors;
+
+            let html = baseMessage;
+
+            // 필드별 오류 메시지 모아 보여주기
+            if (fieldErrors && typeof fieldErrors === "object") {
+                html += "<br/><br/>";
+                for (const [field, message] of Object.entries(fieldErrors)) {
+                    html += `<b>${field}</b>: ${message}<br/>`;
+                }
+            }
+
             openConfirm({
-                title: '데이터를 불러오는 중 오류가 발생했습니다.',
-                html: error.response?.data?.message || "에러: 관리자에게 문의바랍니다."
+                title: '회원가입 오류',
+                html
             });
-        }
-        finally {
+        } finally {
             setIsLoading(false);
         }
-    }
+    };
 
     // 엔터 키를 눌렀을 때 로그인 버튼 클릭 동작을 위한 훅
     const handleEnterKey = useEnterKeySubmit(handleClickLogin);

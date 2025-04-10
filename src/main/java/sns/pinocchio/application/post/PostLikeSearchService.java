@@ -34,6 +34,11 @@ public class PostLikeSearchService {
         return postLikeRepository.findAllByTsidAndStatus(userTsid, CancellState.ACTIVE,pageable);
     }
 
+    // content 요약 함수
+    private String summarizeContent(String content) {
+        return content.length() > 15 ? content.substring(0, 15) + "..." : content;
+    }
+
     // 좋아요 + 게시글 내용 조회 (마이페이지 용)
     public Page<PostSummaryDto> findLikesByUserWithContent(String userTsid, int page) {
         Pageable pageable = PageRequest.of(page, 15);
@@ -49,14 +54,15 @@ public class PostLikeSearchService {
                 .collect(Collectors.toMap(Post::getId, Post::getContent));
 
         List<PostSummaryDto> result = likesPage.getContent().stream()
-                .map(like -> new PostSummaryDto(
-                        like.getPostId(),
-                        postIdToContent.getOrDefault(like.getPostId(), "삭제된 게시글입니다")
-                ))
+                .map(like -> {
+                    String rawContent = postIdToContent.getOrDefault(like.getPostId(), "삭제된 게시글입니다");
+                    return new PostSummaryDto(like.getPostId(), summarizeContent(rawContent));
+                })
                 .toList();
 
         return new PageImpl<>(result, pageable, likesPage.getTotalElements());
     }
+
     // 특정 게시글에 좋아요 누른 사용자 목록
     public List<PostLike> findUsersByPost(String postId) {
         return postLikeRepository.findAllByPostIdAndStatus(postId, CancellState.ACTIVE);

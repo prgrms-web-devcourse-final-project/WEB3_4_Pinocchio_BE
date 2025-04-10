@@ -1,48 +1,33 @@
 package sns.pinocchio.MemberFollow.controller;
 
-import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import org.junit.jupiter.api.BeforeEach;
+import jakarta.transaction.Transactional;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestParam;
-
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import jakarta.transaction.Transactional;
 import sns.pinocchio.application.comment.CommentService;
-import sns.pinocchio.config.global.auth.jwt.MemberAuthFilter;
-import sns.pinocchio.config.global.auth.model.CustomUserDetails;
-import sns.pinocchio.config.global.auth.service.CustomUserDetailService;
 import sns.pinocchio.domain.fixtures.TestFixture;
 import sns.pinocchio.domain.member.Member;
 import sns.pinocchio.infrastructure.member.MemberRepository;
-import sns.pinocchio.presentation.member.MemberInfoFindController;
 
+import java.util.List;
+import java.util.Map;
+
+import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+@Tag("integration")
 @SpringBootTest
 @AutoConfigureMockMvc
 @Transactional
@@ -90,7 +75,7 @@ public class MemberFindCommentsControllerTest {
 		List<Map<String, String>> comments = List.of(info,info,info,info,info);
 		Map<String, Object> response = Map.of("message","댓글요청에 성공하였습니다.","comments", comments);
 		when(commentService.findCommentsByUser(anyString(),anyInt())).thenReturn(response);
-		mockMvc.perform(get("/members/"+member.getTsid()+"/activities/comments").contentType(MediaType.APPLICATION_JSON)
+		mockMvc.perform(get("/user/"+member.getTsid()+"/activities/comments").contentType(MediaType.APPLICATION_JSON)
 				.header("Authorization", accessToken))
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.message").value("댓글요청에 성공하였습니다."))

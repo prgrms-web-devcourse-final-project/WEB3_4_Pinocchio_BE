@@ -11,6 +11,7 @@ import MyPageFollower from "../pages/board/mypage/MyPageFollower";
 import MyPageMentions from "../pages/board/mypage/MyPageMentions";
 import MyPageBlock from "../pages/board/mypage/MyPageBlock";
 import MyPageModify from "../pages/board/mypage/MyPageModify";
+import BoardDetail from "../pages/board/BoardDetail";
 
 const BaseRoutes = () => {
     return (
@@ -22,6 +23,7 @@ const BaseRoutes = () => {
                 <Route path="" element={<Navigate to="login" replace />} />
                 <Route path="board/list" element={<MainBoardList />} />
                 <Route path="board/new" element={<NewPost />} />
+                <Route path="board/detail/:boardId" element={<BoardDetail />} />
                 <Route path="board/mypage/like" element={<MyPageLike />} />
                 <Route path="board/mypage/comment" element={<MyPageComment />} />
                 <Route path="board/mypage/follower" element={<MyPageFollower />} />

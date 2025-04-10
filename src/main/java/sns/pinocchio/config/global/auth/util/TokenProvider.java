@@ -2,6 +2,7 @@ package sns.pinocchio.config.global.auth.util;
 
 import io.jsonwebtoken.Jwts;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import sns.pinocchio.domain.member.Member;
 
@@ -10,6 +11,7 @@ import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.UUID;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class TokenProvider {
@@ -18,6 +20,8 @@ public class TokenProvider {
 
   // JWT 토큰 생성
   public String generateAccessToken(Member member) {
+    // TODO : 오류 해결 후 log 삭제
+    log.info("jwt 토큰 생성 시작");
     return Jwts.builder()
         .setSubject(member.getName()) // 사용자 이름
         .claim("id", member.getId()) // 사용자 ID

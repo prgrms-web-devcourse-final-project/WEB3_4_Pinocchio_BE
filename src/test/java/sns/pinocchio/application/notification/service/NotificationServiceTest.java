@@ -8,6 +8,7 @@ import static org.mockito.Mockito.when;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -22,6 +23,7 @@ import sns.pinocchio.domain.notification.Notification;
 import sns.pinocchio.domain.notification.NotificationException.NotificationBadRequestException;
 import sns.pinocchio.infrastructure.persistence.mysql.NotificationRepository;
 
+@Tag("unit")
 @ExtendWith(MockitoExtension.class)
 class NotificationServiceTest {
 

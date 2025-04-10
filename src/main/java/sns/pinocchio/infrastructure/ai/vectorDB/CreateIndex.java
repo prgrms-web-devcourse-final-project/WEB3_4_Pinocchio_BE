@@ -1,4 +1,4 @@
-package sns.pinocchio.infrastructure.ai;
+package sns.pinocchio.infrastructure.ai.vectorDB;
 
 import com.mongodb.MongoException;
 import com.mongodb.client.*;

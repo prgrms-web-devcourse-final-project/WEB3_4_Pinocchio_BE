@@ -1,32 +1,27 @@
 package sns.pinocchio.presentation.member;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import org.springframework.data.domain.Page;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.*;
 import sns.pinocchio.application.comment.CommentService;
 import sns.pinocchio.application.post.PostLikeSearchService;
+import sns.pinocchio.application.post.PostSummaryDto;
 import sns.pinocchio.config.global.auth.model.CustomUserDetails;
 import sns.pinocchio.domain.member.Member;
-import sns.pinocchio.domain.post.PostLike;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @Tag(name = "유저 정보 조회", description = "유저 정보 관련 API")
 @RestController
-@RequestMapping("/members")
+@RequestMapping("/user")
 @RequiredArgsConstructor
 public class MemberInfoFindController {
 	private final CommentService commentService;
@@ -52,14 +47,15 @@ public class MemberInfoFindController {
 		@ApiResponse(responseCode = "500", description = "서버 내부 오류")})
 	@GetMapping("/{userId}/activities/likes")
 	public ResponseEntity<Map<String, Object>> findFindLikes(@PathVariable String userId,
-		@RequestParam(value = "page", defaultValue = "0") int page) {
+                                                             @RequestParam(value = "page", defaultValue = "0") int page) {
+        // 조회 수정||
+        Page<PostSummaryDto> postSummaryPage = postLikeSearchService.findLikesByUserWithContent(userId, page);
 
-		Page<PostLike> postLikePage = postLikeSearchService.findLikesByUser(userId, page);
-		Map<String, Object> response = new HashMap<>();
+        Map<String, Object> response = new HashMap<>();
 		response.put("message", "게시물 좋아요 목록 요청 성공");
-		response.put("likes", postLikePage.getContent());
-		response.put("totalPages", postLikePage.getTotalPages());
-		response.put("totalElements", postLikePage.getTotalElements());
+        response.put("likes", postSummaryPage.getContent());
+        response.put("totalPages", postSummaryPage.getTotalPages());
+        response.put("totalElements", postSummaryPage.getTotalElements());
 		return ResponseEntity.status(HttpStatus.OK).body(response);
 	}
 }

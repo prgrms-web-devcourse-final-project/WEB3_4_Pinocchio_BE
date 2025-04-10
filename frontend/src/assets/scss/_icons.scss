@@ -331,11 +331,24 @@
 }
 .ico-chat {
   display: inline-block;
-  min-width: 20px;
-  height: 20px;
+  min-width: 40px;
+  height: 40px;
   background: url(../images/icon/ico_chat.svg) no-repeat 50% 50%;
   font-style: normal;
+  cursor: pointer;
+  position: relative;
 }
+
+.ico-close {
+  display: inline-block;
+  width: 24px;
+  height: 24px;
+  margin: 0;
+  padding: 0;
+  background: url(../images/icon/modal-close-sm.svg) no-repeat 50% 50%;
+  //opacity: 1;
+}
+
 .ico-exclamation {
   display: inline-block;
   min-width: 16px;

@@ -20,7 +20,7 @@ import sns.pinocchio.infrastructure.shared.swagger.ErrorResponseSchema;
 @Tag(name = "검색", description = "검색 API")
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/search")
+@RequestMapping("/search")
 public class SearchController {
 
   private final SearchService searchService;

@@ -15,7 +15,7 @@ import sns.pinocchio.config.global.auth.model.CustomUserDetails;
 @Tag(name = "게시글 좋아요", description = "게시글 좋아요/취소 API")
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/posts/like")
+@RequestMapping("/posts/like")
 public class PostLikeController {
 
     private final PostLikeService postLikeService;

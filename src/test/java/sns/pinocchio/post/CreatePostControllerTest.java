@@ -50,7 +50,7 @@ class CreatePostControllerTest {
                 .thenReturn("post_12345");
 
         // when & then
-        mockMvc.perform(post("/api/posts")
+        mockMvc.perform(post("/posts")
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization", "Bearer dummyToken")
                         .content(requestBody))

@@ -1,12 +1,8 @@
 package sns.pinocchio.MemberFollow.controller;
 
-import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-
-import java.util.Map;
-
+import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.transaction.Transactional;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,16 +13,22 @@ import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import jakarta.transaction.Transactional;
 import sns.pinocchio.application.comment.CommentService;
 import sns.pinocchio.application.member.MemberFollowService;
 import sns.pinocchio.application.member.memberDto.MemberFollowRequest;
 import sns.pinocchio.domain.fixtures.TestFixture;
 import sns.pinocchio.domain.member.Member;
 import sns.pinocchio.infrastructure.member.MemberRepository;
+
+import java.util.Map;
+
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+@Tag("integration")
 @SpringBootTest
 @AutoConfigureMockMvc
 @Transactional
@@ -78,7 +80,7 @@ class MemberFollowControllerTest {
 		MemberFollowRequest request = MemberFollowRequest.builder().followingNickname(authorNickname).build();
 		Map<String, Object> response = Map.of("message", "팔로우에 성공하였습니다.", "followed", true);
 		when(memberFollowService.followingUser(request,userId,member.getTsid(),member.getNickname()) ).thenReturn(response);
-		mockMvc.perform(post("/users/"+userId+"/follow").contentType(MediaType.APPLICATION_JSON)
+		mockMvc.perform(post("/user/"+userId+"/follow").contentType(MediaType.APPLICATION_JSON)
 				.header("Authorization", accessToken)
 				.content(new ObjectMapper().writeValueAsString(request)))
 			.andExpect(status().isOk())
@@ -99,7 +101,7 @@ class MemberFollowControllerTest {
 		MemberFollowRequest request = MemberFollowRequest.builder().followingNickname(authorNickname).build();
 		Map<String, Object> response = Map.of("message", "팔로우 취소에 성공하였습니다.", "followed", false);
 		when(memberFollowService.followingUser(request,userId,member.getTsid(),member.getNickname()) ).thenReturn(response);
-		mockMvc.perform(post("/users/"+userId+"/follow").contentType(MediaType.APPLICATION_JSON)
+		mockMvc.perform(post("/user/"+userId+"/follow").contentType(MediaType.APPLICATION_JSON)
 				.header("Authorization", accessToken)
 				.content(new ObjectMapper().writeValueAsString(request)))
 			.andExpect(status().isOk())

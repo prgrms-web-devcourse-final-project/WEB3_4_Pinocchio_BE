@@ -20,7 +20,7 @@ import java.io.IOException;
 @Tag(name = "게시글", description = "게시글 관련 API")
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/posts")
+@RequestMapping("/posts")
 public class PostController {
 
     private final PostService postService;

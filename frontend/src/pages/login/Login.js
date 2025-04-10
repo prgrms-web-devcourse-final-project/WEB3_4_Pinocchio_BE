@@ -12,7 +12,7 @@ import {Stack} from "react-bootstrap";
 const Login = () => {
     const navigate = useNavigate();
     const { openConfirm } = useConfirm();
-    const [loginId, setLoginId] = useState("");
+    const [email, setEmailId] = useState("");
     const [password, setPassword] = useState("");
     const [isLoading, setIsLoading] = useState(false);
 

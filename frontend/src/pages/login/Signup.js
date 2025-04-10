@@ -12,7 +12,7 @@ import {useState} from "react";
 const Signup = () => {
     const navigate = useNavigate();
     const { openConfirm } = useConfirm();
-    const [loginId, setLoginId] = useState("");
+    const [email, setEmailId] = useState("");
     const [password, setPassword] = useState("");
     const [nickName, setNickName] = useState("");
     const [name, setName] = useState("");

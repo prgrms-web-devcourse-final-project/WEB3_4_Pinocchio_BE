@@ -7,6 +7,7 @@ import lombok.Builder;
 import lombok.Getter;
 import sns.pinocchio.domain.chat.Chat;
 import sns.pinocchio.domain.chatroom.ChatRoom;
+import sns.pinocchio.domain.member.Member;
 import sns.pinocchio.infrastructure.shared.response.GlobalCursorPageResponse;
 
 public class ChatResponseDto {
@@ -48,6 +49,10 @@ public class ChatResponseDto {
 
     private String targetUserId;
 
+    private String targetUserNickName;
+
+    private String targetUserProfileImageUrl;
+
     private String lastMessage;
 
     private Instant lastMessageTime;
@@ -61,7 +66,7 @@ public class ChatResponseDto {
      * @param chatRoom 채팅방 정보
      * @return ChatRoomsDetail 채팅방 세부 정보
      */
-    public static ChatRoomsDetail toDetail(String userTsid, ChatRoom chatRoom) {
+    public static ChatRoomsDetail toDetail(String userTsid, Member targetUser, ChatRoom chatRoom) {
 
       // 채팅 대상 확인: 없을 경우 null
       String targetUserTsid =
@@ -90,6 +95,8 @@ public class ChatResponseDto {
           .createdAt(chatRoom.getCreatedAt().toString())
           .createdAtForSearch(chatRoom.getCreatedAtTsid())
           .targetUserId(targetUserTsid)
+          .targetUserNickName(targetUser.getNickname())
+          .targetUserProfileImageUrl(targetUser.getProfileImageUrl())
           .lastMessage(lastMessage)
           .lastMessageTime(lastMessageTime)
           .unreadCounts(unreadCounts)

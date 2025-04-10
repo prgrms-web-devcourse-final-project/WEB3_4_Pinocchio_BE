@@ -1,13 +1,16 @@
 package sns.pinocchio.application.chat.service;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.IntStream;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import sns.pinocchio.application.chat.dto.ChatRequestDto.SendMessage;
 import sns.pinocchio.application.chat.dto.ChatResponseDto.*;
+import sns.pinocchio.application.member.MemberService;
 import sns.pinocchio.config.global.auth.model.CustomUserDetails;
 import sns.pinocchio.domain.chat.Chat;
 import sns.pinocchio.domain.chat.ChatException.ChatBadRequestException;
@@ -25,6 +28,7 @@ import sns.pinocchio.infrastructure.persistence.mongodb.ChatRoomRepository;
 import sns.pinocchio.infrastructure.persistence.mongodb.ChatRoomRepositoryCustom;
 import sns.pinocchio.infrastructure.shared.util.TsidUtil;
 import sns.pinocchio.infrastructure.websocket.WebSocketHandler;
+import sns.pinocchio.presentation.member.exception.MemberException;
 
 @Service
 @Slf4j
@@ -35,6 +39,7 @@ public class ChatService {
   private final ChatRoomRepositoryCustom chatRoomRepositoryCustom;
   private final ChatRepository chatRepository;
   private final WebSocketHandler webSocketHandler;
+  private final MemberService memberService;
 
   /**
    * 해당 채팅방에 메시지 전송
@@ -209,9 +214,14 @@ public class ChatService {
     // nextCursor 판단: 이후 데이터가 존재하지 않으면 null
     String nextCursor = hasNext ? sliced.getLast().getCreatedAtTsid() : null;
 
+    // 참여자 정보 조회: 존재하지 않으면 404에러
+    List<Member> targetUsers = getTargetUsers(userTsid, sliced);
+
     // 응답 데이터 생성: ChatRoom Entity -> ChatRoomDetail Dto
     List<ChatRoomsDetail> chatroomDetails =
-        sliced.stream().map(chatRoom -> ChatRoomsDetail.toDetail(userTsid, chatRoom)).toList();
+        IntStream.range(0, sliced.size())
+            .mapToObj(i -> ChatRoomsDetail.toDetail(userTsid, targetUsers.get(i), sliced.get(i)))
+            .toList();
 
     return new ChatRoomsInfo(nextCursor, hasNext, chatroomDetails);
   }
@@ -267,5 +277,38 @@ public class ChatService {
         sliced.stream().map(ChatMessageDetail::toDetail).toList();
 
     return new ChatMessagesInfo(nextCursor, hasNext, chatId, chatMessageDetail);
+  }
+
+  /**
+   * 채팅방 참여자 중, 현재 로그인한 유저를 제외한 상대방 유저 리스트 조회
+   *
+   * @param userTsid 로그인한 유저 TSID
+   * @param chatRooms 채팅방 리스트
+   * @return List<Member> 상대방 유저 리스트
+   * @throws ChatNotFoundException 등록된 유저를 찾을 수 없을 경우
+   */
+  public List<Member> getTargetUsers(String userTsid, List<ChatRoom> chatRooms) {
+    List<Member> targetUsers = new ArrayList<>();
+
+    for (ChatRoom chatroom : chatRooms) {
+
+      // 채팅방 참여자 내에서 로그인한 유저를 제외한 상대방 유저 찾기
+      String targetUserTsid =
+          chatroom.getParticipantTsids().stream()
+              .filter(user -> !user.equals(userTsid))
+              .findFirst()
+              .orElseThrow(() -> new ChatNotFoundException("상대방 사용자의 정보가 존재하지 않습니다."));
+
+      try {
+        Member targetUser = memberService.findByTsid(targetUserTsid);
+        targetUsers.add(targetUser);
+
+      } catch (MemberException e) {
+        log.error("Target User [{}] is null. Fail to get ChatRoom:", targetUserTsid, e);
+        throw new ChatNotFoundException("상대방 사용자의 정보가 존재하지 않습니다.");
+      }
+    }
+
+    return targetUsers;
   }
 }

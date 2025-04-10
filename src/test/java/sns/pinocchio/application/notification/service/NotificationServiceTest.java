@@ -49,7 +49,7 @@ class NotificationServiceTest {
             .build();
 
     // tsid 수동 설정
-    ReflectionTestUtils.setField(mockMember, "tsid", userId);
+    ReflectionTestUtils.setField(mockMember, "id", 1L);
   }
 
   @Test
@@ -66,17 +66,16 @@ class NotificationServiceTest {
             .mention(true)
             .build();
 
-    when(notificationRepository.findByUserId(userId)).thenReturn(Optional.empty());
-    when(notificationRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
-    when(userDetails.getTsid()).thenReturn(userId);
     when(userDetails.getMember()).thenReturn(mockMember);
+    when(notificationRepository.findByUsersId(1L)).thenReturn(Optional.empty());
+    when(notificationRepository.save(any(Notification.class)))
+        .thenAnswer(invocation -> invocation.getArgument(0));
 
     // when
     NotificationInfo updated = notificationService.updateNotifications(userDetails, update);
 
     // then
     assertThat(updated).isNotNull();
-    assertThat(updated.userId()).isEqualTo(userId);
     assertThat(updated.message()).isTrue();
     assertThat(updated.like()).isTrue();
     assertThat(updated.comment()).isTrue();
@@ -92,6 +91,7 @@ class NotificationServiceTest {
     Notification existed =
         Notification.builder()
             .id(1L)
+            .users(mockMember)
             .messageAlert(false)
             .likeAlert(false)
             .commentAlert(false)
@@ -108,17 +108,16 @@ class NotificationServiceTest {
             .mention(true)
             .build();
 
-    when(notificationRepository.findByUserId(userId)).thenReturn(Optional.of(existed));
-    when(notificationRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
-    when(userDetails.getTsid()).thenReturn(userId);
     when(userDetails.getMember()).thenReturn(mockMember);
+    when(notificationRepository.findByUsersId(1L)).thenReturn(Optional.of(existed));
+    when(notificationRepository.save(any(Notification.class)))
+        .thenAnswer(invocation -> invocation.getArgument(0));
 
     // when
     NotificationInfo updated = notificationService.updateNotifications(userDetails, update);
 
     // then
     assertThat(updated).isNotNull();
-    assertThat(updated.userId()).isEqualTo(userId);
     assertThat(updated.message()).isTrue();
     assertThat(updated.like()).isTrue();
     assertThat(updated.comment()).isTrue();
@@ -131,15 +130,14 @@ class NotificationServiceTest {
   void getNotificationsNotExistTest() {
 
     // given
-    when(notificationRepository.findByUserId(userId)).thenReturn(Optional.empty());
-    when(userDetails.getTsid()).thenReturn(userId);
+    when(notificationRepository.findByUsersId(1L)).thenReturn(Optional.empty());
+    when(userDetails.getUserId()).thenReturn(1L);
 
     // when
     NotificationInfo info = notificationService.getNotifications(userDetails);
 
     // then
     assertThat(info).isNotNull();
-    assertThat(info.userId()).isEqualTo(userId);
     assertThat(info.message()).isFalse();
     assertThat(info.like()).isFalse();
     assertThat(info.comment()).isFalse();
@@ -162,15 +160,14 @@ class NotificationServiceTest {
             .mentionAlert(false)
             .build();
 
-    when(notificationRepository.findByUserId(userId)).thenReturn(Optional.of(existed));
-    when(userDetails.getTsid()).thenReturn(userId);
+    when(notificationRepository.findByUsersId(1L)).thenReturn(Optional.of(existed));
+    when(userDetails.getUserId()).thenReturn(1L);
 
     // when
     NotificationInfo info = notificationService.getNotifications(userDetails);
 
     // then
     assertThat(info).isNotNull();
-    assertThat(info.userId()).isEqualTo(userId);
     assertThat(info.message()).isFalse();
     assertThat(info.like()).isTrue();
     assertThat(info.comment()).isFalse();

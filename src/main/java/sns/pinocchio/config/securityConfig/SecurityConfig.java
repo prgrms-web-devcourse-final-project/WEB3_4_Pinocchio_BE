@@ -13,6 +13,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import sns.pinocchio.config.global.auth.jwt.MemberAuthFilter;
 
 @Configuration
@@ -57,6 +58,8 @@ public class SecurityConfig {
                         "/manifest.json",
                         "/logo192.png",
                         "/logo512.png")
+                    .permitAll()
+                    .requestMatchers(AntPathRequestMatcher.antMatcher("/login"))
                     .permitAll()
                     .anyRequest()
                     .authenticated())

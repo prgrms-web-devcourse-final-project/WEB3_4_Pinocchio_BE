@@ -48,7 +48,7 @@ public class MemberInfoFindController {
 	@GetMapping("/{userId}/activities/likes")
 	public ResponseEntity<Map<String, Object>> findFindLikes(@PathVariable String userId,
                                                              @RequestParam(value = "page", defaultValue = "0") int page) {
-        // 조회 수정
+        // 조회 수정||
         Page<PostSummaryDto> postSummaryPage = postLikeSearchService.findLikesByUserWithContent(userId, page);
 
         Map<String, Object> response = new HashMap<>();

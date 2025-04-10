@@ -287,6 +287,7 @@ public class ChatService {
    * @return List<Member> 상대방 유저 리스트
    * @throws ChatNotFoundException 등록된 유저를 찾을 수 없을 경우
    */
+  @Transactional(readOnly = true)
   public List<Member> getTargetUsers(String userTsid, List<ChatRoom> chatRooms) {
     List<Member> targetUsers = new ArrayList<>();
 

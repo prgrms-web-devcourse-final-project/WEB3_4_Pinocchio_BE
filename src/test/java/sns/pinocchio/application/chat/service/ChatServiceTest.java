@@ -1,5 +1,15 @@
 package sns.pinocchio.application.chat.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.*;
+
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
@@ -8,11 +18,12 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 import sns.pinocchio.application.chat.dto.ChatRequestDto.SendMessage;
 import sns.pinocchio.application.chat.dto.ChatResponseDto.ChatMessagesInfo;
 import sns.pinocchio.application.chat.dto.ChatResponseDto.ChatRoomsInfo;
 import sns.pinocchio.application.chat.dto.ChatResponseDto.SendMessageInfo;
-import sns.pinocchio.application.notification.service.NotificationService;
+import sns.pinocchio.application.member.MemberService;
 import sns.pinocchio.config.global.auth.model.CustomUserDetails;
 import sns.pinocchio.domain.chat.Chat;
 import sns.pinocchio.domain.chat.ChatException.ChatBadRequestException;
@@ -30,17 +41,6 @@ import sns.pinocchio.infrastructure.persistence.mongodb.ChatRoomRepository;
 import sns.pinocchio.infrastructure.persistence.mongodb.ChatRoomRepositoryCustom;
 import sns.pinocchio.infrastructure.websocket.WebSocketHandler;
 
-import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.*;
-
 @Tag("unit")
 @ExtendWith(MockitoExtension.class)
 class ChatServiceTest {
@@ -57,7 +57,7 @@ class ChatServiceTest {
 
   @Mock private CustomUserDetails customUserDetails;
 
-  @Mock private NotificationService notificationService;
+  @Mock private MemberService memberService;
 
   private String testSenderTsid;
 
@@ -68,6 +68,12 @@ class ChatServiceTest {
   private Chat mockChat;
 
   private SendMessage mockSendMessage;
+
+  private Member mockMember1;
+
+  private Member mockMember2;
+
+  private Member mockMember3;
 
   @BeforeEach
   void setUp() {
@@ -107,6 +113,16 @@ class ChatServiceTest {
             .likeStatus(false)
             .createdAt(mockSendMessage.sentAt())
             .build();
+
+    // 상대방 유저
+    mockMember1 = Member.builder().nickname("테스트 유저456").build();
+    ReflectionTestUtils.setField(mockMember1, "profileImageUrl", "https://img.com/user456.png");
+
+    mockMember2 = Member.builder().nickname("테스트 유저789").build();
+    ReflectionTestUtils.setField(mockMember2, "profileImageUrl", "https://img.com/user789.png");
+
+    mockMember3 = Member.builder().nickname("테스트 유저999").build();
+    ReflectionTestUtils.setField(mockMember3, "profileImageUrl", "https://img.com/user999.png");
   }
 
   @Test
@@ -115,9 +131,7 @@ class ChatServiceTest {
 
     // given
     Member mockMember = mock(Member.class);
-    Notification mockNotification = Notification.builder()
-            .messageAlert(true)
-            .build();
+    Notification mockNotification = Notification.builder().messageAlert(true).build();
 
     when(mockMember.getNotification()).thenReturn(mockNotification);
 
@@ -211,9 +225,7 @@ class ChatServiceTest {
     String errorMsg = "메시지 알림 전송에 실패했습니다.";
 
     Member mockMember = mock(Member.class);
-    Notification mockNotification = Notification.builder()
-            .messageAlert(true)
-            .build();
+    Notification mockNotification = Notification.builder().messageAlert(true).build();
 
     when(mockMember.getNotification()).thenReturn(mockNotification);
     when(customUserDetails.getTsid()).thenReturn(testSenderTsid);
@@ -223,10 +235,10 @@ class ChatServiceTest {
     when(webSocketHandler.sendNotificationToUser(any(), any())).thenReturn(false);
 
     // when
-    ChatInternalServerErrorException exception = assertThrows(
+    ChatInternalServerErrorException exception =
+        assertThrows(
             ChatInternalServerErrorException.class,
-            () -> chatService.sendMessageToChatroom(customUserDetails, mockSendMessage)
-    );
+            () -> chatService.sendMessageToChatroom(customUserDetails, mockSendMessage));
 
     // then
     assertThat(exception.getMessage()).isEqualTo(errorMsg);
@@ -283,6 +295,8 @@ class ChatServiceTest {
     List<ChatRoom> fakeRooms = List.of(room1, room2, extra);
 
     when(customUserDetails.getTsid()).thenReturn(testSenderTsid);
+    when(memberService.findByTsid("user_456")).thenReturn(mockMember1);
+    when(memberService.findByTsid("user_789")).thenReturn(mockMember2);
 
     given(
             chatRoomRepositoryCustom.findChatRoomsByUserWithCursor(
@@ -318,6 +332,7 @@ class ChatServiceTest {
             .build();
 
     when(customUserDetails.getTsid()).thenReturn(userTsid);
+    when(memberService.findByTsid("user_999")).thenReturn(mockMember1);
 
     given(
             chatRoomRepositoryCustom.findChatRoomsByUserWithCursor(

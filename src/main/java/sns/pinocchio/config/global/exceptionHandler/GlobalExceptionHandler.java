@@ -1,7 +1,5 @@
 package sns.pinocchio.config.global.exceptionHandler;
 
-import java.util.HashMap;
-import java.util.Map;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.support.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -28,6 +26,9 @@ import sns.pinocchio.presentation.report.exception.ReportException;
 import sns.pinocchio.presentation.search.exception.SearchErrorCode;
 import sns.pinocchio.presentation.search.exception.SearchException;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
@@ -37,12 +38,14 @@ public class GlobalExceptionHandler {
     MemberErrorCode errorCode = ex.getMemberErrorCode();
 
     // ErrorResponse 객체 생성
-    ErrorResponse errorResponse =
-        new ErrorResponse(
-            "error",
-            errorCode.getHttpStatus().value(),
-            errorCode.getMessage(),
-            errorCode.getCode());
+      ErrorResponse errorResponse =
+              new ErrorResponse(
+                      "error",
+                      errorCode.getHttpStatus().value(),
+                      errorCode.getMessage(),
+                      errorCode.getCode(),
+                      null
+              );
 
     // HTTP 상태 코드와 함께 응답 반환
     return new ResponseEntity<>(errorResponse, errorCode.getHttpStatus());
@@ -53,12 +56,14 @@ public class GlobalExceptionHandler {
   public ResponseEntity<ErrorResponse> handleAuthException(AuthException ex) {
     AuthErrorCode errorCode = ex.getAuthErrorCode();
 
-    ErrorResponse errorResponse =
-        new ErrorResponse(
-            "error",
-            errorCode.getHttpStatus().value(),
-            errorCode.getMessage(),
-            errorCode.getCode());
+      ErrorResponse errorResponse =
+              new ErrorResponse(
+                      "error",
+                      errorCode.getHttpStatus().value(),
+                      errorCode.getMessage(),
+                      errorCode.getCode(),
+                      null
+              );
 
     // HTTP 상태 코드와 함께 응답 반환
     return new ResponseEntity<>(errorResponse, errorCode.getHttpStatus());
@@ -69,12 +74,14 @@ public class GlobalExceptionHandler {
   public ResponseEntity<ErrorResponse> handleBlockException(BlockException ex) {
     BlockErrorCode errorCode = ex.getBlockErrorCode();
 
-    ErrorResponse errorResponse =
-        new ErrorResponse(
-            "error",
-            errorCode.getHttpStatus().value(),
-            errorCode.getMessage(),
-            errorCode.getCode());
+      ErrorResponse errorResponse =
+              new ErrorResponse(
+                      "error",
+                      errorCode.getHttpStatus().value(),
+                      errorCode.getMessage(),
+                      errorCode.getCode(),
+                      null
+              );
 
     // HTTP 상태 코드와 함께 응답 반환
     return new ResponseEntity<>(errorResponse, errorCode.getHttpStatus());
@@ -85,12 +92,14 @@ public class GlobalExceptionHandler {
   public ResponseEntity<ErrorResponse> handleChatException(ChatException ex) {
     ChatErrorCode errorCode = ex.getChatErrorCode();
 
-    ErrorResponse errorResponse =
-        new ErrorResponse(
-            "error",
-            errorCode.getHttpStatus().value(),
-            errorCode.getMessage(),
-            errorCode.getCode());
+      ErrorResponse errorResponse =
+              new ErrorResponse(
+                      "error",
+                      errorCode.getHttpStatus().value(),
+                      errorCode.getMessage(),
+                      errorCode.getCode(),
+                      null
+              );
 
     // HTTP 상태 코드와 함께 응답 반환
     return new ResponseEntity<>(errorResponse, errorCode.getHttpStatus());
@@ -101,12 +110,14 @@ public class GlobalExceptionHandler {
   public ResponseEntity<ErrorResponse> handleCommentException(CommentException ex) {
     CommentErrorCode errorCode = ex.getCommentErrorCode();
 
-    ErrorResponse errorResponse =
-        new ErrorResponse(
-            "error",
-            errorCode.getHttpStatus().value(),
-            errorCode.getMessage(),
-            errorCode.getCode());
+      ErrorResponse errorResponse =
+              new ErrorResponse(
+                      "error",
+                      errorCode.getHttpStatus().value(),
+                      errorCode.getMessage(),
+                      errorCode.getCode(),
+                      null
+              );
 
     // HTTP 상태 코드와 함께 응답 반환
     return new ResponseEntity<>(errorResponse, errorCode.getHttpStatus());
@@ -117,12 +128,14 @@ public class GlobalExceptionHandler {
   public ResponseEntity<ErrorResponse> handleMailException(MailException ex) {
     MailErrorCode errorCode = ex.getMailErrorCode();
 
-    ErrorResponse errorResponse =
-        new ErrorResponse(
-            "error",
-            errorCode.getHttpStatus().value(),
-            errorCode.getMessage(),
-            errorCode.getCode());
+      ErrorResponse errorResponse =
+              new ErrorResponse(
+                      "error",
+                      errorCode.getHttpStatus().value(),
+                      errorCode.getMessage(),
+                      errorCode.getCode(),
+                      null
+              );
 
     // HTTP 상태 코드와 함께 응답 반환
     return new ResponseEntity<>(errorResponse, errorCode.getHttpStatus());
@@ -133,12 +146,14 @@ public class GlobalExceptionHandler {
   public ResponseEntity<ErrorResponse> handleNotificationException(NotificationException ex) {
     NotificationErrorCode errorCode = ex.getNotificationErrorCode();
 
-    ErrorResponse errorResponse =
-        new ErrorResponse(
-            "error",
-            errorCode.getHttpStatus().value(),
-            errorCode.getMessage(),
-            errorCode.getCode());
+      ErrorResponse errorResponse =
+              new ErrorResponse(
+                      "error",
+                      errorCode.getHttpStatus().value(),
+                      errorCode.getMessage(),
+                      errorCode.getCode(),
+                      null
+              );
 
     return new ResponseEntity<>(errorResponse, errorCode.getHttpStatus());
   }
@@ -147,12 +162,16 @@ public class GlobalExceptionHandler {
   @ExceptionHandler(PostException.class)
   public ResponseEntity<ErrorResponse> handlePostException(PostException ex) {
     PostErrorCode errorCode = ex.getPostErrorCode();
-    ErrorResponse errorResponse =
-        new ErrorResponse(
-            "error",
-            errorCode.getHttpStatus().value(),
-            errorCode.getMessage(),
-            errorCode.getCode());
+
+      ErrorResponse errorResponse =
+              new ErrorResponse(
+                      "error",
+                      errorCode.getHttpStatus().value(),
+                      errorCode.getMessage(),
+                      errorCode.getCode(),
+                      null
+              );
+
     return new ResponseEntity<>(errorResponse, errorCode.getHttpStatus());
   }
 
@@ -160,12 +179,16 @@ public class GlobalExceptionHandler {
   @ExceptionHandler(SearchException.class)
   public ResponseEntity<ErrorResponse> handleSearchException(SearchException ex) {
     SearchErrorCode errorCode = ex.getSearchErrorCode();
-    ErrorResponse errorResponse =
-        new ErrorResponse(
-            "error",
-            errorCode.getHttpStatus().value(),
-            errorCode.getMessage(),
-            errorCode.getCode());
+
+      ErrorResponse errorResponse =
+              new ErrorResponse(
+                      "error",
+                      errorCode.getHttpStatus().value(),
+                      errorCode.getMessage(),
+                      errorCode.getCode(),
+                      null
+              );
+
     return new ResponseEntity<>(errorResponse, errorCode.getHttpStatus());
   }
 
@@ -173,12 +196,16 @@ public class GlobalExceptionHandler {
   @ExceptionHandler(ReportException.class)
   public ResponseEntity<ErrorResponse> handleReportException(ReportException ex) {
     ReportErrorCode errorCode = ex.getReportErrorCode();
-    ErrorResponse errorResponse =
-        new ErrorResponse(
-            "error",
-            errorCode.getHttpStatus().value(),
-            errorCode.getMessage(),
-            errorCode.getCode());
+
+      ErrorResponse errorResponse =
+              new ErrorResponse(
+                      "error",
+                      errorCode.getHttpStatus().value(),
+                      errorCode.getMessage(),
+                      errorCode.getCode(),
+                      null
+              );
+
     return new ResponseEntity<>(errorResponse, errorCode.getHttpStatus());
   }
 
@@ -196,7 +223,8 @@ public class GlobalExceptionHandler {
             "VALIDATION_ERROR", // 상태
             400, // 상태 코드
             "입력 값 검증 실패", // 메시지
-            null // 코드 (사용하지 않음)
+            null, // 코드 (사용하지 않음)
+            errors
             );
 
     return ResponseEntity.badRequest().body(errorResponse);

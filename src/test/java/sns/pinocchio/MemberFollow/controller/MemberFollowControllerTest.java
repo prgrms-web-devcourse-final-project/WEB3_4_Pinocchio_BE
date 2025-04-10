@@ -80,7 +80,7 @@ class MemberFollowControllerTest {
 		MemberFollowRequest request = MemberFollowRequest.builder().followingNickname(authorNickname).build();
 		Map<String, Object> response = Map.of("message", "팔로우에 성공하였습니다.", "followed", true);
 		when(memberFollowService.followingUser(request,userId,member.getTsid(),member.getNickname()) ).thenReturn(response);
-		mockMvc.perform(post("/users/"+userId+"/follow").contentType(MediaType.APPLICATION_JSON)
+		mockMvc.perform(post("/user/"+userId+"/follow").contentType(MediaType.APPLICATION_JSON)
 				.header("Authorization", accessToken)
 				.content(new ObjectMapper().writeValueAsString(request)))
 			.andExpect(status().isOk())
@@ -101,7 +101,7 @@ class MemberFollowControllerTest {
 		MemberFollowRequest request = MemberFollowRequest.builder().followingNickname(authorNickname).build();
 		Map<String, Object> response = Map.of("message", "팔로우 취소에 성공하였습니다.", "followed", false);
 		when(memberFollowService.followingUser(request,userId,member.getTsid(),member.getNickname()) ).thenReturn(response);
-		mockMvc.perform(post("/users/"+userId+"/follow").contentType(MediaType.APPLICATION_JSON)
+		mockMvc.perform(post("/user/"+userId+"/follow").contentType(MediaType.APPLICATION_JSON)
 				.header("Authorization", accessToken)
 				.content(new ObjectMapper().writeValueAsString(request)))
 			.andExpect(status().isOk())

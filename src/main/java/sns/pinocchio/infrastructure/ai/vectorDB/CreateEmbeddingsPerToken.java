@@ -1,5 +1,6 @@
-package sns.pinocchio.infrastructure.ai;
+package sns.pinocchio.infrastructure.ai.vectorDB;
 
+import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mongodb.MongoException;
@@ -10,16 +11,16 @@ import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.result.InsertManyResult;
 import org.bson.BsonArray;
 import org.bson.Document;
-import org.bson.json.JsonParseException;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
-public class CreateEmbeddings {
+public class CreateEmbeddingsPerToken {
+  private static final String DB_NAME = "rag_db";
+  private static final String COLLECTION_NAME = "scenes"; // 새로운 컬렉션 이름
 
   public static void main(String[] args) {
     String uri = System.getenv("ATLAS_CONNECTION_STRING");
@@ -31,53 +32,54 @@ public class CreateEmbeddings {
 
     try {
       // Read and load preprocessed data from JSON file
-      // 각 항목은 Map<String, Object> 형태이며, 원본 데이터 필드와 처리된 토큰을 포함
       List<Map<String, Object>> preprocessedEntries = loadPreprocessedData(filePath);
 
-      // 임베딩할 텍스트만 추출 (processed_tokens를 공백으로 연결)
-      List<String> textsToEmbed = preprocessedEntries.stream()
-              .map(entry -> (List<String>) entry.getOrDefault("processed_tokens", List.of())) // processed_tokens 가져오기
-              .map(tokens -> String.join(" ", tokens)) // 토큰들을 공백으로 연결
-              .collect(Collectors.toList());
+      // EmbeddingProvider 인스턴스 생성 (ai 패키지에 있다고 가정)
+      EmbeddingProvider embeddingProvider = new EmbeddingProvider();
+
+      // Prepare documents for MongoDB insertion (each token will be a separate document)
+      List<Document> documentsToInsert = new ArrayList<>();
+      for (Map<String, Object> entry : preprocessedEntries) {
+        List<String> tokens = (List<String>) entry.getOrDefault("processed_tokens", List.of());
+        if (!tokens.isEmpty()) {
+          List<BsonArray> embeddings = embeddingProvider.getEmbeddings(tokens); // 각 토큰에 대한 임베딩 생성
+
+          if (embeddings.size() != tokens.size()) {
+            System.err.println("Warning: Mismatch between number of tokens (" + tokens.size() +
+                    ") and generated embeddings (" + embeddings.size() + ") for entry: " + entry.get("dialogue_id"));
+            // 에러 처리 방식 결정 (skip, throw exception 등)
+            continue;
+          }
+
+          for (int i = 0; i < tokens.size(); i++) {
+            String token = tokens.get(i);
+            BsonArray embedding = embeddings.get(i);
+
+            Document doc = new Document()
+                    // 원본 메타데이터 추가 (필요한 필드만 선택)
+                    .append("dialogue_id", entry.get("dialogue_id"))
+                    .append("scene_number", entry.get("scene_number"))
+                    .append("speaker", entry.get("speaker"))
+                    .append("utterance", entry.get("utterance"))
+                    .append("context", entry.get("context"))
+                    .append("emotion", entry.get("emotion"))
+                    .append("keywords", entry.get("keywords"))
+                    .append("original_tokens", entry.get("processed_tokens")) // 원본 토큰 리스트 보존
+                    .append("weight", entry.get("weight"))
+                    .append("token", token) // 개별 토큰
+                    .append("embedding", embedding); // 해당 토큰의 임베딩
+            documentsToInsert.add(doc);
+          }
+        }
+      }
 
       // Establish MongoDB connection
       try (MongoClient mongoClient = MongoClients.create(uri)) {
-        MongoDatabase database = mongoClient.getDatabase("rag_db"); // DB 이름 확인
-        MongoCollection<Document> collection = database.getCollection("scenes"); // Collection 이름 확인
+        MongoDatabase database = mongoClient.getDatabase(DB_NAME);
+        MongoCollection<Document> collection = database.getCollection(COLLECTION_NAME);
 
         System.out.println("Loaded " + preprocessedEntries.size() + " entries from " + filePath);
-        System.out.println("Creating embeddings for " + textsToEmbed.size() + " processed texts");
-
-        // EmbeddingProvider 인스턴스 생성 (ai 패키지에 있다고 가정)
-        EmbeddingProvider embeddingProvider = new EmbeddingProvider();
-
-        // Generate embeddings for the joined processed tokens
-        List<BsonArray> embeddings = embeddingProvider.getEmbeddings(textsToEmbed); // BsonArray 타입 확인 필요
-
-        if (embeddings.size() != preprocessedEntries.size()) {
-          throw new RuntimeException("Mismatch between number of preprocessed entries ("
-                  + preprocessedEntries.size() + ") and generated embeddings (" + embeddings.size() + ")");
-        }
-
-        // Prepare documents for MongoDB insertion
-        List<Document> documentsToInsert = new ArrayList<>();
-        for (int i = 0; i < preprocessedEntries.size(); i++) {
-          Map<String, Object> originalData = preprocessedEntries.get(i);
-          BsonArray embedding = embeddings.get(i);
-
-          Document doc = new Document()
-                  // 원본 메타데이터 추가 (필요한 필드만 선택)
-                  .append("dialogue_id", originalData.get("dialogue_id"))
-                  .append("scene_number", originalData.get("scene_number"))
-                  .append("speaker", originalData.get("speaker"))
-                  .append("utterance", originalData.get("utterance"))
-                  .append("context", originalData.get("context"))
-                  .append("emotion", originalData.get("emotion"))
-                  .append("keywords", originalData.get("keywords"))
-                  .append("processed_tokens", originalData.get("processed_tokens"))
-                  .append("embedding", embedding); // 필드 이름은 Atlas Vector Search 인덱스와 일치해야 함
-          documentsToInsert.add(doc);
-        }
+        System.out.println("Creating embeddings and preparing " + documentsToInsert.size() + " documents for tokens");
 
         // Insert the documents into the Atlas collection
         List<String> insertedIds = new ArrayList<>();
@@ -87,7 +89,7 @@ public class CreateEmbeddings {
             result.getInsertedIds().values()
                     .forEach(insertedId -> insertedIds.add(insertedId.asObjectId().getValue().toString())); // ObjectId에서 문자열 ID 추출
 
-            System.out.println("Successfully inserted " + insertedIds.size() + " documents into " +
+            System.out.println("Successfully inserted " + insertedIds.size() + " documents (one per token) into " +
                     collection.getNamespace());
             // System.out.println("Inserted document IDs: " + insertedIds); // 필요시 ID 출력
           } catch (MongoException me) {
@@ -116,7 +118,6 @@ public class CreateEmbeddings {
       throw new IOException("File not found: " + filePath);
     }
 
-    // JSON 파일이 객체 배열이라고 가정하고 TypeReference를 사용하여 List<Map<String, Object>>로 읽음
     try {
       return objectMapper.readValue(inputFile, new TypeReference<List<Map<String, Object>>>() {});
     } catch (JsonParseException | com.fasterxml.jackson.databind.JsonMappingException e) {

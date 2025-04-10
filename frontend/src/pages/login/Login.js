@@ -71,8 +71,8 @@ const Login = () => {
                         <input
                             type="text"
                             className="form-control form-control-lg"
-                            placeholder="아이디를 입력하세요"
-                            value={loginId}
+                            placeholder="이메일를 입력하세요"
+                            value={email}
                             onChange={(event) => setLoginId(event.target.value)}
                             onKeyDown={handleEnterKey}
                         />

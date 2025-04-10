@@ -4,6 +4,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +20,7 @@ import sns.pinocchio.application.member.memberDto.response.SignupResponseDto;
 import sns.pinocchio.config.global.auth.util.TokenProvider;
 import sns.pinocchio.domain.member.Member;
 
+@Slf4j
 @RequestMapping("/auth")
 @RequiredArgsConstructor
 @RestController
@@ -46,24 +48,22 @@ public class AuthController {
     return ResponseEntity.status(HttpStatus.CREATED).body(signupResponseDto);
   }
 
-  // 로그인
   @PostMapping("/login")
   public ResponseEntity<SignupResponseDto> login(
       @RequestBody @Valid LoginRequestDto loginRequestDto, HttpServletResponse response) {
-    // 이메일 검증
+    // TODO : log 삭제 해야함
+    log.info("요청 url : /auth/login 로그인 API 동작");
     Member member = memberService.findByEmail(loginRequestDto.email());
-
-    // 패스워드 검증
+    log.info("요청 url : /auth/login 이메일 존재 여부{}", member.getEmail());
     authService.validatePassword(loginRequestDto.password(), member);
-
-    // 토콘 생성
+    log.info("패스워드 존재 여부");
     String accessToken = authService.generateAndSaveToken(member);
+    log.info("엑세스토큰 생성 완료");
     String refreshToken = tokenProvider.generateRefreshToken();
+    log.info("리프레시토큰 생성 완료");
 
-    // 리프레시 토큰 쿠키 및 레디스 저장
     memberService.saveRefreshToken(refreshToken, member, response);
-
-    // 응답 DTO 변환
+    log.info("토큰 응답에 저장 완료");
     SignupResponseDto signupResponseDto =
         new SignupResponseDto(
             "success",

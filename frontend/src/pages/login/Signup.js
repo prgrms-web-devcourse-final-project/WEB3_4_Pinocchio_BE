@@ -9,82 +9,91 @@ import useConfirm from "../../hooks/useConfirm";
 import {isEmptyOrNull, useEnterKeySubmit} from "../../utils/utils";
 import {useState} from "react";
 
-const handleClickLogin = () => {
-    // 이메일 공백 + 형식 체크
-    if (isEmptyOrNull(loginId)) {
-        openConfirm({
-            title: '회원가입 중 오류가 발생했습니다.',
-            html: '이메일은 필수 항목입니다.'
-        });
-        return false;
-    }
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(loginId)) {
-        openConfirm({
-            title: '회원가입 중 오류가 발생했습니다.',
-            html: '올바른 이메일 형식이 아닙니다.'
-        });
-        return false;
-    }
+const Signup = () => {
+    const navigate = useNavigate();
+    const { openConfirm } = useConfirm();
+    const [loginId, setLoginId] = useState("");
+    const [password, setPassword] = useState("");
+    const [nickname, setNickName] = useState("");
+    const [name, setName] = useState("");
+    const [isLoading, setIsLoading] = useState(false);
 
-    // 비밀번호 공백 + 길이 + 특수문자 포함
-    if (isEmptyOrNull(password)) {
-        openConfirm({
-            title: '회원가입 중 오류가 발생했습니다.',
-            html: '비밀번호는 필수 항목입니다.'
-        });
-        return false;
-    }
-    if (password.length < 8) {
-        openConfirm({
-            title: '회원가입 중 오류가 발생했습니다.',
-            html: '비밀번호는 8자 이상이어야 합니다.'
-        });
-        return false;
-    }
-    const passwordRegex = /^(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
-    if (!passwordRegex.test(password)) {
-        openConfirm({
-            title: '회원가입 중 오류가 발생했습니다.',
-            html: '비밀번호는 특수문자를 포함해야 합니다.'
-        });
-        return false;
-    }
+    const handleClickLogin = () => {
+        // 이메일 공백 + 형식 체크
+        if (isEmptyOrNull(loginId)) {
+            openConfirm({
+                title: '회원가입 중 오류가 발생했습니다.',
+                html: '이메일은 필수 항목입니다.'
+            });
+            return false;
+        }
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(loginId)) {
+            openConfirm({
+                title: '회원가입 중 오류가 발생했습니다.',
+                html: '올바른 이메일 형식이 아닙니다.'
+            });
+            return false;
+        }
 
-    // 닉네임 공백 + 길이 체크
-    if (isEmptyOrNull(nickname)) {
-        openConfirm({
-            title: '회원가입 중 오류가 발생했습니다.',
-            html: '닉네임은 필수 항목입니다.'
-        });
-        return false;
-    }
-    if (nickname.length < 3 || nickname.length > 20) {
-        openConfirm({
-            title: '회원가입 중 오류가 발생했습니다.',
-            html: '닉네임은 3자 이상 20자 이하로 입력해주세요.'
-        });
-        return false;
-    }
+        // 비밀번호 공백 + 길이 + 특수문자 포함
+        if (isEmptyOrNull(password)) {
+            openConfirm({
+                title: '회원가입 중 오류가 발생했습니다.',
+                html: '비밀번호는 필수 항목입니다.'
+            });
+            return false;
+        }
+        if (password.length < 8) {
+            openConfirm({
+                title: '회원가입 중 오류가 발생했습니다.',
+                html: '비밀번호는 8자 이상이어야 합니다.'
+            });
+            return false;
+        }
+        const passwordRegex = /^(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+        if (!passwordRegex.test(password)) {
+            openConfirm({
+                title: '회원가입 중 오류가 발생했습니다.',
+                html: '비밀번호는 특수문자를 포함해야 합니다.'
+            });
+            return false;
+        }
 
-    // 이름 공백 체크
-    if (isEmptyOrNull(name)) {
-        openConfirm({
-            title: '회원가입 중 오류가 발생했습니다.',
-            html: '이름은 필수 항목입니다.'
-        });
-        return false;
-    }
+        // 닉네임 공백 + 길이 체크
+        if (isEmptyOrNull(nickname)) {
+            openConfirm({
+                title: '회원가입 중 오류가 발생했습니다.',
+                html: '닉네임은 필수 항목입니다.'
+            });
+            return false;
+        }
+        if (nickname.length < 3 || nickname.length > 20) {
+            openConfirm({
+                title: '회원가입 중 오류가 발생했습니다.',
+                html: '닉네임은 3자 이상 20자 이하로 입력해주세요.'
+            });
+            return false;
+        }
 
-    // 모든 검증 통과 시 백엔드로 전송
-    const sendData = {
-        email: loginId,
-        password,
-        nickname,
-        name
+        // 이름 공백 체크
+        if (isEmptyOrNull(name)) {
+            openConfirm({
+                title: '회원가입 중 오류가 발생했습니다.',
+                html: '이름은 필수 항목입니다.'
+            });
+            return false;
+        }
+
+        // 모든 검증 통과 시 백엔드로 전송
+        const sendData = {
+            email: loginId,
+            password,
+            nickname,
+            name
+        };
+        requestSignup(sendData);
     };
-    requestSignup(sendData);
-};
 
     const requestSignup = async (sendData) => {
         try {

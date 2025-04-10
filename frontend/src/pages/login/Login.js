@@ -12,14 +12,14 @@ import {Stack} from "react-bootstrap";
 const Login = () => {
     const navigate = useNavigate();
     const { openConfirm } = useConfirm();
-    const [email, setEmailId] = useState("");
+    const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [isLoading, setIsLoading] = useState(false);
 
     const handleClickLogin = () => {
         let sendData = undefined;
 
-        if (isEmptyOrNull(loginId)) {
+        if (isEmptyOrNull(email))
             openConfirm({
                 title: '로그인 중 오류가 발생했습니다.',
                 html: '사용자 계정을 입력하세요'
@@ -35,7 +35,7 @@ const Login = () => {
             return false;
         }
 
-        sendData = {email : loginId, password};
+        sendData = { email, password };
         requestLogin(sendData);
     }
 
@@ -71,9 +71,9 @@ const Login = () => {
                         <input
                             type="text"
                             className="form-control form-control-lg"
-                            placeholder="이메일를 입력하세요"
+                            placeholder="아이디를 입력하세요"
                             value={email}
-                            onChange={(event) => setLoginId(event.target.value)}
+                            onChange={(event) => setEmail(event.target.value)}
                             onKeyDown={handleEnterKey}
                         />
                         <input

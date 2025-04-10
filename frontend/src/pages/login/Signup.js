@@ -12,7 +12,7 @@ import {useState} from "react";
 const Signup = () => {
     const navigate = useNavigate();
     const { openConfirm } = useConfirm();
-    const [email, setEmailId] = useState("");
+    const [loginId, setLoginId] = useState("");
     const [password, setPassword] = useState("");
     const [nickName, setNickName] = useState("");
     const [name, setName] = useState("");
@@ -92,8 +92,8 @@ const Signup = () => {
                         <input
                             type="text"
                             className="form-control form-control-lg"
-                            placeholder="이메일를 입력하세요"
-                            value={email}
+                            placeholder="아이디를 입력하세요"
+                            value={loginId}
                             onChange={(event) => setLoginId(event.target.value)}
                             onKeyDown={handleEnterKey}
                         />

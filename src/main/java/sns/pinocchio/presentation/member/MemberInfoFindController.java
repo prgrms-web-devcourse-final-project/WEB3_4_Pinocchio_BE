@@ -26,7 +26,7 @@ import sns.pinocchio.domain.post.PostLike;
 
 @Tag(name = "유저 정보 조회", description = "유저 정보 관련 API")
 @RestController
-@RequestMapping("/members")
+@RequestMapping("/user")
 @RequiredArgsConstructor
 public class MemberInfoFindController {
 	private final CommentService commentService;

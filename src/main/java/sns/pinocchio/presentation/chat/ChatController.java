@@ -23,7 +23,7 @@ import sns.pinocchio.infrastructure.shared.swagger.ErrorResponseSchema;
 @Tag(name = "채팅", description = "채팅 API")
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/chat")
+@RequestMapping("/chat")
 public class ChatController {
 
   private final ChatService chatService;

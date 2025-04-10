@@ -28,7 +28,7 @@ import sns.pinocchio.infrastructure.member.MemberRepository;
 
 @Tag(name = "유저 팔로우", description = "유저 팔로우 관련 API")
 @RestController
-@RequestMapping("/users")
+@RequestMapping("/user")
 @RequiredArgsConstructor
 public class MemberFollowController {
 	private final MemberFollowService memberFollowService;

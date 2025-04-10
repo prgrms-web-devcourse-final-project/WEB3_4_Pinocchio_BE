@@ -8,6 +8,7 @@ import Spinner from "../../shared/Spinner";
 import useConfirm from "../../hooks/useConfirm";
 import axios from "axios";
 import {Stack} from "react-bootstrap";
+import PasswordResetModal from "./PasswordResetModal";
 
 const Login = () => {
     const navigate = useNavigate();
@@ -15,6 +16,7 @@ const Login = () => {
     const [loginId, setLoginId] = useState("");
     const [password, setPassword] = useState("");
     const [isLoading, setIsLoading] = useState(false);
+    const [isPasswordResetModalOpen, setPasswordResetModalOpen] = useState(false);
 
     const handleClickLogin = () => {
         let sendData = undefined;
@@ -57,6 +59,10 @@ const Login = () => {
         }
     }
 
+    const handlePasswordResetClick = () => {
+
+    }
+
     // 엔터 키를 눌렀을 때 로그인 버튼 클릭 동작을 위한 훅
     const handleEnterKey = useEnterKeySubmit(handleClickLogin);
 
@@ -95,12 +101,15 @@ const Login = () => {
                     <div className="kw-login-text">
                         <Stack direction={"horizontal"}>
                             <Link to={"/signup"}>회원 가입</Link>
-                            <p className={"ms-auto"}>비밀번호 찾기</p>
+                            <Link to={"#"} className={"ms-auto"} onClick={() => setPasswordResetModalOpen(true)}>비밀번호 찾기</Link>
                         </Stack>
                     </div>
                 </div>
             </div>
             <Spinner show={isLoading}/>
+            <PasswordResetModal isOpen={isPasswordResetModalOpen}
+                                onHide={() => setPasswordResetModalOpen(false)}
+            />
         </>
     );
 }

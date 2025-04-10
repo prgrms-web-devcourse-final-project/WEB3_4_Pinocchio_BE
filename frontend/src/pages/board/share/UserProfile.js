@@ -21,7 +21,7 @@ const UserProfile = ({ page }) => {
         { keepPreviousData: true, refetchOnWindowFocus: false}
     );
 
-    const deleteMutation = useMutation(() => axios.delete(`/user/{userId}`), {
+    const deleteMutation = useMutation(() => axios.delete(`/user/${userId}`), {
         onSuccess: (param) => {
             openConfirm({
                 title: "회원 탈퇴가 완료되었습니다. 그동안 이용해주셔서 감사합니다."

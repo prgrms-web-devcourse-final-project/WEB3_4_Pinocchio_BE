@@ -14,7 +14,7 @@ const Signup = () => {
     const { openConfirm } = useConfirm();
     const [loginId, setLoginId] = useState("");
     const [password, setPassword] = useState("");
-    const [nickName, setNickName] = useState("");
+    const [nickname, setNickName] = useState("");
     const [name, setName] = useState("");
     const [isLoading, setIsLoading] = useState(false);
 
@@ -35,7 +35,7 @@ const Signup = () => {
             return false;
         }
 
-        if (isEmptyOrNull(nickName)) {
+        if (isEmptyOrNull(nickname)) {
             openConfirm({
                 title: '회원가입 중 오류가 발생했습니다.',
                 html: '사용자 닉네임을 입력하세요'
@@ -52,9 +52,9 @@ const Signup = () => {
         }
 
         const sendData = {
-            userId : loginId
+            email : loginId
             , password
-            , nickName
+            , nickname
             , name
         };
         requestSignup(sendData);
@@ -109,7 +109,7 @@ const Signup = () => {
                             type="text"
                             className="form-control form-control-lg"
                             placeholder="닉네임을 입력하세요"
-                            value={nickName}
+                            value={nickname}
                             onChange={(event) => setNickName(event.target.value)}
                             onKeyDown={handleEnterKey}
                         />

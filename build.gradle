@@ -8,6 +8,9 @@ plugins {
 
 group = 'sns'
 version = '0.0.1-SNAPSHOT'
+ext {
+    springAiVersion = "1.0.0-M6"
+}
 
 java {
     toolchain {
@@ -35,6 +38,9 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-websocket'
     implementation 'org.springframework.security:spring-security-crypto:5.7.1'
+
+    //ollama
+    implementation 'io.github.ollama4j:ollama4j:1.0.93'
 
     // 스웨거
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.6'
@@ -101,6 +107,10 @@ dependencies {
     //ollama
     implementation 'io.github.ollama4j:ollama4j:1.0.93'
 
+    //openai
+    implementation 'org.springframework.ai:spring-ai-openai-spring-boot-starter'
+
+
     // Actuator
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
 
@@ -136,5 +146,10 @@ tasks.named('test') {
     systemProperty "spring.data.mongodb.uri", System.getenv("SPRING_DATA_MONGODB_URI") ?: "mongodb://root:root@localhost:27017/test?authSource=admin"
 
     useJUnitPlatform()
+}
 
+dependencyManagement {
+    imports {
+        mavenBom("org.springframework.ai:spring-ai-bom:${property("springAiVersion")}")
+    }
 }

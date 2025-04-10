@@ -57,12 +57,14 @@ public class MemberLoader {
 
 	// JSON에서 AiMember 불러오기
 	private AiMember parseAiMember(JsonNode memberNode) {
+		List<String> promptList = new ArrayList<>();
+		memberNode.get("prompt").forEach(node -> promptList.add(node.asText()));
 		return AiMember.builder()
 			.name(memberNode.get("name").asText())
 			.email(memberNode.get("email").asText())
 			.nickname(memberNode.get("nickname").asText())
 			.password(memberNode.get("password").asText())
-			.prompt(memberNode.get("prompt").asText())
+			.prompt(promptList)
 			.type(memberNode.get("type").asText())
 			.build();
 	}

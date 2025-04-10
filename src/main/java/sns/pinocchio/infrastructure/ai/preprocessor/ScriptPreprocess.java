@@ -1,4 +1,4 @@
-package sns.pinocchio.infrastructure.ai;
+package sns.pinocchio.infrastructure.ai.preprocessor;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;

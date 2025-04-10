@@ -91,7 +91,7 @@ class PostControllerTest {
     @Test
     @DisplayName("게시글 상세 조회 성공 - 공개 게시글")
     void getPublicPostDetail() throws Exception {
-        mockMvc.perform(get("/api/posts/" + publicPostId))
+        mockMvc.perform(get("/posts/" + publicPostId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.postId").value(publicPostId))
                 .andExpect(jsonPath("$.nickname").value(nickname)) // 동적으로 비교
@@ -102,7 +102,7 @@ class PostControllerTest {
     @Test
     @DisplayName("게시글 상세 조회 실패 - 비공개 게시글, 인증 없음")
     void getPrivatePostWithoutAuthentication() throws Exception {
-        mockMvc.perform(get("/api/posts/" + privatePostId))
+        mockMvc.perform(get("/posts/" + privatePostId))
                 .andExpect(status().isForbidden());
     }
 }

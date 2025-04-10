@@ -1,4 +1,4 @@
-package sns.pinocchio.config.global.ollama;
+package sns.pinocchio.config.global.ai;
 
 import java.io.IOException;
 import java.util.List;
@@ -15,7 +15,7 @@ import io.github.ollama4j.utils.OptionsBuilder;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import sns.pinocchio.config.global.aiMemberLoad.AiMember;
-import sns.pinocchio.infrastructure.ai.VectorQuery;
+import sns.pinocchio.infrastructure.ai.vectorDB.VectorQuery;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -46,11 +46,9 @@ public class Ollama {
 
 	public String convertPrompt(String content, AiMember aiMember) {
 		Prompt prompt = new Prompt();
-		prompt.setMemberPost(content);
 		List<VectorQuery.SimilarityResult> results = VectorQuery.searchSimilarDocuments(content, 5);
-		for (VectorQuery.SimilarityResult r : results) {
-			prompt.addAnswerEx(r.getUtterance());
-		}
+		prompt.setMemberPost(content);
+		prompt.setAnswerEx(results);
 		prompt.setBasePrompt(aiMember.getPrompt());
 		return prompt.toString();
 	}

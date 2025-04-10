@@ -50,6 +50,7 @@ public class MemberAuthFilter extends OncePerRequestFilter {
     if (accessToken == null) {
       log.debug("인증 토큰이 없습니다.");
       handleAuthError(response, AuthErrorCode.INVALID_TOKEN);
+      return;
     }
 
     try {

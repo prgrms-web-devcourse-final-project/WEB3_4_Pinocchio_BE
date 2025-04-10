@@ -2,10 +2,11 @@ package sns.pinocchio.application.post;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 import sns.pinocchio.application.member.MemberService;
+import sns.pinocchio.config.S3img.S3Uploader;
 import sns.pinocchio.config.global.event.PostEvent;
 import sns.pinocchio.domain.member.Member;
 import sns.pinocchio.domain.post.Hashtag;
@@ -16,6 +17,7 @@ import sns.pinocchio.infrastructure.persistence.mysql.HashtagRepository;
 import sns.pinocchio.presentation.post.exception.PostErrorCode;
 import sns.pinocchio.presentation.post.exception.PostException;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -27,6 +29,20 @@ public class PostService {
     private final HashtagRepository hashtagRepository;
     private final MemberService memberService;
     private final ApplicationEventPublisher publisher;
+    private final S3Uploader s3Uploader;
+
+    // 이미지 업로드
+    public String createPostWithImage(PostCreateRequest request, MultipartFile image, String tsid) throws IOException {
+        if (image == null || image.isEmpty()) {
+            throw new IllegalArgumentException("이미지는 반드시 1장 첨부해야 합니다.");
+        }
+
+        String imageUrl = s3Uploader.uploadFile(image, "post-image");
+        request.setImageUrls(List.of(imageUrl)); // 기존 로직 재활용
+
+        return createPost(request, tsid);
+    }
+
 
     // 게시물 생성
     public String createPost(PostCreateRequest request, String tsid) {

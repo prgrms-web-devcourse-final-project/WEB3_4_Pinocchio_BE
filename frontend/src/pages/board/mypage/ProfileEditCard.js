@@ -4,6 +4,7 @@ import {useEffect, useState} from "react";
 import axios from "axios";
 import {useNavigate} from "react-router-dom";
 import {useQuery} from "react-query";
+import Spinner from "../../../shared/Spinner";
 
 const fetchUser = async (userId) => {
     const response = await axios.get(`/user/{userId}`);
@@ -123,6 +124,7 @@ const ProfileEditCard = () => {
                     </Button>
                 </Stack>
             </Card.Footer>
+            <Spinner show={isLoading} />
         </Card>
     )
 }

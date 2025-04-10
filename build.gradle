@@ -113,6 +113,10 @@ dependencies {
 
     // Actuator
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
+
+    // AWS
+    implementation platform("software.amazon.awssdk:bom:2.21.0")
+    implementation "software.amazon.awssdk:s3"
 }
 
 def querydslDir = "$buildDir/generated/querydsl"

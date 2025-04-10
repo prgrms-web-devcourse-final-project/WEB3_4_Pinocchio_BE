@@ -35,7 +35,7 @@ const Login = () => {
             return false;
         }
 
-        sendData = {userId : loginId, password : password};
+        sendData = {email : loginId, password};
         requestLogin(sendData);
     }
 

@@ -52,9 +52,9 @@ const Signup = () => {
         }
 
         const sendData = {
-            userId : loginId
+            email : loginId
             , password
-            , nickName
+            , nickname
             , name
         };
         requestSignup(sendData);

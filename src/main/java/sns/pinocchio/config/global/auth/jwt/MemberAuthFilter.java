@@ -50,6 +50,7 @@ public class MemberAuthFilter extends OncePerRequestFilter {
     if (accessToken == null) {
       log.debug("인증 토큰이 없습니다.");
       handleAuthError(response, AuthErrorCode.INVALID_TOKEN);
+      return;
     }
 
     try {
@@ -87,18 +88,31 @@ public class MemberAuthFilter extends OncePerRequestFilter {
     String method = request.getMethod();
     log.info("요청 경로: {}, 메서드: {}", path, method);
 
-      boolean shouldSkip =
-              (method.equals("GET") && (path.equals("/api/posts/search") || path.startsWith("/actuator/health") || path.startsWith("/api/actuator/health")))
-                      || (method.equals("POST") && (path.startsWith("/auth") || path.startsWith("/api/auth")))
-                      || (method.equals("POST") && (path.startsWith("/user/password/reset") || path.startsWith("/api/user/password/reset")))
-                      || path.startsWith("/swagger")
-                      || path.startsWith("/v3/api-docs")
-                      || path.startsWith("/swagger-ui")
-                      || path.startsWith("/swagger-resources")
-                      || path.startsWith("/webjars");
+    boolean shouldSkip =
+        //  API 예외 처리 경로
+        method.equals("GET") && (path.equals("/posts/search"))
+            || (method.equals("GET") && path.startsWith("/actuator/health"))
+            || (method.equals("POST") && (path.startsWith("/auth")))
+            || (method.equals("POST") && (path.startsWith("/auth/login")))
+            || (method.equals("POST") && (path.startsWith("/auth/signup")))
+            || (method.equals("POST") && (path.startsWith("/user/password/reset")))
+            || path.startsWith("/swagger")
+            || path.startsWith("/v3/api-docs")
+            || path.startsWith("/swagger-ui")
+            || path.startsWith("/swagger-resources")
+            || path.startsWith("/webjars")
 
-      log.info("필터 건너뛰기: {}", shouldSkip);
-      return shouldSkip;
+            //  React 정적 리소스 경로 제외
+            || path.equals("/")
+            || path.equals("/index.html")
+            || path.startsWith("/static/")
+            || path.startsWith("/favicon.ico")
+            || path.startsWith("/manifest.json")
+            || path.startsWith("/asset-manifest.json")
+            || path.startsWith("/logo");
+
+    log.info("필터 건너뛰기: {}", shouldSkip);
+    return shouldSkip;
   }
 
   // SecurityContext에 인증 정보를 주입하는 메서드

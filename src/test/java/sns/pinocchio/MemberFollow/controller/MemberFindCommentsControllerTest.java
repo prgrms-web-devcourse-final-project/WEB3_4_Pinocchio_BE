@@ -75,7 +75,7 @@ public class MemberFindCommentsControllerTest {
 		List<Map<String, String>> comments = List.of(info,info,info,info,info);
 		Map<String, Object> response = Map.of("message","댓글요청에 성공하였습니다.","comments", comments);
 		when(commentService.findCommentsByUser(anyString(),anyInt())).thenReturn(response);
-		mockMvc.perform(get("/members/"+member.getTsid()+"/activities/comments").contentType(MediaType.APPLICATION_JSON)
+		mockMvc.perform(get("/user/"+member.getTsid()+"/activities/comments").contentType(MediaType.APPLICATION_JSON)
 				.header("Authorization", accessToken))
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.message").value("댓글요청에 성공하였습니다."))

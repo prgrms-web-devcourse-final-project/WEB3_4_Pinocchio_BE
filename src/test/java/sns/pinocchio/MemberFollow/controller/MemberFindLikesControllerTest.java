@@ -10,19 +10,25 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import sns.pinocchio.application.comment.CommentService;
 import sns.pinocchio.application.post.PostLikeSearchService;
+import sns.pinocchio.application.post.PostSummaryDto;
 import sns.pinocchio.domain.fixtures.TestFixture;
 import sns.pinocchio.domain.member.Member;
 import sns.pinocchio.domain.post.PostLike;
 import sns.pinocchio.infrastructure.member.MemberRepository;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -77,16 +83,15 @@ public class MemberFindLikesControllerTest {
 		int page = 0;
 		Member member = setUp();
 
-		PostLike postLike = PostLike.builder().postId("1").build();
-		Page<PostLike> postLikePage = new PageImpl<>(List.of(postLike, postLike, postLike));
+		PostSummaryDto postSummaryDto = new PostSummaryDto("1","1");
+		Page<PostSummaryDto> postLikePage = new PageImpl<>(List.of(postSummaryDto,postSummaryDto,postSummaryDto));
 
 		ResultActions loginResponse = loginAndGetResponse();
 		String accessToken = loginResponse.andReturn().getResponse().getHeader("Authorization");
-
-		when(postLikeSearchService.findLikesByUser(userId, page)).thenReturn(postLikePage);
+		when(postLikeSearchService.findLikesByUserWithContent(anyString(),anyInt())).thenReturn(postLikePage);
 
 		mockMvc.perform(
-				get("/members/" + userId + "/activities/likes").contentType(MediaType.APPLICATION_JSON)
+				get("/user/" + userId + "/activities/likes").contentType(MediaType.APPLICATION_JSON)
 					.header("Authorization", accessToken))
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.message").value("게시물 좋아요 목록 요청 성공"))

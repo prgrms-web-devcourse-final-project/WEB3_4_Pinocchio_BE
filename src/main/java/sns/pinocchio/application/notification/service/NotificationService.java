@@ -34,7 +34,7 @@ public class NotificationService {
       CustomUserDetails userDetails, UpdateNotifications updateNotifications) {
 
     // 로그인한 유저 정보가 존재하지 않을 경우, 401에러 반환
-    if (userDetails == null || userDetails.getTsid().isEmpty()) {
+    if (userDetails == null || userDetails.getMember() == null) {
       log.error("No authenticated user found.");
       throw new NotificationUnauthorizedException("사용자가 인증되지 않았습니다. 로그인 후 다시 시도해주세요.");
     }
@@ -50,7 +50,7 @@ public class NotificationService {
     // 회원의 알림 설정 조회
     Notification notification =
         notificationRepository
-            .findByUserId(member.getTsid())
+            .findByUsersId(member.getId())
             .orElse(
                 Notification.builder()
                     .messageAlert(updateNotifications.message())
@@ -91,14 +91,14 @@ public class NotificationService {
   public NotificationInfo getNotifications(CustomUserDetails userDetails) {
 
     // 로그인한 유저 정보가 존재하지 않을 경우, 400에러 반환
-    if (userDetails == null || userDetails.getTsid().isEmpty()) {
+    if (userDetails == null || userDetails.getUserId() == null) {
       log.error("[userId] is null. Can't get notifications.");
       throw new NotificationBadRequestException("[userId] 정보가 존재하지 않습니다.");
     }
 
     Notification notification =
         notificationRepository
-            .findByUserId(userDetails.getTsid())
+            .findByUsersId(userDetails.getUserId())
             .orElse(
                 Notification.builder()
                     .messageAlert(false)

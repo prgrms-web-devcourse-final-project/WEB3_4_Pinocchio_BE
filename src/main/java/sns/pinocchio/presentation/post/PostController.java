@@ -1,5 +1,6 @@
 package sns.pinocchio.presentation.post;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -24,6 +25,27 @@ import java.io.IOException;
 public class PostController {
 
     private final PostService postService;
+
+    @PostMapping(value = "/swagger", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @Operation(summary = "게시글 생성 (Swagger 전용)", description = "Swagger에서 테스트용으로 사용되는 엔드포인트입니다.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "게시글 생성 성공"),
+            @ApiResponse(responseCode = "400", description = "잘못된 입력"),
+            @ApiResponse(responseCode = "500", description = "서버 오류")
+    })
+    public ResponseEntity<String> createPostForSwagger(
+            @RequestPart("request") String requestJson,  // JSON 문자열 직접 파싱
+            @RequestPart("image") MultipartFile image,
+            @AuthenticationPrincipal CustomUserDetails userDetails
+    ) throws IOException {
+        ObjectMapper objectMapper = new ObjectMapper();
+        PostCreateRequest request = objectMapper.readValue(requestJson, PostCreateRequest.class);
+
+        String tsid = userDetails.getTsid();
+        String postId = postService.createPostWithImage(request, image, tsid);
+        return ResponseEntity.ok(postId);
+    }
+
 
     @Operation(
             summary = "게시글 생성",

@@ -55,6 +55,10 @@ public class BlockedUserService {
     List<Long> blockedUserIds =
         blockedUsers.stream().map(BlockedUser::getBlockedUserId).collect(Collectors.toList());
 
+    if (blockedUserIds.isEmpty()) {
+      throw new BlockException(BlockErrorCode.BLOCK_NOT_FOUND);
+    }
+
     List<Member> blockedMembers = memberRepository.findAllById(blockedUserIds);
 
     return blockedMembers.stream()

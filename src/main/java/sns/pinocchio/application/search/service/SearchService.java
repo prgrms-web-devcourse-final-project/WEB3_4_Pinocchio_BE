@@ -1,89 +1,64 @@
 package sns.pinocchio.application.search.service;
 
+import static sns.pinocchio.presentation.search.exception.SearchErrorCode.UNAUTHORIZED_USER;
+
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import sns.pinocchio.application.search.dto.SearchResponseDto.SearchInfo;
-import sns.pinocchio.application.search.dto.SearchResponseDto.SearchPosts;
-import sns.pinocchio.application.search.dto.SearchResponseDto.SearchPostsDetail;
-import sns.pinocchio.domain.post.Post;
-import sns.pinocchio.domain.search.SearchSortType;
-import sns.pinocchio.domain.search.SearchType;
-import sns.pinocchio.infrastructure.persistence.mongodb.SearchRepositoryCustom;
+import sns.pinocchio.application.search.dto.SearchResponseDto.SearchUsers;
+import sns.pinocchio.config.global.auth.model.CustomUserDetails;
+import sns.pinocchio.domain.member.Member;
+import sns.pinocchio.infrastructure.member.MemberRepository;
+import sns.pinocchio.presentation.search.exception.SearchErrorCode;
+import sns.pinocchio.presentation.search.exception.SearchException;
 
 @Service
 @Slf4j
 @RequiredArgsConstructor
 public class SearchService {
 
-  private final SearchRepositoryCustom searchRepositoryCustom;
+  private final MemberRepository searchMemberRepository;
 
   /**
-   * 검색 타입에 맞게 게시물, 해시태그, 유저 검색
+   * 유저 검색
    *
+   * @param userDetails 로그인한 유저 정보
    * @param query 검색 키워드
-   * @param type 검색 대상 (all / posts / hashtags / users)
    * @param limit 최대 결과 개수
-   * @param sortBy 정렬 기준 (latest / popular / random)
-   * @param cursor 페이징 커서 (생성 날짜 기준)
-   * @return SearchInfo 검색 정보
-   * @implNote 현재 해시태그 및 유저 조회 로직은 없음 (기능 확정 시 추가 필요)
+   * @param cursor 페이징 커서 (userTsid)
+   * @return SearchInfo 사용자 검색 정보
+   * @throws SearchException 인증되지 않은 사용자일 경우 {@link SearchErrorCode#UNAUTHORIZED_USER} 예외 발생
    */
   @Transactional
-  public SearchInfo searchUsersOrPosts(
-      String query, String type, int limit, String sortBy, String cursor) {
+  public SearchInfo searchUsers(
+      CustomUserDetails userDetails, String query, int limit, String cursor) {
 
-    // 검색 타입 체크: 유효하지 않으면, 400에러 반환
-    SearchType searchType = SearchType.from(type);
+    // 유저 정보 체크: 유효하지 않으면, 401에러 반환
+    if (userDetails == null) {
+      log.error("No authenticated user found.");
+      throw new SearchException(UNAUTHORIZED_USER);
+    }
 
-    // 정렬 기준 체크
-    SearchSortType sortType = SearchSortType.from(sortBy);
+    // 유저 조회 (다음 데이터 판단을 위해 limit + 1)
+    List<Member> members = searchMemberRepository.searchUsers(query, limit + 1, cursor);
 
-    // 게시물 조회
-    SearchPosts posts = searchPosts(query, searchType, sortType, limit, cursor);
-
-    // TODO: 해시태그 조회 로직 필요 (기능 확정 시 추가)
-
-    // TODO: 유저 조회 로직 필요 (기능 확정 시 추가)
-
-    return new SearchInfo(query, posts, null, null);
-  }
-
-  /**
-   * 게시물 검색
-   *
-   * @param query 검색 키워드
-   * @param searchType 검색 타입
-   * @param sortType 정렬 기준
-   * @param limit 최대 결과 개수
-   * @param cursor 페이징 커서 (생성 날짜 기준)
-   * @return SearchPosts 게시물 검색 결과
-   */
-  @Transactional
-  public SearchPosts searchPosts(
-      String query, SearchType searchType, SearchSortType sortType, int limit, String cursor) {
-
-    // 게시물 조회 (다음 데이터 판단을 위해 limit + 1)
-    List<Post> posts =
-        searchRepositoryCustom.searchPostByQueryWithCursor(
-            query, searchType, sortType, limit + 1, cursor);
-
-    log.info("Found Posts: count {}, data {}", posts.size(), posts);
+    log.info("Found Members: count {}, data {}", members.size(), members);
 
     // hasNext 판단: 이후 데이터가 존재하지 않으면 false
-    boolean hasNext = posts.size() > limit;
+    boolean hasNext = members.size() > limit;
 
-    // 실제 응답에 보낼 데이터는 limit까지만 저장
-    List<Post> sliced = hasNext ? posts.subList(0, limit) : posts;
-
-    List<SearchPostsDetail> searchPostsDetails =
-        sliced.stream().map(SearchPostsDetail::toDetail).toList();
+    // 실제 응답에 보낼 데이터는 limit 까지만 저장
+    List<Member> sliced = hasNext ? members.subList(0, limit) : members;
 
     // nextCursor 판단: 이후 데이터가 존재하지 않으면 null
-    String nextCursor = hasNext ? sliced.getLast().getCreatedAt().toString() : null;
+    String nextCursor = hasNext ? sliced.getLast().getTsid() : null;
 
-    return new SearchPosts(nextCursor, hasNext, searchPostsDetails);
+    // 응답 데이터 생성: Member Entity -> SearchUsers Dto
+    List<SearchUsers> searchUsers = sliced.stream().map(SearchUsers::toDetail).toList();
+
+    return new SearchInfo(query, nextCursor, hasNext, searchUsers);
   }
 }

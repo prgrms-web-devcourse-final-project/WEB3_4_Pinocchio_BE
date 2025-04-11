@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import lombok.*;
 import sns.pinocchio.application.notification.dto.NotificationRequestDto.UpdateNotifications;
+import sns.pinocchio.domain.member.Member;
 
 @Entity
 @Getter
@@ -29,13 +30,9 @@ public class Notification {
 
   private LocalDateTime updatedAt; // 알림 설정 변경 날짜
 
-  // todo: user 테이블 생성 시 아래 주석과 교체 필요
-  private String userId; // 알림 설정 사용자
-
-  /*
-   * @OneToOne(mappedBy = "user")
-   * private Users users;  // 알림 설정 사용자
-   * */
+  @OneToOne
+  @JoinColumn(name = "member_id")
+  private Member users; // 알림 설정 사용자
 
   /**
    * @implNote 기존 알림 설정을 모두 덮어쓰는 방식으로 동작하기 때문에, 모든 항목을 포함한 updateNotifications 요청값이 필요.

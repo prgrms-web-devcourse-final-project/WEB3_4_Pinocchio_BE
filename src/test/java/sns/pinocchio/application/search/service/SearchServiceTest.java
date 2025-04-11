@@ -1,26 +1,22 @@
 package sns.pinocchio.application.search.service;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Test;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
+import java.util.List;
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import sns.pinocchio.application.search.dto.SearchResponseDto;
 import sns.pinocchio.application.search.dto.SearchResponseDto.SearchInfo;
-import sns.pinocchio.application.search.dto.SearchResponseDto.SearchPosts;
-import sns.pinocchio.domain.post.Post;
-import sns.pinocchio.domain.search.SearchSortType;
-import sns.pinocchio.domain.search.SearchType;
-import sns.pinocchio.infrastructure.persistence.mongodb.SearchRepositoryCustom;
-
-import java.time.LocalDateTime;
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.when;
+import sns.pinocchio.application.search.dto.SearchResponseDto.SearchUsers;
+import sns.pinocchio.config.global.auth.model.CustomUserDetails;
+import sns.pinocchio.domain.member.Member;
+import sns.pinocchio.infrastructure.persistence.mysql.SearchMemberRepositoryCustom;
+import sns.pinocchio.presentation.search.exception.SearchException;
 
 @Tag("unit")
 @ExtendWith(MockitoExtension.class)
@@ -28,82 +24,56 @@ class SearchServiceTest {
 
   @InjectMocks private SearchService searchService;
 
-  @Mock private SearchRepositoryCustom searchRepositoryCustom;
+  @Mock private SearchMemberRepositoryCustom searchMemberRepository;
 
-  private Post mockPost1;
+  private CustomUserDetails mockUserDetails;
 
-  private Post mockPost2;
+  private Member mockMember1;
 
-  private Post mockPost3;
+  private Member mockMember2;
+
+  private Member mockMember3;
 
   @BeforeEach
   void setUp() {
 
-    mockPost1 =
-        Post.builder()
-            .id("post_1")
-            .tsid("user_1")
-            .imageUrls(List.of("https://image.com/post_1.jpg"))
-            .createdAt(LocalDateTime.now())
-            .content("테스트 문서입니다.")
-            .hashtags(List.of("#테스트"))
-            .build();
+    mockUserDetails = mock(CustomUserDetails.class);
 
-    mockPost2 =
-        Post.builder()
-            .id("post_2")
-            .tsid("user_2")
-            .imageUrls(List.of("https://image.com/post_2.jpg"))
-            .createdAt(LocalDateTime.now())
-            .content("테스트 문서입니다.")
-            .hashtags(List.of("#테스트"))
-            .build();
+    mockMember1 = Member.builder().name("테스트유저1").nickname("테스트유저닉네임1").build();
+    mockMember2 = Member.builder().name("테스트유저2").nickname("테스트유저닉네임2").build();
+    mockMember3 = Member.builder().name("테스트유저3").nickname("테스트유저닉네임3").build();
 
-    mockPost3 =
-        Post.builder()
-            .id("post_3")
-            .tsid("user_3")
-            .imageUrls(List.of("https://image.com/post_3.jpg"))
-            .createdAt(LocalDateTime.now())
-            .content("테스트 문서입니다.")
-            .hashtags(List.of("#테스트"))
-            .build();
+    //    https://image.com/post_1.jpg
   }
 
   @Test
   @DisplayName("검색 Success: 결과가 limit 이하인 경우")
-  void searchPostsNoNextPageSuccessTest() {
+  void searchUsersNoNextPageSuccessTest() {
 
     // given
-    String query = "제주도";
-    SearchType searchType = SearchType.HASHTAGS;
-    SearchSortType sortType = SearchSortType.LATEST;
+    String query = "테스트";
     int limit = 2;
     String cursor = null;
 
-    List<Post> mockPosts = List.of(mockPost1, mockPost2);
+    List<Member> mockMembers = List.of(mockMember1, mockMember2);
 
-    when(searchRepositoryCustom.searchPostByQueryWithCursor(
-            query, searchType, sortType, limit + 1, cursor))
-        .thenReturn(mockPosts);
+    when(searchMemberRepository.searchUsers(query, limit + 1, cursor)).thenReturn(mockMembers);
 
     // when
-    SearchPosts result = searchService.searchPosts(query, searchType, sortType, limit, cursor);
+    SearchInfo result = searchService.searchUsers(mockUserDetails, query, limit, cursor);
 
     // then
-    assertThat(result.getPosts()).hasSize(2);
+    assertThat(result.getUsers()).hasSize(2);
     assertThat(result.isHasNext()).isFalse();
     assertThat(result.getNextCursor()).isNull();
 
-    SearchResponseDto.SearchPostsDetail detail1 = result.getPosts().get(0);
-    assertThat(detail1.getPostId()).isEqualTo(mockPost1.getId());
-    assertThat(detail1.getUserId()).isEqualTo(mockPost1.getTsid());
-    assertThat(detail1.getProfileImageUrl()).containsExactlyElementsOf(mockPost1.getImageUrls());
+    SearchUsers detail1 = result.getUsers().get(0);
+    assertThat(detail1.getName()).isEqualTo(mockMember1.getName());
+    assertThat(detail1.getNickname()).isEqualTo(mockMember1.getNickname());
 
-    SearchResponseDto.SearchPostsDetail detail2 = result.getPosts().get(1);
-    assertThat(detail2.getPostId()).isEqualTo(mockPost2.getId());
-    assertThat(detail2.getUserId()).isEqualTo(mockPost2.getTsid());
-    assertThat(detail2.getProfileImageUrl()).containsExactlyElementsOf(mockPost2.getImageUrls());
+    SearchUsers detail2 = result.getUsers().get(1);
+    assertThat(detail2.getName()).isEqualTo(mockMember2.getName());
+    assertThat(detail2.getNickname()).isEqualTo(mockMember2.getNickname());
   }
 
   @Test
@@ -111,59 +81,42 @@ class SearchServiceTest {
   void searchPostsWithNextPageSuccessTest() {
     // given
     String query = "제주도";
-    SearchType searchType = SearchType.POSTS;
-    SearchSortType sortType = SearchSortType.LATEST;
     int limit = 2;
     String cursor = null;
 
-    List<Post> mockPosts = List.of(mockPost1, mockPost2, mockPost3);
+    List<Member> mockMembers = List.of(mockMember1, mockMember2, mockMember3);
 
-    when(searchRepositoryCustom.searchPostByQueryWithCursor(
-            query, searchType, sortType, limit + 1, cursor))
-        .thenReturn(mockPosts);
+    when(searchMemberRepository.searchUsers(query, limit + 1, cursor)).thenReturn(mockMembers);
 
     // when
-    SearchPosts result = searchService.searchPosts(query, searchType, sortType, limit, cursor);
+    SearchInfo result = searchService.searchUsers(mockUserDetails, query, limit, cursor);
 
     // then
-    assertThat(result.getPosts()).hasSize(2);
+    assertThat(result.getUsers()).hasSize(2);
     assertThat(result.isHasNext()).isTrue();
+    assertThat(result.getNextCursor()).isNotNull();
 
-    SearchResponseDto.SearchPostsDetail detail1 = result.getPosts().get(0);
-    assertThat(detail1.getPostId()).isEqualTo(mockPost1.getId());
-    assertThat(detail1.getUserId()).isEqualTo(mockPost1.getTsid());
-    assertThat(detail1.getProfileImageUrl()).containsExactlyElementsOf(mockPost1.getImageUrls());
+    SearchUsers detail1 = result.getUsers().get(0);
+    assertThat(detail1.getName()).isEqualTo(mockMember1.getName());
+    assertThat(detail1.getNickname()).isEqualTo(mockMember1.getNickname());
 
-    SearchResponseDto.SearchPostsDetail detail2 = result.getPosts().get(1);
-    assertThat(detail2.getPostId()).isEqualTo(mockPost2.getId());
-    assertThat(detail2.getUserId()).isEqualTo(mockPost2.getTsid());
-    assertThat(detail2.getProfileImageUrl()).containsExactlyElementsOf(mockPost2.getImageUrls());
+    SearchUsers detail2 = result.getUsers().get(1);
+    assertThat(detail2.getName()).isEqualTo(mockMember2.getName());
+    assertThat(detail2.getNickname()).isEqualTo(mockMember2.getNickname());
   }
 
   @Test
-  @DisplayName("통합 검색 Success")
-  void searchUsersOrPostsSuccess() {
-
-    // TODO: 해시태그 및 유저는 아직 미완성
+  @DisplayName("검색 Fail: 인증 정보를 찾을 수 없을 경우")
+  void searchUsersUnauthorizedFailTest() {
 
     // given
-    String query = "제주도";
-    String type = "posts";
-    String sortBy = "latest";
-    int limit = 2;
-    String cursor = null;
-
-    when(searchRepositoryCustom.searchPostByQueryWithCursor(
-            query, SearchType.POSTS, SearchSortType.LATEST, limit + 1, cursor))
-        .thenReturn(List.of());
+    String errorMsg = "유효하지 않는 인증 정보입니다.";
 
     // when
-    SearchInfo result = searchService.searchUsersOrPosts(query, type, limit, sortBy, cursor);
+    SearchException exception =
+        assertThrows(SearchException.class, () -> searchService.searchUsers(null, null, 0, null));
 
     // then
-    assertThat(result.getQuery()).isEqualTo("제주도");
-    assertThat(result.getPosts()).isNotNull();
-    assertThat(result.getHashtags()).isNull();
-    assertThat(result.getUsers()).isNull();
+    assertThat(exception.getMessage()).isEqualTo(errorMsg);
   }
 }

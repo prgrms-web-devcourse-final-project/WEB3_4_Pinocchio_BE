@@ -12,14 +12,16 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import sns.pinocchio.application.notification.dto.NotificationRequestDto.UpdateNotifications;
 import sns.pinocchio.application.notification.dto.NotificationResponseDto.NotificationInfo;
 import sns.pinocchio.application.notification.service.NotificationService;
+import sns.pinocchio.config.global.auth.model.CustomUserDetails;
 import sns.pinocchio.infrastructure.shared.response.GlobalApiResponse;
 import sns.pinocchio.infrastructure.shared.swagger.ErrorResponseSchema;
 
-@Tag(name = "Notification", description = "알림 설정 API")
+@Tag(name = "알림", description = "알림 설정 API")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/notifications")
@@ -50,26 +52,14 @@ public class NotificationController {
     @ApiResponse(
         responseCode = "401",
         description = "인증 실패",
-        content = @Content(schema = @Schema(implementation = ErrorResponseSchema.class))),
-    @ApiResponse(
-        responseCode = "500",
-        description = "서버 오류",
-        content =
-            @Content(
-                schema = @Schema(implementation = ErrorResponseSchema.class),
-                mediaType = "application/json",
-                examples =
-                    @ExampleObject(
-                        name = "Internal Server Error",
-                        value = NOTIFICATION_INTERNAL_SERVER_ERROR_EXAMPLE)))
+        content = @Content(schema = @Schema(implementation = ErrorResponseSchema.class)))
   })
   @PutMapping("/settings")
   public ResponseEntity<GlobalApiResponse<NotificationInfo>> updateNotificationSettings(
-      @RequestHeader(value = "Authorization") String accessToken,
+      @AuthenticationPrincipal CustomUserDetails userDetails,
       @RequestBody UpdateNotifications request) {
 
-    // todo: JWT 토큰 인증 기능 완료 시, 변경 필요
-    NotificationInfo updated = notificationService.updateNotifications("mockUser", request);
+    NotificationInfo updated = notificationService.updateNotifications(userDetails, request);
 
     return ResponseEntity.ok(success("알림 설정이 성공적으로 업데이트되었습니다.", updated));
   }
@@ -92,10 +82,9 @@ public class NotificationController {
   })
   @GetMapping("/settings")
   public ResponseEntity<GlobalApiResponse<NotificationInfo>> getNotificationSettings(
-      @RequestHeader(value = "Authorization") String accessToken) {
+      @AuthenticationPrincipal CustomUserDetails userDetails) {
 
-    // todo: JWT 토큰 인증 기능 완료 시, 변경 필요
-    NotificationInfo info = notificationService.getNotifications("mockUser");
+    NotificationInfo info = notificationService.getNotifications(userDetails);
 
     return ResponseEntity.ok(success("유저의 알림 설정을 조회했습니다.", info));
   }

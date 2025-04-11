@@ -11,12 +11,14 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import sns.pinocchio.application.chat.dto.ChatRequestDto.SendMessage;
 import sns.pinocchio.application.chat.dto.ChatResponseDto.ChatMessagesInfo;
 import sns.pinocchio.application.chat.dto.ChatResponseDto.ChatRoomsInfo;
 import sns.pinocchio.application.chat.dto.ChatResponseDto.SendMessageInfo;
 import sns.pinocchio.application.chat.service.ChatService;
+import sns.pinocchio.config.global.auth.model.CustomUserDetails;
 import sns.pinocchio.infrastructure.shared.response.GlobalApiResponse;
 import sns.pinocchio.infrastructure.shared.swagger.ErrorResponseSchema;
 
@@ -68,15 +70,12 @@ public class ChatController {
                       value = SEND_CHAT_NOTIFICATION_INTERNAL_SERVER_ERROR_EXAMPLE)
                 }))
   })
-  @PostMapping("/{senderId}")
+  @PostMapping
   public ResponseEntity<GlobalApiResponse<SendMessageInfo>> sendMessage(
-      @RequestHeader(value = "Authorization") String accessToken,
-      @PathVariable(name = "senderId") String senderTsid,
+      @AuthenticationPrincipal CustomUserDetails userDetails,
       @RequestBody SendMessage messageInfo) {
 
-    // todo: JWT 토큰 인증 기능 완료 시, 추가 필요
-
-    SendMessageInfo sendMessageInfo = chatService.sendMessageToChatroom(senderTsid, messageInfo);
+    SendMessageInfo sendMessageInfo = chatService.sendMessageToChatroom(userDetails, messageInfo);
 
     return ResponseEntity.ok(GlobalApiResponse.success("메시지가 성공적으로 전송되었습니다.", sendMessageInfo));
   }
@@ -109,15 +108,12 @@ public class ChatController {
   })
   @GetMapping("/list")
   public ResponseEntity<GlobalApiResponse<ChatRoomsInfo>> getChatRooms(
-      @RequestHeader(value = "Authorization") String accessToken,
+      @AuthenticationPrincipal CustomUserDetails userDetails,
       @RequestParam(name = "limit", defaultValue = "9", required = false) int limit,
       @RequestParam(name = "sortBy", defaultValue = "latest", required = false) String sortBy,
       @RequestParam(name = "cursor", required = false) String cursor) {
 
-    // TODO: 코드 병합 시, 해당 메서드는 UserController로 이동 필요
-    // TODO: JWT 토큰 인증 기능 완료 시, 추가 필요
-
-    ChatRoomsInfo chatRoomsInfo = chatService.getChatRooms("mockUser", limit, sortBy, cursor);
+    ChatRoomsInfo chatRoomsInfo = chatService.getChatRooms(userDetails, limit, sortBy, cursor);
 
     return ResponseEntity.ok(GlobalApiResponse.success("유저의 채팅방 목록을 조회했습니다.", chatRoomsInfo));
   }
@@ -151,14 +147,13 @@ public class ChatController {
   @GetMapping("/{chatId}/messages")
   public ResponseEntity<GlobalApiResponse<ChatMessagesInfo>> getMessages(
       @PathVariable(name = "chatId") String chatId,
-      @RequestHeader(value = "Authorization") String accessToken,
+      @AuthenticationPrincipal CustomUserDetails userDetails,
       @RequestParam(name = "limit", defaultValue = "9", required = false) int limit,
       @RequestParam(name = "sortBy", defaultValue = "latest", required = false) String sortBy,
       @RequestParam(name = "cursor", required = false) String cursor) {
 
-    // TODO: JWT 토큰 인증 기능 완료 시, 추가 필요
-
-    ChatMessagesInfo messageInfo = chatService.getMessages(chatId, limit, sortBy, cursor);
+    ChatMessagesInfo messageInfo =
+        chatService.getMessages(userDetails, chatId, limit, sortBy, cursor);
 
     return ResponseEntity.ok(GlobalApiResponse.success("채팅방의 채팅 메시지 목록을 조회했습니다.", messageInfo));
   }

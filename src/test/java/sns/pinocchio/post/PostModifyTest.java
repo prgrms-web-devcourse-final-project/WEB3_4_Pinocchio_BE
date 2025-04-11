@@ -9,7 +9,6 @@ import sns.pinocchio.application.post.PostService;
 import sns.pinocchio.domain.post.Post;
 import sns.pinocchio.infrastructure.persistence.mongodb.PostRepository;
 
-import java.util.List;
 import java.util.Optional;
 
 @Tag("integration")
@@ -37,12 +36,11 @@ public class PostModifyTest {
 
         Post originalPost = optionalPost.get();
 // 테스트용 주석
-        // 2️⃣ 수정 요청 생성
+        // 2️⃣ 수정 요청 생성  (이미지 수정 제외)
         PostModifyRequest request = PostModifyRequest.builder()
                 .postId(originalPost.getId())
                 .tsid("user_123")
                 .content("✅ 수정된 게시물입니다. #수정됨")
-                .imageUrls(List.of("https://example.com/modified_image.jpg"))
                 .visibility("private") // 문자열로 줘도 내부에서 Enum으로 처리됨
                 .build();
 

@@ -56,6 +56,7 @@ public class MemberInfoFindController {
         response.put("likes", postSummaryPage.getContent());
         response.put("totalPages", postSummaryPage.getTotalPages());
         response.put("totalElements", postSummaryPage.getTotalElements());
+		response.put("page",page);
 		return ResponseEntity.status(HttpStatus.OK).body(response);
 	}
 }

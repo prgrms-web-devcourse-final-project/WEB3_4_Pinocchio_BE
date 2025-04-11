@@ -21,7 +21,7 @@ import sns.pinocchio.config.global.auth.model.CustomUserDetails;
 import sns.pinocchio.infrastructure.shared.response.GlobalApiResponse;
 import sns.pinocchio.infrastructure.shared.swagger.ErrorResponseSchema;
 
-@Tag(name = "Notification", description = "알림 설정 API")
+@Tag(name = "알림", description = "알림 설정 API")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/notifications")

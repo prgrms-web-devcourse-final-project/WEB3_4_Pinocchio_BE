@@ -1,8 +1,5 @@
 package sns.pinocchio.presentation.notification;
 
-import static sns.pinocchio.infrastructure.shared.response.GlobalApiResponse.success;
-import static sns.pinocchio.infrastructure.shared.swagger.ErrorExamples.*;
-
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
@@ -19,10 +16,13 @@ import sns.pinocchio.application.notification.service.NotificationService;
 import sns.pinocchio.infrastructure.shared.response.GlobalApiResponse;
 import sns.pinocchio.infrastructure.shared.swagger.ErrorResponseSchema;
 
+import static sns.pinocchio.infrastructure.shared.response.GlobalApiResponse.success;
+import static sns.pinocchio.infrastructure.shared.swagger.ErrorExamples.*;
+
 @Tag(name = "Notification", description = "알림 설정 API")
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/notifications")
+@RequestMapping("/notifications")
 public class NotificationController {
 
   private final NotificationService notificationService;

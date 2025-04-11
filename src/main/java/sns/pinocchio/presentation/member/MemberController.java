@@ -3,11 +3,14 @@ package sns.pinocchio.presentation.member;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
+import java.io.IOException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import sns.pinocchio.application.auth.AuthService;
 import sns.pinocchio.application.member.MemberService;
 import sns.pinocchio.application.member.memberDto.request.ChangePasswordRequestDto;
@@ -46,12 +49,14 @@ public class MemberController {
   }
 
   // 유저 프로필 수정
-  @PutMapping
+  @PutMapping(value = "/profile", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   public ResponseEntity<ProfileResponseDto> updateMemberInfo(
       @AuthenticationPrincipal CustomUserDetails customUserDetails,
-      @Valid @RequestBody UpdateRequestDto updateRequestDto) {
-    // 유저 프로필 수정
-    Member member = memberService.updateProfile(customUserDetails.getUserId(), updateRequestDto);
+      @Valid @RequestPart("request") UpdateRequestDto updateRequestDto,
+      @RequestPart(value = "image", required = false) MultipartFile image)
+      throws IOException {
+    Member member =
+        memberService.updateProfile(updateRequestDto, image, customUserDetails.getUserId());
 
     // 응답 DTO 변환
     ProfileResponseDto profileResponseDto =
@@ -80,7 +85,8 @@ public class MemberController {
     Member member = customUserDetails.getMember();
 
     authService.validatePassword(changePasswordRequestDto.currentPassword(), member);
-    authService.validateSamePassword(changePasswordRequestDto.currentPassword(), changePasswordRequestDto.newPassword());
+    authService.validateSamePassword(
+        changePasswordRequestDto.currentPassword(), changePasswordRequestDto.newPassword());
 
     memberService.changePassword(member, changePasswordRequestDto.newPassword());
 

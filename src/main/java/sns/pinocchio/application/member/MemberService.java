@@ -6,8 +6,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 import sns.pinocchio.application.member.memberDto.request.SignupRequestDto;
 import sns.pinocchio.application.member.memberDto.request.UpdateRequestDto;
+import sns.pinocchio.config.S3img.S3Uploader;
 import sns.pinocchio.config.global.auth.service.cookieService.CookieService;
 import sns.pinocchio.config.global.auth.util.EmailUtil;
 import sns.pinocchio.config.global.auth.util.JwtUtil;
@@ -20,6 +22,8 @@ import sns.pinocchio.presentation.auth.exception.AuthException;
 import sns.pinocchio.presentation.member.exception.MemberErrorCode;
 import sns.pinocchio.presentation.member.exception.MemberException;
 
+import java.io.IOException;
+
 @RequiredArgsConstructor
 @Service
 public class MemberService {
@@ -29,6 +33,7 @@ public class MemberService {
   private final CookieService cookieService;
   private final RedisService redisService;
   private final JwtUtil jwtUtil;
+  private final S3Uploader s3Uploader;
 
   // 계정 생성
   @Transactional
@@ -54,14 +59,20 @@ public class MemberService {
 
   // 사용자 프로필 수정
   @Transactional
-  public Member updateProfile(Long memberId, UpdateRequestDto updateRequestDto) {
-    // 유저 확인
-    Member member = findById(memberId);
+  public Member updateProfile(UpdateRequestDto updateRequestDto, MultipartFile image, Long userId)
+      throws IOException {
+    Member member = findById(userId);
 
-    // 닉네임 중복 체크
     checkNicknameDuplicate(updateRequestDto.nickname());
 
+    // 이미지가 있을 경우 업로드
+    if (image != null && !image.isEmpty()) {
+      String imageUrl = s3Uploader.uploadFile(image, "post-profile/");
+      updateRequestDto =
+          updateRequestDto.withProfileImageUrl(imageUrl); // 불변 객체라면 builder 패턴 또는 with 메서드 필요
+    }
     member.updateProfile(updateRequestDto);
+
     return member;
   }
 

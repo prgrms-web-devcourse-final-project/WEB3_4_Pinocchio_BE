@@ -12,4 +12,9 @@ public record UpdateRequestDto(
     @Size(max = 100, message = "소개글은 100자 이하로 입력해주세요.") String bio,
     String website,
     String profileImageUrl,
-    Boolean isActive) {}
+    Boolean isActive) {
+  public UpdateRequestDto withProfileImageUrl(String imageUrl) {
+    return new UpdateRequestDto(
+        this.name, this.nickname, this.bio, this.website, imageUrl, this.isActive);
+  }
+}

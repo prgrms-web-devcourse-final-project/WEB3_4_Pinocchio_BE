@@ -13,7 +13,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import sns.pinocchio.config.global.auth.jwt.MemberAuthFilter;
 
 @Configuration
@@ -34,21 +33,26 @@ public class SecurityConfig {
         .logout(AbstractHttpConfigurer::disable) // 로그아웃 비활성화
         .authorizeHttpRequests(
             auth ->
-                auth.requestMatchers(
+                auth.
+                     requestMatchers(
+                  // === [ Swagger & 문서 접근 허용 ] ===
                         "/swagger-ui/**",
                         "/swagger-ui.html",
                         "/v3/api-docs/**",
                         "/swagger-resources/**",
                         "/webjars/**")
                     .permitAll()
+                  // === [ 인증 불필요 API ] ===
                     .requestMatchers(
                         "/auth/signup",
                         "/auth/login",
                         "/auth/logout",
                         "/posts/search",
-                        "/actuator/health")
+                        "/actuator/health",
+                        "/user/password/reset")
                     .permitAll()
-                    //  정적 리소스 (React 빌드 파일들) 허용
+   /*<Spring Security의 requestMatchers는 위에서 아래로 순차적으로 평가되므로, 특정 경로에 대한 예외 허용(permitAll)은 가장 위에 위치>*/
+                 // === [ 정적 리소스 (React 빌드 파일들)  접근 허용 ] ===
                     .requestMatchers(
                         "/",
                         "/index.html",
@@ -59,8 +63,16 @@ public class SecurityConfig {
                         "/logo192.png",
                         "/logo512.png")
                     .permitAll()
-                    .requestMatchers(AntPathRequestMatcher.antMatcher("/login"))
-                    .permitAll()
+                        // === [ 인증 필요한 API ] ===
+                    .requestMatchers("/user/**").authenticated()
+                    .requestMatchers("/posts/**").authenticated()
+                    .requestMatchers("/posts/like/**").authenticated()
+                    .requestMatchers("/comments/**").authenticated()
+                    .requestMatchers("/block/**").authenticated()
+                    //.requestMatchers("/chat/**").authenticated()  // TODO: JWT 적용 후 해제
+                    //.requestMatchers("/search").authenticated()  // TODO: JWT 적용 후 해제
+                    //.requestMatchers("/notifications/settings").authenticated()  // TODO: JWT 적용 후 해제
+                  // === [ 모든 나머지 요청 인증 ] ===
                     .anyRequest()
                     .authenticated())
         .addFilterBefore(memberAuthFilter, UsernamePasswordAuthenticationFilter.class);

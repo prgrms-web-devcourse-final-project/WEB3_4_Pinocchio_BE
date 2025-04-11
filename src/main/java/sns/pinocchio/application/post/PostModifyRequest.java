@@ -3,8 +3,6 @@ package sns.pinocchio.application.post;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 
-import java.util.List;
-
 @Getter
 @Setter
 @NoArgsConstructor
@@ -21,8 +19,9 @@ public class PostModifyRequest {
     @Schema(description = "수정할 본문 내용", example = "수정된 게시글입니다.")
     private String content;
 
-    @Schema(description = "수정할 이미지 URL 리스트", example = "[\"https://img.com/updated.jpg\"]")
-    private List<String> imageUrls;
+    // 이미지 수정 불가
+    //@Schema(description = "수정할 이미지 URL 리스트", example = "[\"https://img.com/updated.jpg\"]")
+    //private List<String> imageUrls;
 
     @Schema(description = "공개 범위 (public/private)", example = "private")
     private String visibility;

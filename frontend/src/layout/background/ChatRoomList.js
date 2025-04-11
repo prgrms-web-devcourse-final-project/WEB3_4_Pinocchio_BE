@@ -1,7 +1,25 @@
 import {Card, Col, Image, ListGroup, Row, Stack} from "react-bootstrap";
 import sampleProfile from "../../assets/images/sample_profile.png";
+import {jwtDecode} from "jwt-decode";
+import axios from "axios";
+import {useQuery} from "react-query";
+
+const fetchchatList = async () => {
+    const token = localStorage.getItem('token');
+    const loginUser = jwtDecode(token);
+    const response = await axios.get(`/chat/list`);
+    console.log(response.data);
+    return response.data;
+}
 
 const ChatRoomList = ({isOpen, handleCloseClick, openChatRoom}) => {
+    const { isLoading, data } = useQuery(
+        ['fetchchatList'],
+        () => fetchchatList(),
+        { keepPreviousData: true, refetchOnWindowFocus: false}
+    );
+
+    console.log('채팅리스트: ', data)
     return (
         isOpen &&
         <Card bg={"light"} style={{

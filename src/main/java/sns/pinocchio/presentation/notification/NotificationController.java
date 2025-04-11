@@ -24,7 +24,7 @@ import sns.pinocchio.infrastructure.shared.swagger.ErrorResponseSchema;
 @Tag(name = "알림", description = "알림 설정 API")
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/notifications")
+@RequestMapping("/notifications")
 public class NotificationController {
 
   private final NotificationService notificationService;

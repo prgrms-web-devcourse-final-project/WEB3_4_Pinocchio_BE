@@ -1,21 +1,20 @@
-import ChatRoomList from "./ChatRoomList";
+import ChatRoomList from "../../pages/chat/ChatRoomList";
 import {useState} from "react";
-import ChatPopup from "../../shared/DraggablePopup";
+import ChatPopup from "../../pages/chat/ChatPopup";
 
 const ChatButton = () => {
     const [isOpen, setOpen] = useState(false);
     const [openChats, setOpenChats] = useState([]);
 
     const openChatRoom = (room) => {
-        console.log('openChatRoom param : ', room)
         setOpenChats((prev) => {
-            if (prev.find((c) => c.id === room.id)) return [...prev]; // 중복 방지
+            if (prev.find((c) => c.roomId === room.roomId)) return [...prev]; // 중복 방지
             return [...prev, room];
         });
     };
 
     const closeChatRoom = (id) => {
-        setOpenChats((prev) => prev.filter((room) => room.id !== id));
+        setOpenChats((prev) => prev.filter((room) => room.roomId !== id));
     };
 
     const handleCloseClick = () => {

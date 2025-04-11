@@ -349,6 +349,26 @@
   //opacity: 1;
 }
 
+.ico-like-empty {
+  display: inline-block;
+  width: 30px;
+  height: 30px;
+  margin: 0;
+  padding: 0;
+  background: url(../images/icon/ico-like-fill.svg) no-repeat 50% 50%;
+  //opacity: 1;
+}
+
+.ico-like-fill {
+  display: inline-block;
+  width: 30px;
+  height: 30px;
+  margin: 0;
+  padding: 0;
+  background: url(../images/icon/ico-like-empty.svg) no-repeat 50% 50%;
+  //opacity: 1;
+}
+
 .ico-exclamation {
   display: inline-block;
   min-width: 16px;

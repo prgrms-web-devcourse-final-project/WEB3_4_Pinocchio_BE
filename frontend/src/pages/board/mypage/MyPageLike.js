@@ -6,9 +6,12 @@ import FlexibleTable from "../../../shared/table/FlexibleTable";
 import TableBackGroundCard from "../../../shared/TableBackGroundCard";
 import MyPageTabLayout from "./MyPageTabLayout";
 import UserProfile from "../share/UserProfile";
+import {jwtDecode} from "jwt-decode";
 
 const fetchMyPageLikeList = async () => {
-    const response = await axios.get(`/user/{userId}/activities/likes`);
+    const token = localStorage.getItem('token');
+    const loginUser = jwtDecode(token);
+    const response = await axios.get(`/user/${loginUser.tsid}/activities/likes`);
     return response.data;
 };
 

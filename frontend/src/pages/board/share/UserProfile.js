@@ -4,24 +4,28 @@ import useConfirm from "../../../hooks/useConfirm";
 import {useNavigate} from "react-router-dom";
 import {Button, Col, Form, Row, Stack} from "react-bootstrap";
 import profile from "../../../assets/images/sample_profile.png";
+import {jwtDecode} from "jwt-decode";
+import {useState} from "react";
+import NotificationModal from "./NotificationModal";
 
 const fetchUser = async (userId) => {
-    const response = await axios.get(`/user/{userId}`);
+    const response = await axios.get(`/user/${userId}`);
     return response.data;
 };
 
 const UserProfile = ({ page }) => {
     const { openConfirm } = useConfirm();
     const navigate = useNavigate();
-
-    const userId = 1;
+    const [isNotificationModalOpen, setNotificationModalOpen] = useState();
+    const token = localStorage.getItem('token');
+    const loginUser = jwtDecode(token);
     const { isLoading: userLoading, data: user } = useQuery(
         ['fetchUser'],
-        () => fetchUser(userId),
+        () => fetchUser(loginUser.id),
         { keepPreviousData: true, refetchOnWindowFocus: false}
     );
 
-    const deleteMutation = useMutation(() => axios.delete(`/user/${userId}`), {
+    const deleteMutation = useMutation(() => axios.delete(`/user/${loginUser.id}`), {
         onSuccess: (param) => {
             openConfirm({
                 title: "회원 탈퇴가 완료되었습니다. 그동안 이용해주셔서 감사합니다."
@@ -52,6 +56,7 @@ const UserProfile = ({ page }) => {
             return <>
                 <Button className={"ms-auto"} size={"md"} onClick={() => navigate("/board/mypage/modify")}>수정</Button>
                 <Button size={"md"} onClick={handleDeleteUser}>계정 삭제</Button>
+                <span className={"ico-bell cursor-pointer"} onClick={() => setNotificationModalOpen(true)}/>
             </>
         } else if (page === "main") {
             return <Button className={"ms-auto"} size={"md"} onClick={() => navigate("/board/new")}>UPLOAD</Button>
@@ -59,22 +64,27 @@ const UserProfile = ({ page }) => {
     }
 
     return (
-        <Form >
-            <Row>
-                <Col md={3}>
-                    <img src={profile} style={{ width: "150px", height: "140px" }}/>
-                </Col>
-                <Col >
-                    <Stack direction={"horizontal"} gap={3} >
-                        {userLoading || <h4>{user?.data.nickname} ({user?.data.name})</h4>}
-                        {renderButton()}
-                    </Stack>
-                    <Row>
-                        <Col className={"mt-4"}>{user?.data.bio}</Col>
-                    </Row>
-                </Col>
-            </Row>
-        </Form>
+        <>
+            <Form >
+                <Row>
+                    <Col md={3}>
+                        <img src={profile} style={{ width: "150px", height: "140px" }}/>
+                    </Col>
+                    <Col >
+                        <Stack direction={"horizontal"} gap={3} >
+                            {userLoading || <h4>{user?.data.nickname} ({user?.data.name})</h4>}
+                            {renderButton()}
+                        </Stack>
+                        <Row>
+                            <Col className={"mt-4"}>{user?.data.bio}</Col>
+                        </Row>
+                    </Col>
+                </Row>
+            </Form>
+            <NotificationModal isOpen={isNotificationModalOpen}
+                               onHide={() => setNotificationModalOpen(false)}
+            />
+        </>
     )
 }
 

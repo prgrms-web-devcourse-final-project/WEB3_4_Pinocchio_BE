@@ -6,9 +6,12 @@ import MyPageTabLayout from "./MyPageTabLayout";
 import TableBackGroundCard from "../../../shared/TableBackGroundCard";
 import FlexibleTable from "../../../shared/table/FlexibleTable";
 import UserProfile from "../share/UserProfile";
+import {jwtDecode} from "jwt-decode";
 
 const fetchMyPageCommentList = async () => {
-    const response = await axios.get(`/comments/{postId}`);
+    const token = localStorage.getItem('token');
+    const loginUser = jwtDecode(token);
+    const response = await axios.get(`/user/${loginUser.tsid}/activities/comments`);
     return response.data;
 };
 
@@ -27,7 +30,7 @@ const MyPageComment = () => {
             size: 200,
         },
         {
-            accessorKey: "commentId",
+            accessorKey: "id",
             header: "댓글 ID",
             size: 200,
         },

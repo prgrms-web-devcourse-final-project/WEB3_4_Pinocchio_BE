@@ -8,23 +8,25 @@ import FlexibleTable from "../../../shared/table/FlexibleTable";
 import UserProfile from "../share/UserProfile";
 import {Button, Stack} from "react-bootstrap";
 import useConfirm from "../../../hooks/useConfirm";
+import {jwtDecode} from "jwt-decode";
 
-const fetchMyPageBlockList = async (userId) => {
-    const response = await axios.get(`/block/users`);
+const fetchMyPageBlockList = async () => {
+    const response = await axios.get(`/block`);
     return response.data;
 };
 
 
 const MyPageBlock = () => {
-    const userId = 1;
+    const token = localStorage.getItem('token');
+    const loginUser = jwtDecode(token);
     const { isLoading, data, refetch } = useQuery(
         ['fetchMyPageBlockList'],
-        () => fetchMyPageBlockList(userId),
+        () => fetchMyPageBlockList(),
         { keepPreviousData: true, refetchOnWindowFocus: false}
     );
     const { openConfirm } = useConfirm();
     const queryClient = useQueryClient();
-    const deleteMutation = useMutation((userId) => axios.delete(`/block/user/{userId}`), {
+    const deleteMutation = useMutation((userId) => axios.delete(`/block/user/${userId}`), {
         onSuccess: () => {
             console.log('요청 성공');
             queryClient.invalidateQueries('fetchMyPageBlockList')
@@ -39,7 +41,7 @@ const MyPageBlock = () => {
 
     const initColumns = [
         {
-            accessorKey: "blockedUserId",
+            accessorKey: "userId",
             header: "유저 ID",
             cell: ({getValue}) => <Stack direction={"horizontal"} gap={3} >
                 {getValue()}

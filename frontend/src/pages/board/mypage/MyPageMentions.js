@@ -6,18 +6,20 @@ import MyPageTabLayout from "./MyPageTabLayout";
 import TableBackGroundCard from "../../../shared/TableBackGroundCard";
 import FlexibleTable from "../../../shared/table/FlexibleTable";
 import UserProfile from "../share/UserProfile";
+import {jwtDecode} from "jwt-decode";
 
-const fetchMyPageMentionsList = async (userId) => {
-    const response = await axios.get(`/user/{userId}/activities/mentions`);
+const fetchMyPageMentionsList = async () => {
+    const token = localStorage.getItem('token');
+    const loginUser = jwtDecode(token);
+    const response = await axios.get(`/user/${loginUser.tsid}/activites/mentions`);
     return response.data;
 };
 
 
 const MyPageMentions = () => {
-    const userId = 1;
     const { isLoading, data } = useQuery(
         ['fetchMyPageMentionsList'],
-        () => fetchMyPageMentionsList(userId),
+        () => fetchMyPageMentionsList(),
         { keepPreviousData: true, refetchOnWindowFocus: false}
     );
 

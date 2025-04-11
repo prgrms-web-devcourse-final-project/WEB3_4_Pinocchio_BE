@@ -7,28 +7,31 @@ import TableBackGroundCard from "../../../shared/TableBackGroundCard";
 import FlexibleTable from "../../../shared/table/FlexibleTable";
 import UserProfile from "../share/UserProfile";
 import {Col, Row} from "react-bootstrap";
+import {jwtDecode} from "jwt-decode";
 
 const fetchMyPageFollowerList = async (userId) => {
-    const response = await axios.get(`/user/{userId}/follower`);
+    const response = await axios.post(`/user/${userId}/followers`);
     return response.data;
 };
 
 const fetchMyPageFollowingList = async (userId) => {
-    const response = await axios.get(`/user/{userId}/following`);
+    const response = await axios.post(`/user/${userId}/followings`);
+    console.log(response.data)
     return response.data;
 };
 
 const MyPageFollower = () => {
-    const userId = 1;
+    const token = localStorage.getItem('token');
+    const loginUser = jwtDecode(token);
     const { isLoading: follwerLoading, data: followerData } = useQuery(
         ['fetchMyPageFollowerList'],
-        () => fetchMyPageFollowerList(userId),
+        () => fetchMyPageFollowerList(loginUser.tsid),
         { keepPreviousData: true, refetchOnWindowFocus: false}
     );
 
     const { isLoading: followingLoading, data: followingData } = useQuery(
         ['fetchMyPageFollowingList'],
-        () => fetchMyPageFollowingList(userId),
+        () => fetchMyPageFollowingList(loginUser.tsid),
         { keepPreviousData: true, refetchOnWindowFocus: false}
     );
 
@@ -58,7 +61,7 @@ const MyPageFollower = () => {
                             <FlexibleTable initColumns={initFollwerColumns} data={followerData?.followers || []} isLoading={follwerLoading} />
                         </Col>
                         <Col>
-                            <FlexibleTable initColumns={initFollowingColumns} data={followingData?.following || []} isLoading={followingLoading} />
+                            <FlexibleTable initColumns={initFollowingColumns} data={followingData?.followings || []} isLoading={followingLoading} />
                         </Col>
                     </Row>
                 </TableBackGroundCard>

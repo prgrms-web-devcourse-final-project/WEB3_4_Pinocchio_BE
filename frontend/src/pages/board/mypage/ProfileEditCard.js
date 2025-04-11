@@ -5,9 +5,12 @@ import axios from "axios";
 import {useNavigate} from "react-router-dom";
 import {useQuery} from "react-query";
 import Spinner from "../../../shared/Spinner";
+import {jwtDecode} from "jwt-decode";
 
-const fetchUser = async (userId) => {
-    const response = await axios.get(`/user/{userId}`);
+const fetchUser = async () => {
+    const token = localStorage.getItem('token');
+    const loginUser = jwtDecode(token);
+    const response = await axios.get(`/user/${loginUser.id}`);
     return response.data;
 };
 

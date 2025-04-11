@@ -8,6 +8,7 @@ import CreateEditor from "../../shared/quillEditor/CreateEditor";
 import {useNavigate} from "react-router-dom";
 import Spinner from "../../shared/Spinner";
 import {useToast} from "../../hooks/useToast";
+import ProfileImageZone from "./mypage/ImageDropZone";
 
 const NewPost = () => {
     const showToast = useToast();
@@ -17,17 +18,7 @@ const NewPost = () => {
     const [formData, setFormData] = useState({softwareName:'', softwareVersionName:'', expectedReleaseDate:'', prevInspectionHistory:'', description:''});
     // 업로드한 파일
     const [uploadedFileData, setUploadedFileData] = useState([]);
-
-    // 요청 필드 데이터 반환
-    const getRequestField = async () => {
-        const response = await axios.get(`/api/code/list?groupName=REQUEST_FIELD_SETTING`);
-        return response.data;
-    };
-
-    // 파일 업로드
-    const handleUploadComplete = (data) => {
-        setUploadedFileData(data);
-    };
+    const [content, setContent] = useState("");
 
 
     return (
@@ -44,28 +35,19 @@ const NewPost = () => {
                                 <Row className="g-6">
                                     <Col>
                                         <label className="form-label"> 사진 추가 </label>
-                                        <NoMappingFile
-                                            onUploadComplete={handleUploadComplete}
-                                            maxFiles = {20}
-                                        />
+                                        <ProfileImageZone/>
                                     </Col>
                                     <div className="col-12">
                                         <Form.Label>
                                             <small style={{marginLeft: '15px'}}>나의 스토리</small>
                                         </Form.Label>
                                         <div style={{ position: "relative" }}>
-                                            <CreateEditor
-                                                setEditorContent={(editorHtml) => {
-                                                    setFormData((prevData) => ({
-                                                        ...prevData,
-                                                        description: editorHtml,
-                                                    }));
-                                                }}
-                                                minHeight={'200px'}
-                                                height={'100%'}
-                                                maxHeight={'400px'}
-                                                showFooter={false}
-                                                mentionBoxWidth={300}
+                                            <Form.Control
+                                                as="textarea"
+                                                style={{ height: 'unset' }}
+                                                rows={3}
+                                                value={content}
+                                                onChange={(e) => setContent(e.target.value)}
                                             />
                                         </div>
                                     </div>

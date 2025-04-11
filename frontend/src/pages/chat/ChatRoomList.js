@@ -8,7 +8,6 @@ const fetchchatList = async () => {
     const token = localStorage.getItem('token');
     const loginUser = jwtDecode(token);
     const response = await axios.get(`/chat/list`);
-    console.log(response.data);
     return response.data;
 }
 
@@ -19,7 +18,6 @@ const ChatRoomList = ({isOpen, handleCloseClick, openChatRoom}) => {
         { keepPreviousData: true, refetchOnWindowFocus: false}
     );
 
-    console.log('채팅리스트: ', data)
     return (
         isOpen &&
         <Card bg={"light"} style={{
@@ -34,7 +32,7 @@ const ChatRoomList = ({isOpen, handleCloseClick, openChatRoom}) => {
                 </Stack>
             </Card.Header>
             <ListGroup style={{ overflowY: "auto", overflowX: "hidden" }}>
-                {[{id: 1}, {id: 2}, {id: 3}].map(room => {
+                {[{roomId: 1}, {roomId: 2}, {roomId: 3}].map(room => {
                     return <ListGroup.Item action>
                         <Row className={"cursor-pointer"} onClick={() => openChatRoom(room)}>
                             <Col xs={3} ><Image src={sampleProfile} rounded fluid /></Col>

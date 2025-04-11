@@ -27,7 +27,7 @@ const queryClient = new QueryClient({
 axios.interceptors.request.use(config => {
     const token = localStorage.getItem('token');
     if (token) {
-        config.headers.Authorization = `${token}`;
+        config.headers.Authorization = `Bearer ${token}`;
     }
 
     // Content-Type이 없으면 기본적으로 application/json으로 설정

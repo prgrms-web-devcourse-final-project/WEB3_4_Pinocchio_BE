@@ -20,7 +20,7 @@ const ChangePasswordCard = () => {
         }
         const params = {
             currentPassword: oldPassword
-            , newPasswordConfirm: newPassword
+            , newPassword: newPassword
         }
         console.log('parmas: ', params);
         const response = await axios.put("/user/password", params);

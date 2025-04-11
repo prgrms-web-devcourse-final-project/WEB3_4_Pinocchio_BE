@@ -109,24 +109,37 @@ public class PostService {
 
         // 수정 가능한 항목만 업데이트
         post.setContent(request.getContent());  // 본문 수정
-        post.setImageUrls(request.getImageUrls());  // 이미지 수정
         post.setVisibility(Visibility.valueOf(request.getVisibility().toUpperCase()));  // 공개 범위 수정
         post.setUpdatedAt(LocalDateTime.now());  // 수정 시간 갱신
+        // 이미지 수정은 허용하지 않음
 
         postRepository.save(post);  // 수정 내용 저장
     }
 
     // 게시물 삭제
     @Transactional
-    public void deletePost(String postId, String loginTsid) {
+    public void deletePost(String postId, String loginTsid, String action) {
         // 작성자 본인의 게시물인지 확인하고 조회 (status: active)
         Post post = postRepository.findByIdAndTsidAndStatus(postId, loginTsid, "active")
                 .orElseThrow(() -> new IllegalArgumentException("게시물을 찾을 수 없습니다."));
 
-        // 상태만 'deleted'로 변경
-        post.setStatus("deleted");
-        post.setUpdatedAt(LocalDateTime.now());
+        switch (action.toLowerCase()) {
+            case "delete" -> {
+                // 🔸 소프트 삭제 (status = deleted + 비공개 전환)
+                post.setStatus("deleted");
+                post.setVisibility(Visibility.PRIVATE);
+            }
+            case "private" -> {
+                // 🔸 공개 → 비공개 전환만 수행
+                post.setVisibility(Visibility.PRIVATE);
+            }
+            default -> {
+                // 지원하지 않는 action 값인 경우 예외 발생
+                throw new IllegalArgumentException("지원하지 않는 삭제 유형입니다. (delete | private 만 허용)");
+            }
+        }
 
+        post.setUpdatedAt(LocalDateTime.now());
         postRepository.save(post);
     }
 

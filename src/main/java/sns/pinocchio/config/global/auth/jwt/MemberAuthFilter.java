@@ -45,10 +45,11 @@ public class MemberAuthFilter extends OncePerRequestFilter {
 
     final String accessToken = getTokenFromHeader(request, HttpHeaders.AUTHORIZATION);
     final String refreshToken = cookieService.getRefreshTokenFromCookie(request);
+    final String uri = request.getRequestURI();
 
     // 토큰이 없는 경우 바로 다음 필터로 진행
     if (accessToken == null) {
-      log.debug("인증 토큰이 없습니다.");
+        log.warn("🚫 인증 토큰 없음 | URI: {}", uri);
       handleAuthError(response, AuthErrorCode.INVALID_TOKEN);
       return;
     }
@@ -58,22 +59,24 @@ public class MemberAuthFilter extends OncePerRequestFilter {
 
       switch (tokenStatus) {
         case VALID:
+          log.info("✅ 유효한 토큰 | URI: {} | Token(앞 10자리): {}...", uri, accessToken.substring(0, 10));
           setAuthenticationInContext(accessToken);
           break;
 
         case EXPIRED:
-          log.info("만료된 토큰입니다.");
+          log.warn("⚠️ 만료된 토큰 | URI: {} | 재발급 시도", uri);
           String newAccessToken = reissueToken(refreshToken, request, response);
+          log.info("♻️ 토큰 재발급 성공 | URI: {} | NewToken(앞 10자리): {}...", uri, newAccessToken.substring(0, 10));
           setAuthenticationInContext(newAccessToken);
           break;
 
         case MALFORMED, INVALID:
-          log.error("잘못된 형식의 토큰입니다.");
+          log.error("❌ 잘못된 토큰 | URI: {} | Token: {}", uri, accessToken);
           handleAuthError(response, AuthErrorCode.INVALID_TOKEN);
           return;
       }
     } catch (Exception e) {
-      log.error("필터 내부에서 예상치 못한 예외 발생: {}", e.getMessage());
+      log.error("🔥 예외 발생 | URI: {} | 메시지: {}", request.getRequestURI(), e.getMessage());
       handleAuthError(response, AuthErrorCode.AUTHORIZATION_FAILED);
       return;
     }

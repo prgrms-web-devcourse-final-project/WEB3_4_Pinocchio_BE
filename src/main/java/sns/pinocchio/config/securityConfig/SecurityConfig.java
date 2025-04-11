@@ -59,6 +59,8 @@ public class SecurityConfig {
                         "/logo192.png",
                         "/logo512.png")
                     .permitAll()
+                    // 인증 필요한 경로 명시
+                    .requestMatchers("/posts/**").authenticated()
                     .requestMatchers(AntPathRequestMatcher.antMatcher("/login"))
                     .permitAll()
                     .anyRequest()

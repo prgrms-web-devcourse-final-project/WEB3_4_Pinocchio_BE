@@ -24,10 +24,12 @@ public class PostLikeService {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new IllegalArgumentException("게시글을 찾을 수 없습니다."));
 
-        // 2. 본인의 게시글인지 확인하여 좋아요 금지
-        if (post.getTsid().equals(tsid)) {
+        // 2. 본인의 게시글인지 확인하여 좋아요 금지  // 프론트에서 확인할 방법이 없어서 403에러가 떠서 삭제
+       /* if (post.getTsid().equals(tsid)) {
             throw new IllegalArgumentException("자신의 게시글에는 좋아요를 누를 수 없습니다.");
         }
+        */
+
 
         // 3. 기존에 좋아요를 누른 기록이 있는지 확인
         PostLike postLike = postLikeRepository
@@ -54,7 +56,7 @@ public class PostLikeService {
                 postRepository.incrementLikesCount(postId, -1); // 좋아요 수 -1
             } else {
                 postLike.setStatus(CancellState.ACTIVE);     // 다시 좋아요
-                postRepository.incrementLikesCount(postId, -1); // 좋아요 수 -1
+                postRepository.incrementLikesCount(postId, 1); // 좋아요 수 1
             }
             postLike.setUpdatedAt(LocalDateTime.now());    // 변경 시각 업데이트
 

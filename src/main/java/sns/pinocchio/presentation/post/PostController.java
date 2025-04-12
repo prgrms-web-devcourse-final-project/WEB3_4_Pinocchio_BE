@@ -160,7 +160,7 @@ public class PostController {
             @RequestParam(name = "cursor", required = false) String cursor
     ) {
         SearchType searchType = SearchType.from("POSTS");
-        SearchSortType searchSortType = SearchSortType.from(type);
+        SearchSortType searchSortType = SearchSortType.from(sortBy);
 
         return ResponseEntity.ok(
                 postSearchService.searchPosts(userDetails, query, searchType, searchSortType, limit, cursor));

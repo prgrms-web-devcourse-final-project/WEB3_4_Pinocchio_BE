@@ -13,8 +13,11 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import sns.pinocchio.application.post.PostCreateRequest;
 import sns.pinocchio.application.post.PostModifyRequest;
+import sns.pinocchio.application.post.PostSearchService;
 import sns.pinocchio.application.post.PostService;
 import sns.pinocchio.config.global.auth.model.CustomUserDetails;
+import sns.pinocchio.domain.post.SearchSortType;
+import sns.pinocchio.domain.post.SearchType;
 
 import java.io.IOException;
 
@@ -25,6 +28,7 @@ import java.io.IOException;
 public class PostController {
 
     private final PostService postService;
+    private final PostSearchService postSearchService;
 
     @PostMapping(value = "/swagger", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(summary = "게시글 생성 (Swagger 전용)", description = "Swagger에서 테스트용으로 사용되는 엔드포인트입니다.")
@@ -138,4 +142,27 @@ public class PostController {
         return ResponseEntity.ok(postService.getPostDetail(postId, tsid));
     }
 
+    @Operation(
+            summary = "게시글 검색",
+            description = "검색어에 해당하는 게시글을 검색합니다."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "게시글 검색 성공"),
+            @ApiResponse(responseCode = "401", description = "인증 실패"),
+    })
+    @GetMapping("/search")
+    public ResponseEntity<?> searchPosts(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @RequestParam(name = "query", required = false) String query,
+            @RequestParam(name = "type", required = false, defaultValue = "all") String type,
+            @RequestParam(name = "limit", required = false, defaultValue = "9") int limit,
+            @RequestParam(name = "sortBy", required = false, defaultValue = "latest") String sortBy,
+            @RequestParam(name = "cursor", required = false) String cursor
+    ) {
+        SearchType searchType = SearchType.from("POSTS");
+        SearchSortType searchSortType = SearchSortType.from(type);
+
+        return ResponseEntity.ok(
+                postSearchService.searchPosts(userDetails, query, searchType, searchSortType, limit, cursor));
+    }
 }

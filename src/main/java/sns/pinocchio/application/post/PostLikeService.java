@@ -46,12 +46,15 @@ public class PostLikeService {
                     .build();
 
             postLikeRepository.save(newLike);              // MongoDB에 저장
+            postRepository.incrementLikesCount(postId, 1);   // 좋아요 수 +1
         } else {
             // 5. 기존 기록이 있다면 상태 토글
             if (postLike.getStatus() == CancellState.ACTIVE) {
                 postLike.setStatus(CancellState.CANCELLED);  // 취소
+                postRepository.incrementLikesCount(postId, -1); // 좋아요 수 -1
             } else {
                 postLike.setStatus(CancellState.ACTIVE);     // 다시 좋아요
+                postRepository.incrementLikesCount(postId, -1); // 좋아요 수 -1
             }
             postLike.setUpdatedAt(LocalDateTime.now());    // 변경 시각 업데이트
 

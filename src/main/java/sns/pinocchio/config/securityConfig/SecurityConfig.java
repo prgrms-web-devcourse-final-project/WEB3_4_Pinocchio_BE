@@ -43,6 +43,7 @@ public class SecurityConfig {
                         "/webjars/**")
                     .permitAll()
                   // === [ 인증 불필요 API ] ===
+                    .requestMatchers("/login", "/login/**").permitAll()
                     .requestMatchers(
                         "/auth/signup",
                         "/auth/login",
@@ -61,7 +62,20 @@ public class SecurityConfig {
                         "/asset-manifest.json",
                         "/manifest.json",
                         "/logo192.png",
-                        "/logo512.png")
+                        "/logo512.png",
+
+                            //  React SPA 라우터 경로도 허용
+
+                            "/signup",
+                            "/mypage",
+                            "/main",
+                            "/board/**",
+                            "/**/*.js",
+                            "/**/*.css",
+                            "/**/*.png",
+                            "/**/*.svg"
+
+                            )
                     .permitAll()
                         // === [ 인증 필요한 API ] ===
                     .requestMatchers("/user/**").authenticated()

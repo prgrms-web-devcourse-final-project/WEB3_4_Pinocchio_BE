@@ -45,7 +45,8 @@ const Login = () => {
         try {
             setIsLoading(true);
             const response = await axios.post('/auth/login', sendData);
-            const authHeader = response.headers.get("Authorization");
+            const authHeader = response.headers["authorization"];
+            //const authHeader = response.headers.get("Authorization");
             if (authHeader && authHeader.startsWith("Bearer ")) {
                 const token = authHeader.substring(7);
                 localStorage.setItem("token", token);

@@ -51,7 +51,7 @@ const Login = () => {
                 const token = authHeader.substring(7);
                 localStorage.setItem("token", token);
             }
-            navigate('/board/list')
+            navigate('/post/list')
         } catch (error) {
             console.log("error login api: ", error);
             openConfirm({

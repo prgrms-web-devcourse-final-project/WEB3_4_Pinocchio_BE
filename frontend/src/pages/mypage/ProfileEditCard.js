@@ -4,7 +4,7 @@ import {useEffect, useState} from "react";
 import axios from "axios";
 import {useNavigate} from "react-router-dom";
 import {useQuery} from "react-query";
-import Spinner from "../../../shared/Spinner";
+import Spinner from "../../shared/Spinner";
 import {jwtDecode} from "jwt-decode";
 
 const fetchUser = async () => {
@@ -31,7 +31,6 @@ const ProfileEditCard = () => {
 
     useEffect(() => {
         if (data) {
-            console.log(data)
             const user = data.data;
             setEmail(user.email);
             setNickname(user.nickname);
@@ -53,8 +52,7 @@ const ProfileEditCard = () => {
         }
         console.log('params: ', parmas)
         const response = await axios.put("/user", parmas);
-        navigate("/board/mypage/like");
-        console.log(response);
+        navigate("/mypage/like");
     }
     return (
         <Card className="p-5">
@@ -121,7 +119,7 @@ const ProfileEditCard = () => {
                             size={"md"} onClick={handleClickSubmit}>
                         수정
                     </Button>
-                    <Button variant={'secondary'} size={"md"} onClick={() => navigate("/board/mypage/like")}>
+                    <Button variant={'secondary'} size={"md"} onClick={() => navigate("/mypage/like")}>
 
                     취소
                     </Button>

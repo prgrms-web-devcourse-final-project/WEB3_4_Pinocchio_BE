@@ -1,5 +1,5 @@
 import {useLocation, useNavigate} from "react-router-dom";
-import TabLayout from "../../../shared/TabLayout";
+import TabLayout from "../../shared/TabLayout";
 
 const tabMenu = [
     { key: "like", title: "좋아요 목록" }

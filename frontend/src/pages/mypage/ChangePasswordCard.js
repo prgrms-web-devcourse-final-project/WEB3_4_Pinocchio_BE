@@ -2,8 +2,8 @@ import {Button, Card, Col, Form, Row, Stack} from "react-bootstrap";
 import {useState} from "react";
 import axios from "axios";
 import {useNavigate} from "react-router-dom";
-import {isEmptyOrNull} from "../../../utils/utils";
-import useConfirm from "../../../hooks/useConfirm";
+import {isEmptyOrNull} from "../../utils/utils";
+import useConfirm from "../../hooks/useConfirm";
 
 const ChangePasswordCard = () => {
     const [oldPassword, setOldPassword] = useState("");
@@ -22,10 +22,9 @@ const ChangePasswordCard = () => {
             currentPassword: oldPassword
             , newPassword: newPassword
         }
-        console.log('parmas: ', params);
         const response = await axios.put("/user/password", params);
         console.log(response);
-        navigate("/board/mypage/like");
+        navigate("/mypage/like");
     }
 
     return (
@@ -61,7 +60,7 @@ const ChangePasswordCard = () => {
                             size={"md"} onClick={handleClickSubmit}>
                         수정
                     </Button>
-                    <Button variant={'secondary'} size={"md"} onClick={() => navigate("/board/mypage/like")}>
+                    <Button variant={'secondary'} size={"md"} onClick={() => navigate("/mypage/like")}>
                         취소
                     </Button>
                 </Stack>

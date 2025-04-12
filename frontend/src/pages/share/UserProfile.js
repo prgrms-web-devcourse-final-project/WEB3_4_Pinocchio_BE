@@ -1,9 +1,9 @@
 import {useMutation, useQuery} from "react-query";
 import axios from "axios";
-import useConfirm from "../../../hooks/useConfirm";
+import useConfirm from "../../hooks/useConfirm";
 import {useNavigate} from "react-router-dom";
 import {Button, Col, Form, Row, Stack} from "react-bootstrap";
-import profile from "../../../assets/images/sample_profile.png";
+import profile from "../../assets/images/sample_profile.png";
 import {jwtDecode} from "jwt-decode";
 import {useState} from "react";
 import NotificationModal from "./NotificationModal";
@@ -54,12 +54,12 @@ const UserProfile = ({ page }) => {
     const renderButton = () => {
         if (page === "mypage") {
             return <>
-                <Button className={"ms-auto"} size={"md"} onClick={() => navigate("/board/mypage/modify")}>수정</Button>
+                <Button className={"ms-auto"} size={"md"} onClick={() => navigate("/mypage/modify")}>수정</Button>
                 <Button size={"md"} onClick={handleDeleteUser}>계정 삭제</Button>
                 <span className={"ico-bell cursor-pointer"} onClick={() => setNotificationModalOpen(true)}/>
             </>
         } else if (page === "main") {
-            return <Button className={"ms-auto"} size={"md"} onClick={() => navigate("/board/new")}>UPLOAD</Button>
+            return <Button className={"ms-auto"} size={"md"} onClick={() => navigate("/post/new")}>UPLOAD</Button>
         }
     }
 

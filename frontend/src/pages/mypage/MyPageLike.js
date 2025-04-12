@@ -1,25 +1,24 @@
+import SearchCardBox from "../../shared/SearchCardBox";
+import PageLayout from "../../layout/page/PageLayout";
 import {useQuery} from "react-query";
 import axios from "axios";
-import PageLayout from "../../../layout/page/PageLayout";
-import SearchCardBox from "../../../shared/SearchCardBox";
+import FlexibleTable from "../../shared/table/FlexibleTable";
+import TableBackGroundCard from "../../shared/TableBackGroundCard";
 import MyPageTabLayout from "./MyPageTabLayout";
-import TableBackGroundCard from "../../../shared/TableBackGroundCard";
-import FlexibleTable from "../../../shared/table/FlexibleTable";
 import UserProfile from "../share/UserProfile";
 import {jwtDecode} from "jwt-decode";
 
-const fetchMyPageCommentList = async () => {
+const fetchMyPageLikeList = async () => {
     const token = localStorage.getItem('token');
     const loginUser = jwtDecode(token);
-    const response = await axios.get(`/user/${loginUser.tsid}/activities/comments`);
+    const response = await axios.get(`/user/${loginUser.tsid}/activities/likes`);
     return response.data;
 };
 
-
-const MyPageComment = () => {
+const MyPageLike = () => {
     const { isLoading, data } = useQuery(
-        ['fetchMyPageCommentList'],
-        () => fetchMyPageCommentList(),
+        ['fetchMyPageLikeList'],
+        () => fetchMyPageLikeList(),
         { keepPreviousData: true, refetchOnWindowFocus: false}
     );
 
@@ -27,11 +26,6 @@ const MyPageComment = () => {
         {
             accessorKey: "postId",
             header: "게시물 ID",
-            size: 200,
-        },
-        {
-            accessorKey: "id",
-            header: "댓글 ID",
             size: 200,
         },
         {
@@ -46,13 +40,13 @@ const MyPageComment = () => {
             <SearchCardBox>
                 <UserProfile page={"mypage"}/>
             </SearchCardBox>
-            <MyPageTabLayout currentTabKey={"comment"} >
+            <MyPageTabLayout currentTabKey={"like"} >
                 <TableBackGroundCard>
-                    <FlexibleTable initColumns={initColumns} data={data?.comments || []} isLoading={isLoading} />
+                    <FlexibleTable initColumns={initColumns} data={data?.likes || []} isLoading={isLoading} />
                 </TableBackGroundCard>
             </MyPageTabLayout>
         </PageLayout>
     )
 }
 
-export default MyPageComment;
+export default MyPageLike;

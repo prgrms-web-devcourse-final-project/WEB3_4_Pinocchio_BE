@@ -1,10 +1,10 @@
 import {useQuery} from "react-query";
 import axios from "axios";
-import PageLayout from "../../../layout/page/PageLayout";
-import SearchCardBox from "../../../shared/SearchCardBox";
+import PageLayout from "../../layout/page/PageLayout";
+import SearchCardBox from "../../shared/SearchCardBox";
 import MyPageTabLayout from "./MyPageTabLayout";
-import TableBackGroundCard from "../../../shared/TableBackGroundCard";
-import FlexibleTable from "../../../shared/table/FlexibleTable";
+import TableBackGroundCard from "../../shared/TableBackGroundCard";
+import FlexibleTable from "../../shared/table/FlexibleTable";
 import UserProfile from "../share/UserProfile";
 import {Col, Row} from "react-bootstrap";
 import {jwtDecode} from "jwt-decode";
@@ -16,7 +16,6 @@ const fetchMyPageFollowerList = async (userId) => {
 
 const fetchMyPageFollowingList = async (userId) => {
     const response = await axios.post(`/user/${userId}/followings`);
-    console.log(response.data)
     return response.data;
 };
 

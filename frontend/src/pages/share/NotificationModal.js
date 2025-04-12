@@ -2,7 +2,7 @@ import {Button, Form, Modal, Stack} from "react-bootstrap";
 import {useMutation, useQuery} from "react-query";
 
 import axios from "axios";
-import useConfirm from "../../../hooks/useConfirm";
+import useConfirm from "../../hooks/useConfirm";
 
 const fetchNotification = async () => {
     const response = await axios.get(`/notifications/settings`);

@@ -1,10 +1,10 @@
 import {useQuery} from "react-query";
 import axios from "axios";
-import PageLayout from "../../../layout/page/PageLayout";
-import SearchCardBox from "../../../shared/SearchCardBox";
+import PageLayout from "../../layout/page/PageLayout";
+import SearchCardBox from "../../shared/SearchCardBox";
 import MyPageTabLayout from "./MyPageTabLayout";
-import TableBackGroundCard from "../../../shared/TableBackGroundCard";
-import FlexibleTable from "../../../shared/table/FlexibleTable";
+import TableBackGroundCard from "../../shared/TableBackGroundCard";
+import FlexibleTable from "../../shared/table/FlexibleTable";
 import UserProfile from "../share/UserProfile";
 import {jwtDecode} from "jwt-decode";
 

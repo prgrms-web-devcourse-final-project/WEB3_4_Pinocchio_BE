@@ -1,11 +1,11 @@
 import logo from "../../assets/images/pinocchio.png"
 import {Link, useLocation, useNavigate} from "react-router-dom";
 import useConfirm from "../../hooks/useConfirm";
-import BoardSearch from "../../pages/board/share/BoardSearch";
 import {Button} from "react-bootstrap";
 import axios from "axios";
 import {useEffect, useState} from "react";
 import Spinner from "../../shared/Spinner";
+import BoardSearch from "../../pages/share/BoardSearch";
 
 
 const Header = () => {
@@ -36,13 +36,13 @@ const Header = () => {
             <div className="kw-inner">
                 <div className="kw-header-gnb">
                     <div className="kw-header-gnb-brand">
-                        <Link to={"/board/list"}>
+                        <Link to={"/post/list"}>
                             <img src={logo} style={{ width: "120px" }} alt="pinocchio"/>
                         </Link>
                     </div>
                     <BoardSearch type={'notice'} />
                     <Button size={"md"} onClick={handleLogoutClick}>LOGOUT</Button>
-                    {!pathname.includes("/board/mypage") && <Button size={"md"} onClick={() => navigate("/board/mypage/like")}>MYPAGE</Button>}
+                    {!pathname.includes("/board/mypage") && <Button size={"md"} onClick={() => navigate("/mypage/like")}>MYPAGE</Button>}
                 </div>
             </div>
             <Spinner show={isLoading}/>

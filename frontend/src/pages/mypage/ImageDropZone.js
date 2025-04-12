@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react';
-import profileImage from "../../../assets/images/sample_profile.png"
+import profileImage from "../../assets/images/sample_profile.png"
 import {Button} from "react-bootstrap";
 import axios from "axios";
 
@@ -18,24 +18,25 @@ function ProfileImageZone() {
         const imageUrl = URL.createObjectURL(file);
         setPreviewUrl(imageUrl);
 
-        const formData = new FormData()
         const jsonData = {
-            "content": "오늘 날씨가 너무 좋아요 @동생이랑 갔다옴! #여행 #제주도",
-            "visibility": "public",
-            "hashtags": ["#여행", "#제주도"],
-            "mentions": ["동생"]
+            "name": "홍길동",
+            "nickname": "gildong",
+            "bio": "안녕하세요!",
+            "website": "https://example.com",
+            "profileImageUrl": null,
+            "isActive": true
         }
         // json 데이터 삽입
+        const formData = new FormData();
         formData.append("request", new Blob([JSON.stringify(jsonData)], {
             type: "application/json",
         }));
         // file 데이터 삽입
         formData.append("image", file);
         // 여기서 file은 서버 업로드용으로 저장해둘 수 있음
-        console.log('선택한 파일:', file);
 
-        // POST 요청
-        axios.post("/api/posts", formData, {
+        // 수정 요청
+        axios.put("/api/profile", formData, {
             headers: {
                 "Content-Type": "multipart/form-data",
             },

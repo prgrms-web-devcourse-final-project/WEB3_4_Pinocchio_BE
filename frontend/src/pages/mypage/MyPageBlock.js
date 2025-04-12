@@ -1,13 +1,13 @@
 import {useMutation, useQuery, useQueryClient} from "react-query";
 import axios from "axios";
-import PageLayout from "../../../layout/page/PageLayout";
-import SearchCardBox from "../../../shared/SearchCardBox";
+import PageLayout from "../../layout/page/PageLayout";
+import SearchCardBox from "../../shared/SearchCardBox";
 import MyPageTabLayout from "./MyPageTabLayout";
-import TableBackGroundCard from "../../../shared/TableBackGroundCard";
-import FlexibleTable from "../../../shared/table/FlexibleTable";
+import TableBackGroundCard from "../../shared/TableBackGroundCard";
+import FlexibleTable from "../../shared/table/FlexibleTable";
 import UserProfile from "../share/UserProfile";
 import {Button, Stack} from "react-bootstrap";
-import useConfirm from "../../../hooks/useConfirm";
+import useConfirm from "../../hooks/useConfirm";
 import {jwtDecode} from "jwt-decode";
 
 const fetchMyPageBlockList = async () => {
@@ -28,7 +28,6 @@ const MyPageBlock = () => {
     const queryClient = useQueryClient();
     const deleteMutation = useMutation((userId) => axios.delete(`/block/user/${userId}`), {
         onSuccess: () => {
-            console.log('요청 성공');
             queryClient.invalidateQueries('fetchMyPageBlockList')
         }
         , onError: (error) => {

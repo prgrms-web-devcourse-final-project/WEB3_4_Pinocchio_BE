@@ -95,7 +95,6 @@ const ChatPopup = ({ room, onClose }) => {
                 <Card.Footer>
                     <Form onSubmit={(e) => {
                         e.preventDefault();
-                        console.log('newMessage: ', newMessage)
                     }}>
                         <Stack direction={"horizontal"} gap={2} className={"m-2"}>
                             <Form.Control style={{ height: "30px" }}

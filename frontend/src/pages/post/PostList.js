@@ -1,28 +1,26 @@
 import PageLayout from "../../layout/page/PageLayout";
 import {Button, Row} from "react-bootstrap";
-import BoardPost from "./BoardPost";
+import PostProfile from "./PostProfile";
 import SearchCardBox from "../../shared/SearchCardBox";
 import {useNavigate} from "react-router-dom";
-import UserProfile from "./share/UserProfile";
+import UserProfile from "../share/UserProfile";
 import {useInfiniteQuery} from "react-query";
 import axios from "axios";
 import {buildQuery} from "../../utils/utils";
+import {useEffect, useState} from "react";
 
 const fetchBoardList = async (pageParam) => {
     const params = { cursor: pageParam.pageParam };
-    console.log('pageParam: ', pageParam, pageParam.pageParam)
-
-    const response = await axios.get(`/search${buildQuery(params)}`);
-    return response.data.data.users;
+    const response = await axios.get(`/posts/search${buildQuery(params)}`);
+    return response.data;
 }
 
-const MainBoardList = () => {
+const PostList = () => {
     const navigate = useNavigate();
     const { data, fetchNextPage, hasNextPage } = useInfiniteQuery({
         queryKey: ['boardList'],
         queryFn: fetchBoardList,
         getNextPageParam: (lastData, allData) => {
-            console.log('lastData: ', lastData)
             if (lastData?.hasNext) {
                 console.log('nextCursor: ', lastData.nextCursor)
 
@@ -32,31 +30,33 @@ const MainBoardList = () => {
             }
         },
     });
+    const [postList, setPostList] = useState([]);
 
-    console.log("데이터", data)
+    useEffect(() => {
+        if (data) {
+            const postList = [];
+            data?.pages.map((page) => {
+                page.posts.map((post) => {
+                    postList.push(post);
+                })
+            })
+            console.log(postList);
+            setPostList(postList);
+        }
+    }, [data])
 
     return (
         <PageLayout>
             <SearchCardBox>
                 <UserProfile page={"main"}/>
-                {/*<Button onClick={() => fetchNextPage()}>TEST</Button>*/}
+                <Button onClick={() => fetchNextPage()}>TEST</Button>
             </SearchCardBox>
             <Row className="mb-4">
-                {data?.pages.map((page) => {
-                    page.map((user) => {
-                        console.log(user);
-                    })
-                })}
-            </Row>
-            <Row className="mb-4">
-                <BoardPost/>
-                <BoardPost/>
-                <BoardPost/>
+                {postList.map((post) => (<PostProfile post={post} /> ))}
             </Row>
         </PageLayout>
-
     )
 
 }
 
-export default MainBoardList;
+export default PostList;

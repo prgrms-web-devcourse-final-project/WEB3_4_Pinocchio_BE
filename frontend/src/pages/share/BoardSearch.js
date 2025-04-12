@@ -1,8 +1,7 @@
 import { Button, Form } from "react-bootstrap";
 import React, { useState, useEffect } from 'react';
-import { useQueryParam } from "../../../hooks/QueryParam";
 import { useNavigate } from "react-router-dom";
-import { jwtDecode } from "jwt-decode";
+import {useQueryParam} from "../../hooks/QueryParam";
 
 const BoardSearch = ({ refetch, type }) => {
     const navigate = useNavigate();

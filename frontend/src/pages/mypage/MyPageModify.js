@@ -1,4 +1,4 @@
-import PageLayout from "../../../layout/page/PageLayout";
+import PageLayout from "../../layout/page/PageLayout";
 import ProfileEditCard from "./ProfileEditCard";
 import ChangePasswordCard from "./ChangePasswordCard";
 

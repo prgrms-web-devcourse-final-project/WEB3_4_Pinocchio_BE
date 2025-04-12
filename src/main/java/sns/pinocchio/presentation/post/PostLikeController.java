@@ -21,26 +21,24 @@ public class PostLikeController {
     private final PostLikeService postLikeService;
 
     @Operation(
-            summary = "게시글 좋아요 토글",
-            description = "게시글에 좋아요 또는 좋아요 취소를 합니다.",
-            security = @SecurityRequirement(name = "bearerAuth") // Swagger용 인증 표시
+            summary = "게시글 좋아요 누르기", // ✅ 설명 변경
+            description = "게시글에 좋아요를 누릅니다. 누를 때마다 좋아요 수가 1씩 증가합니다.", // ✅ 무한 누적 좋아요 설명으로 변경
+            security = @SecurityRequirement(name = "bearerAuth")
     )
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "성공적으로 토글 처리됨"),
+            @ApiResponse(responseCode = "200", description = "성공적으로 좋아요가 처리됨"), // ✅ 응답 메시지도 변경
             @ApiResponse(responseCode = "400", description = "잘못된 요청 형식"),
             @ApiResponse(responseCode = "401", description = "인증 실패"),
-            @ApiResponse(responseCode = "403", description = "자기 자신의 게시글에는 좋아요 불가"),
             @ApiResponse(responseCode = "404", description = "게시글이 존재하지 않음"),
             @ApiResponse(responseCode = "500", description = "서버 내부 오류")
     })
-    @PostMapping("/{postId}/toggle")
-    public ResponseEntity<String> toggleLike(
-            @PathVariable String postId,
-            @AuthenticationPrincipal CustomUserDetails userDetails
+    @PostMapping("/{postId}")
+    public ResponseEntity<String> like( // ✅ toggleLike → like 이름 변경
+                                        @PathVariable String postId,
+                                        @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
-        String tsid = userDetails.getTsid(); // 인증된 사용자 TSID 추출
-        postLikeService.toggleLike(postId, tsid);
-        return ResponseEntity.ok("좋아요 상태가 변경되었습니다.");
+        String tsid = userDetails.getTsid();
+        postLikeService.like(postId, tsid); // ✅ 새로운 like() 호출
+        return ResponseEntity.ok("좋아요가 추가되었습니다."); // ✅ 응답 메시지도 변경
     }
-
 }

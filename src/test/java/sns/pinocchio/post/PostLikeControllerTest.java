@@ -27,13 +27,13 @@ public class PostLikeControllerTest {
     private PostLikeService postLikeService;
 
     @Test
-    @DisplayName("좋아요 토글 - 성공")
-    void toggleLike_success() throws Exception {
+    @DisplayName("좋아요 추가 - 성공")
+    void like_success() throws Exception {
         // given
         String postId = "66028c8f2f5d661f0cd933ef";
-        String accessToken = "Bearer mockTsid"; // 현재는 mock 처리
+        String accessToken = "Bearer mockTsid";
 
-        doNothing().when(postLikeService).toggleLike(postId, "mockTsid");
+        doNothing().when(postLikeService).like(postId, "mockTsid");
 
         // when & then
         mockMvc.perform(post("/posts/like/{postId}", postId)
@@ -41,9 +41,9 @@ public class PostLikeControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                 )
                 .andExpect(status().isOk())
-                .andExpect(content().string("좋아요 상태가 변경되었습니다."));
+                .andExpect(content().string("좋아요가 추가되었습니다."));
 
         // verify
-        verify(postLikeService).toggleLike(postId, "mockTsid");
+        verify(postLikeService).like(postId, "mockTsid");
     }
 }

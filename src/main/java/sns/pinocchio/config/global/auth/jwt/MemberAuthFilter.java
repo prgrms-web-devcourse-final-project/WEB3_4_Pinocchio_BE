@@ -93,8 +93,7 @@ public class MemberAuthFilter extends OncePerRequestFilter {
 
       boolean shouldSkip =
               // === [ 인증 예외 API ] ===
-              (method.equals("GET") && path.equals("/posts/search"))
-                      || (method.equals("GET") && path.startsWith("/actuator/health"))
+                      (method.equals("GET") && path.startsWith("/actuator/health"))
                       || (method.equals("POST") && path.startsWith("/auth"))
                       || (method.equals("POST") && path.startsWith("/user/password/reset"))
 

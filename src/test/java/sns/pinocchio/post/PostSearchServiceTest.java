@@ -15,6 +15,7 @@ import sns.pinocchio.application.post.PostSearchResponse.SearchPosts;
 import sns.pinocchio.application.post.PostSearchResponse.SearchPostsDetail;
 import sns.pinocchio.application.post.PostSearchService;
 import sns.pinocchio.config.global.auth.model.CustomUserDetails;
+import sns.pinocchio.domain.member.Member;
 import sns.pinocchio.domain.post.Post;
 import sns.pinocchio.domain.post.SearchSortType;
 import sns.pinocchio.domain.post.SearchType;
@@ -33,6 +34,10 @@ public class PostSearchServiceTest {
   private Post mockPost2;
 
   private Post mockPost3;
+
+  private Member mockMember1;
+
+  private Member mockMember2;
 
   @BeforeEach
   void setUp() {
@@ -63,6 +68,10 @@ public class PostSearchServiceTest {
             .likes(3)
             .commentsCount(3)
             .build();
+
+    mockMember1 = Member.builder().nickname("mockNickname1").build();
+
+    mockMember2 = Member.builder().nickname("mockNickname2").build();
   }
 
   @Test
@@ -71,10 +80,10 @@ public class PostSearchServiceTest {
 
     // given
     String query = "제주도";
-    SearchType searchType = SearchType.HASHTAGS;
+    SearchType searchType = SearchType.POSTS;
     SearchSortType sortType = SearchSortType.LATEST;
     int limit = 2;
-    String cursor = null;
+    LocalDateTime cursor = null;
     CustomUserDetails mockUserDeatils = mock(CustomUserDetails.class);
 
     List<Post> mockPosts = List.of(mockPost1, mockPost2);
@@ -82,10 +91,12 @@ public class PostSearchServiceTest {
     when(postSearchRepository.searchPostByQueryWithCursor(
             query, searchType, sortType, limit + 1, cursor))
         .thenReturn(mockPosts);
+    when(mockUserDeatils.getMember()).thenReturn(mockMember1);
 
     // when
     SearchPosts result =
-        postSearchService.searchPosts(mockUserDeatils, query, searchType, sortType, limit, cursor);
+        postSearchService.searchPosts(
+            mockUserDeatils, query, searchType.toString(), sortType.toString(), limit, null);
 
     // then
     assertThat(result.getPosts()).hasSize(2);
@@ -113,7 +124,7 @@ public class PostSearchServiceTest {
     SearchType searchType = SearchType.POSTS;
     SearchSortType sortType = SearchSortType.LATEST;
     int limit = 2;
-    String cursor = null;
+    LocalDateTime cursor = null;
     CustomUserDetails mockUserDeatils = mock(CustomUserDetails.class);
 
     List<Post> mockPosts = List.of(mockPost1, mockPost2, mockPost3);
@@ -121,10 +132,12 @@ public class PostSearchServiceTest {
     when(postSearchRepository.searchPostByQueryWithCursor(
             query, searchType, sortType, limit + 1, cursor))
         .thenReturn(mockPosts);
+    when(mockUserDeatils.getMember()).thenReturn(mockMember1);
 
     // when
     SearchPosts result =
-        postSearchService.searchPosts(mockUserDeatils, query, searchType, sortType, limit, cursor);
+        postSearchService.searchPosts(
+            mockUserDeatils, query, searchType.toString(), sortType.toString(), limit, null);
 
     // then
     assertThat(result.getPosts()).hasSize(2);

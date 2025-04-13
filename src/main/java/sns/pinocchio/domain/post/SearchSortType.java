@@ -2,7 +2,6 @@ package sns.pinocchio.domain.post;
 
 public enum SearchSortType {
   LATEST,
-  POPULAR,
   RANDOM;
 
   /** String으로 받은 정렬 방식을 Enum으로 변경 */

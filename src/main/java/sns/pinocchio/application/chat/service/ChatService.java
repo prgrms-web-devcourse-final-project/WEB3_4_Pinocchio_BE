@@ -69,6 +69,15 @@ public class ChatService {
       throw new ChatBadRequestException("입력값이 유효하지 않습니다.");
     }
 
+    // 수신자가 회원이 아닐 경우, 404에러 반환
+    try {
+      memberService.findByTsid(sendMessage.receiverId());
+
+    } catch (MemberException e) {
+      log.error("Receiver User {} not found: {}", sendMessage.receiverId(), e.getMessage());
+      throw new ChatNotFoundException("수신자의 회원 정보를 찾을 수 없습니다.");
+    }
+
     // sender와 receiver가 속한 RoomId를 조회 (존재하지 않으면, 새로 생성)
     ChatRoom chatRoom =
         chatRoomRepository

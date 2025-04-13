@@ -54,4 +54,6 @@ public class PostDetailResponse {
 
     //  MongoDB: 게시물 마지막 수정 시간
     private LocalDateTime updatedAt;
+
+    private boolean liked; //  내가 좋아요 눌렀는지 여부
 }

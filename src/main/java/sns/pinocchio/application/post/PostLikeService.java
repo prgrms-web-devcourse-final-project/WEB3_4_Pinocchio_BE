@@ -19,6 +19,7 @@ public class PostLikeService {
     private final PostRepository postRepository;
 
     //  기존 toggleLike() 제거, 매번 좋아요 +1 누적하는 구조로 변경
+    //  좋아요 누르기 (매번 새로운 PostLike 생성)
     public void like(String postId, String tsid) {
         // 1. 게시글이 존재하는지 확인
         Post post = postRepository.findById(postId)
@@ -34,7 +35,13 @@ public class PostLikeService {
                 .updatedAt(LocalDateTime.now()) // 현재 시각
                 .build();
 
-        postLikeRepository.save(newLike);           // ✅ 매번 저장 → 기록 계속 쌓임
-        postRepository.incrementLikesCount(postId, 1); // ✅ 매번 +1
+        postLikeRepository.save(newLike);           //  매번 저장 → 기록 계속 쌓임
+        postRepository.incrementLikesCount(postId, 1); //  매번 +1
     }
+
+    //  게시글에 대해 사용자가 좋아요를 눌렀는지 여부 확인
+    public boolean hasUserLiked(String postId, String tsid) {
+        return postLikeRepository.existsByPostIdAndTsid(postId, tsid);
+    }
+
 }

@@ -12,6 +12,7 @@ import sns.pinocchio.domain.member.Member;
 import sns.pinocchio.domain.post.Hashtag;
 import sns.pinocchio.domain.post.Post;
 import sns.pinocchio.domain.post.Visibility;
+import sns.pinocchio.infrastructure.persistence.mongodb.PostLikeRepository;
 import sns.pinocchio.infrastructure.persistence.mongodb.PostRepository;
 import sns.pinocchio.infrastructure.persistence.mysql.HashtagRepository;
 import sns.pinocchio.presentation.post.exception.PostErrorCode;
@@ -29,6 +30,7 @@ import java.util.regex.Pattern;
 public class PostService {
 
     private final PostRepository postRepository;
+    private final PostLikeRepository postLikeRepository;
     private final HashtagRepository hashtagRepository;
     private final MemberService memberService;
     private final ApplicationEventPublisher publisher;
@@ -174,10 +176,13 @@ public class PostService {
         post.setViews(post.getViews() + 1);
         postRepository.save(post);
 
-        // 4. 작성자 정보 (MySQL에서 조회)
+        // 4. 현재 사용자가 이 게시글에 좋아요 했는지 확인
+        boolean liked = postLikeRepository.existsByPostIdAndTsid(post.getId(), loginTsid);
+
+        // 5. 작성자 정보 (MySQL에서 조회)
         Member member = memberService.findByTsid(post.getTsid()); //  TSID 기반 조회
 
-        // 5. DTO로 응답
+        // 6. DTO로 응답
         return PostDetailResponse.builder()
                 .postId(post.getId())
                 .tsid(post.getTsid())
@@ -194,6 +199,7 @@ public class PostService {
                 .status(post.getStatus())
                 .createdAt(post.getCreatedAt())
                 .updatedAt(post.getUpdatedAt())
+                .liked(liked) //  좋아요 여부 응답에 포함
                 .build();
     }
 

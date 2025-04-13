@@ -23,7 +23,7 @@ public class PostCreateRequest {
     @Schema(description = "해시태그 리스트 (예: [\"#여행\", \"#제주도\"])")
     private List<String> hashtags;
 
-    @Schema(description = "멘션된 사용자 ID 리스트")
+    @Schema(description = "멘션된 리스트")
     private List<String> mentions;
 
     @Schema(description = "공개 여부: public | private")

@@ -87,10 +87,6 @@ public class CommentController {
 		@RequestBody CommentLikeRequest request) {
 		Member authorMember = userDetails.getMember();
 
-		if (commentService.isMyComment(authorMember.getTsid(), commentId)) {
-			throw new CommentException(CommentErrorCode.UNAUTHORIZED_COMMENT_ACCESS);
-		}
-
 		if (commentService.isInvalidComment(commentId, request.getPostId())) {
 			throw new CommentException(COMMENT_NOT_FOUND);
 		}

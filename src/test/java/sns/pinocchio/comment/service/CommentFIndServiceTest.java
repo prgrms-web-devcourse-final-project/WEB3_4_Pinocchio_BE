@@ -9,6 +9,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+
+import sns.pinocchio.application.comment.CommentLikeService;
 import sns.pinocchio.application.comment.CommentService;
 import sns.pinocchio.config.global.enums.CancellState;
 import sns.pinocchio.domain.comment.Comment;
@@ -28,6 +30,9 @@ public class CommentFIndServiceTest {
 
 	@Mock
 	private CommentRepository commentRepository;
+
+	@Mock
+	private CommentLikeService commentLikeService;
 	
 	//댓글 조회 테스트 게시글에서 조회했는데 댓글이 하나도 안달린 상황
 	@Test
@@ -35,8 +40,8 @@ public class CommentFIndServiceTest {
 		// Given
 		String postId = "post_001";
 		when(commentRepository.findAllByPostIdAndStatus(postId, CancellState.ACTIVE)).thenReturn(List.of());
-
-		Map<String, Object> response = commentService.findCommentsByPost(postId);
+		when(commentLikeService.isLiked(anyString(),anyString())).thenReturn(true);
+		Map<String, Object> response = commentService.findCommentsByPost(postId,"");
 		List<Comment> commentList = (List<Comment>)response.get("comments");
 		assertEquals("댓글요청에 성공하였습니다.", response.get("message"));
 		assertEquals(0, commentList.size());
@@ -56,8 +61,8 @@ public class CommentFIndServiceTest {
 
 		when(commentRepository.findAllByPostIdAndStatus(postId, CancellState.ACTIVE)).thenReturn(
 			List.of(comment, comment, comment));
-
-		Map<String, Object> response = commentService.findCommentsByPost(postId);
+		when(commentLikeService.isLiked(anyString(),anyString())).thenReturn(true);
+		Map<String, Object> response = commentService.findCommentsByPost(postId,"");
 		List<Comment> commentList = (List<Comment>)response.get("comments");
 		assertEquals("댓글요청에 성공하였습니다.", response.get("message"));
 		assertEquals(3, commentList.size());

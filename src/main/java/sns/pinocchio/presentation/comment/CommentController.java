@@ -5,10 +5,12 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+
 import sns.pinocchio.application.comment.CommentService;
 import sns.pinocchio.application.comment.commentDto.CommentCreateRequest;
 import sns.pinocchio.application.comment.commentDto.CommentDeleteRequest;
@@ -110,8 +112,8 @@ public class CommentController {
 		}
 
 		if (commentService.isInvalidComment(request.getCommentId(), request.getPostId())) {
-            throw new CommentException(CommentErrorCode.COMMENT_NOT_FOUND);
-        }
+			throw new CommentException(CommentErrorCode.COMMENT_NOT_FOUND);
+		}
 
 		Map<String, Object> response = commentService.deleteComment(request);
 		return ResponseEntity.status(HttpStatus.OK).body(response);
@@ -122,13 +124,14 @@ public class CommentController {
 		@ApiResponse(responseCode = "404", description = "댓글 조회 실패")
 	})
 	@GetMapping("/{postId}")
-	public ResponseEntity<Map<String, Object>> findComment(@PathVariable String postId) {
+	public ResponseEntity<Map<String, Object>> findComment(@AuthenticationPrincipal CustomUserDetails userDetails,
+		@PathVariable String postId) {
 		Optional<Post> optPost = postRepository.findByIdAndStatus(postId, "active");
 
 		if (optPost.isEmpty()) {
 			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("message", "등록된 게시글을 찾을 수 없습니다."));
 		}
-		Map<String, Object> response = commentService.findCommentsByPost(postId);
+		Map<String, Object> response = commentService.findCommentsByPost(postId, userDetails.getTsid());
 		return ResponseEntity.status(HttpStatus.OK).body(response);
 	}
 }

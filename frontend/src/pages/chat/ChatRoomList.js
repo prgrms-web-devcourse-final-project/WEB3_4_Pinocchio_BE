@@ -14,7 +14,8 @@ const fetchchatList = async () => {
 const ChatRoomList = ({isOpen, handleCloseClick, openChatRoom}) => {
     const { isLoading, data } = useQuery(
         ['fetchchatList'],
-        () => fetchchatList(),
+        // () => fetchchatList(),
+        () => {},
         { keepPreviousData: true, refetchOnWindowFocus: false}
     );
 

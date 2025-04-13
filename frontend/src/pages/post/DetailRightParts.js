@@ -34,7 +34,7 @@ const DetailRightParts = ({ post }) => {
         }
     });
 
-    const commentLikeMutation = useMutation(({postId, commentId}) => axios.post(`/comments/${commentId}`, {postId}), {
+    const commentLikeMutation = useMutation(({postId, commentId}) => axios.post(`/comments/${commentId}/like`, {postId}), {
         onSuccess: (param) => {
             refetch()
         }

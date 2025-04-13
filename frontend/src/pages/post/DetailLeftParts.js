@@ -5,10 +5,14 @@ import {useState} from "react";
 import {useMutation} from "react-query";
 import axios from "axios";
 import {useNavigate} from "react-router-dom";
+import {jwtDecode} from "jwt-decode";
+import useConfirm from "../../hooks/useConfirm";
 
 const DetailLeftParts = ({ post, postRefetch }) => {
+    const token = localStorage.getItem('token');
+    const loginUser = jwtDecode(token);
     const [isPostLike, setPostLike] = useState(false);
-    const {openConfirm} = useState();
+    const {openConfirm} = useConfirm();
     const navigate = useNavigate();
     const likeMutation = useMutation((postId) => axios.post(`/posts/like/${postId}/toggle`), {
         onSuccess: (param) => {
@@ -23,9 +27,33 @@ const DetailLeftParts = ({ post, postRefetch }) => {
         }
     });
 
+    const deleteMutation = useMutation((postId) => axios.delete(`/posts/delete/${postId}`), {
+        onSuccess: (param) => {
+            console.log(param);
+            openConfirm({
+                title: '게시글이 삭제되었습니다.',
+                callback: () => navigate('/post/list'),
+                showCancelButton: false
+            })
+        }
+        , onError: (error) => {
+            openConfirm({
+                title: '처리 중 오류가 발생했습니다.',
+                html: error.response?.data?.message || "에러: 관리자에게 문의바랍니다."
+            });
+        }
+    });
+
     const handlePostLikeClick = () => {
         setPostLike(prev => !prev);
         likeMutation.mutate(post.postId);
+    }
+
+    const handlePostDeleteClick = () => {
+        openConfirm({
+            title: '게시물을 삭제하시겠습니까?',
+            callback: () => deleteMutation.mutate(post.postId)
+        })
     }
 
     return (
@@ -37,10 +65,11 @@ const DetailLeftParts = ({ post, postRefetch }) => {
                     </Col>
                     <Col md={6} >
                         {post?.tsid}
-                        <Stack direction={"horizontal"} gap={4}>
-                            <Button size={"sm"}>수정</Button>
-                            <Button size={"sm"}>삭제</Button>
-                        </Stack>
+                        {post?.tsid === loginUser.tsid ? <Stack direction={"horizontal"} gap={4}>
+                            <Button size={"sm"}
+                                    onClick={() => navigate('/post/modify', {state: post})}>수정</Button>
+                            <Button size={"sm"} onClick={handlePostDeleteClick}>삭제</Button>
+                        </Stack> : null}
                     </Col>
                     <Col md={4}>
                         {dateFormat(post?.createdAt, "yyyy-MM-dd")}

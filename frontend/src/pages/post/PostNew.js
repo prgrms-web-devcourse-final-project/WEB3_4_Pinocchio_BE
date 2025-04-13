@@ -4,11 +4,11 @@ import {Button, Card, Col, Form, Row, Stack} from "react-bootstrap";
 import {useNavigate} from "react-router-dom";
 import axios from "axios";
 
-const NewPost = () => {
+const PostNew = () => {
     const fileInputRef = useRef(null);
     const [previewUrl, setPreviewUrl] = useState("");
     const [selectedFile, setSelectedFile] = useState(null);
-    const [postVisibility, setPostVisivility] = useState(false);
+    const [postInvisibility, setPostInvisivility] = useState(false);
     const handleButtonClick = () => {
         fileInputRef.current.click();
     };
@@ -28,16 +28,13 @@ const NewPost = () => {
         const matches = content.match(/([#@][\w가-힣_]+)/g) || [];
 
         const hashtags = matches.filter(tag => tag.startsWith("#"));
-        const mentions = matches.filter(tag => tag.startsWith("@"));
+        const mentions = matches.filter(tag => tag.startsWith("@")).map(tag => tag.substring(1)); // @ 제거;
 
-        console.log("해시태그:", hashtags); // ['#바다', '#여행']
-        console.log("멘션:", mentions); // ['@friend', '@you_too']
         const jsonData = {
             "content": content,
-            "imageUrls": [""],
-            "hashtags": ["#테스트!!"],
-            "mentions": ["testUser"],
-            "visibility": postVisibility ? "private" : "public"
+            "hashtags": hashtags,
+            "mentions": mentions,
+            "visibility": postInvisibility ? "private" : "public"
         }
         // json 데이터 삽입
         const formData = new FormData();
@@ -111,8 +108,8 @@ const NewPost = () => {
                                         className={"p-2"}
                                         type="switch"
                                         label={<span style={{ marginLeft: '8px' }}>게시글 숨기기 여부</span>}
-                                        checked={postVisibility}
-                                        onChange={() => setPostVisivility(prev => !prev)}
+                                        checked={postInvisibility}
+                                        onChange={() => setPostInvisivility(prev => !prev)}
                                     />
                                     <div className="ms-auto kw-button p-3">
                                         <Button variant={'secondary'} onClick={() => navigate(-1)}>
@@ -132,4 +129,4 @@ const NewPost = () => {
     );
 }
 
-export default NewPost;
+export default PostNew;

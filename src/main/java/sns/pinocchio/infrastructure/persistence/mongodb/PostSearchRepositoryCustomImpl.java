@@ -1,5 +1,6 @@
 package sns.pinocchio.infrastructure.persistence.mongodb;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -29,7 +30,7 @@ public class PostSearchRepositoryCustomImpl implements PostSearchRepositoryCusto
       SearchType searchType,
       SearchSortType searchSortType,
       int limit,
-      String cursor) {
+      LocalDateTime cursor) {
 
     List<Criteria> conditions = new ArrayList<>();
 
@@ -52,12 +53,7 @@ public class PostSearchRepositoryCustomImpl implements PostSearchRepositoryCusto
 
     // RANDOM이 아닌 경우 커서 조건 추가
     if (cursor != null && searchSortType != SearchSortType.RANDOM) {
-      if (searchSortType == SearchSortType.LATEST) {
-        conditions.add(Criteria.where("createdAt").lt(cursor));
-
-      } else if (searchSortType == SearchSortType.POPULAR) {
-        conditions.add(Criteria.where("likes").lt(Integer.parseInt(cursor)));
-      }
+      conditions.add(Criteria.where("createdAt").lt(cursor));
     }
 
     Criteria combinedCriteria = new Criteria().andOperator(conditions.toArray(new Criteria[0]));
@@ -75,14 +71,44 @@ public class PostSearchRepositoryCustomImpl implements PostSearchRepositoryCusto
     Query q = new Query(combinedCriteria);
 
     // 정렬 필드 지정
-    switch (searchSortType) {
-      case LATEST -> q.with(Sort.by(Sort.Direction.DESC, "createdAt"));
-      case POPULAR -> q.with(Sort.by(Sort.Direction.DESC, "likes"));
-      default -> q.with(Sort.by(Sort.Direction.DESC, "createdAt"));
-    }
+    q.with(Sort.by(Sort.Direction.DESC, "createdAt"));
 
     // 제한 개수 설정
     q.limit(limit);
+
+    return mongoTemplate.find(q, Post.class, "posts");
+  }
+
+  @Override
+  public List<Post> searchPostsByUserTsidWithCursor(
+      String userTsid,
+      SearchType searchType,
+      SearchSortType searchSortType,
+      int limit,
+      LocalDateTime cursor) {
+
+    List<Criteria> criteriaList = new ArrayList<>();
+
+    // 비공개 제외
+    criteriaList.add(Criteria.where("visibility").ne(Visibility.PRIVATE));
+    // 삭제 제외
+    criteriaList.add(Criteria.where("status").ne("deleted"));
+    // 작성자 tsid 조건
+    criteriaList.add(Criteria.where("tsid").is(userTsid));
+
+    // 커서 조건 추가
+    if (cursor != null) {
+      criteriaList.add(Criteria.where("createdAt").lt(cursor));
+    }
+
+    Criteria criteria = new Criteria().andOperator(criteriaList.toArray(new Criteria[0]));
+
+    Query q =
+        new Query(criteria)
+            // 정렬 필드 지정
+            .with(Sort.by(Sort.Direction.DESC, "createdAt"))
+            // 제한 개수 설정
+            .limit(limit);
 
     return mongoTemplate.find(q, Post.class, "posts");
   }

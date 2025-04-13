@@ -69,9 +69,9 @@ public class SecurityConfig {
                     .requestMatchers("/posts/like/**").authenticated()
                     .requestMatchers("/comments/**").authenticated()
                     .requestMatchers("/block/**").authenticated()
-                    //.requestMatchers("/chat/**").authenticated()  // TODO: JWT 적용 후 해제
-                    //.requestMatchers("/search").authenticated()  // TODO: JWT 적용 후 해제
-                    //.requestMatchers("/notifications/settings").authenticated()  // TODO: JWT 적용 후 해제
+                    .requestMatchers("/chat/**").authenticated()
+                    .requestMatchers("/search").authenticated()
+                    .requestMatchers("/notifications/settings").authenticated()
                   // === [ 모든 나머지 요청 인증 ] ===
                     .anyRequest()
                     .authenticated())

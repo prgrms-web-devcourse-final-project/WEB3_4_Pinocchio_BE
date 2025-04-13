@@ -94,17 +94,23 @@ public class CommentService {
 
 	//댓글 좋아요 업데이트 메서드, 댓글_좋아요 테이블에 등록 이후 댓글 좋아요 카운트 증가 or 댓글_좋아요 테이블에 삭제 이후 댓글 좋아요 카운트 감소
 	public Map<String, Object> toggleCommentLike(CommentLikeRequest request, String commentId, String authorId) {
+		Map<String, Object> response = new HashMap<>();
 		Comment comment = commentRepository.findByIdAndPostIdAndStatus(commentId, request.getPostId(),
 				CancellState.ACTIVE)
 			.orElseThrow(() -> new CommentException(COMMENT_NOT_FOUND));
-
+		if (this.isMyComment(authorId, commentId)) {
+			response.put("message", "자신의 댓글엔 좋아요가 불가능합니다.");
+			response.put("userId", authorId);
+			response.put("liked", false);
+			response.put("likes", comment.getLikes());
+			return response;
+		}
 		Optional<String> optCommentLikeId = commentLikeService.toggleCommentLike(commentId, authorId);
 		boolean isLiked = optCommentLikeId.isPresent();
 
 		int updatedLikes = comment.updateLikes(isLiked);
 		commentRepository.save(comment);
 
-		Map<String, Object> response = new HashMap<>();
 		if (isLiked) {
 			response.put("message", "좋아요 요청에 성공했습니다.");
 

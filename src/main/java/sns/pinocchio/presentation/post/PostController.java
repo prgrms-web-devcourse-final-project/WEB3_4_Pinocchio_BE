@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import java.io.IOException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -16,10 +17,6 @@ import sns.pinocchio.application.post.PostModifyRequest;
 import sns.pinocchio.application.post.PostSearchService;
 import sns.pinocchio.application.post.PostService;
 import sns.pinocchio.config.global.auth.model.CustomUserDetails;
-import sns.pinocchio.domain.post.SearchSortType;
-import sns.pinocchio.domain.post.SearchType;
-
-import java.io.IOException;
 
 @Tag(name = "게시글", description = "게시글 관련 API")
 @RestController
@@ -148,21 +145,20 @@ public class PostController {
     )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "게시글 검색 성공"),
-            @ApiResponse(responseCode = "401", description = "인증 실패"),
+            @ApiResponse(responseCode = "400", description = "커서의 날짜 형식이 올바르지 않을 경우"),
+            @ApiResponse(responseCode = "403", description = "게시글 검색에 대한 권한이 없을 경우"),
+            @ApiResponse(responseCode = "404", description = "검색할 유저 정보를 찾을 수 없을 경우"),
     })
     @GetMapping("/search")
     public ResponseEntity<?> searchPosts(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @RequestParam(name = "query", required = false) String query,
-            @RequestParam(name = "type", required = false, defaultValue = "all") String type,
+            @RequestParam(name = "type", required = false, defaultValue = "posts") String type,
             @RequestParam(name = "limit", required = false, defaultValue = "9") int limit,
             @RequestParam(name = "sortBy", required = false, defaultValue = "latest") String sortBy,
             @RequestParam(name = "cursor", required = false) String cursor
     ) {
-        SearchType searchType = SearchType.from("POSTS");
-        SearchSortType searchSortType = SearchSortType.from(sortBy);
-
         return ResponseEntity.ok(
-                postSearchService.searchPosts(userDetails, query, searchType, searchSortType, limit, cursor));
+                postSearchService.searchPosts(userDetails, query, type, sortBy, limit, cursor));
     }
 }

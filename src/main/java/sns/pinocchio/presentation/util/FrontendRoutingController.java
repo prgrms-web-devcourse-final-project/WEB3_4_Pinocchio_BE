@@ -18,6 +18,6 @@ public class FrontendRoutingController {
             "/notice/**"
     })
     public String forwardToIndex() {
-        return "forward:/index.html"; // public/index.html로 요청 전달
+        return "forward:/index.html"; // public/index.html로 요청 전달  //도커 푸시 다시
     }
 }

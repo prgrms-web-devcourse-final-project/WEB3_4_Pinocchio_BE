@@ -39,4 +39,3 @@ out/
 ### Custom ###
 /src/main/generated/
 .env
-.env

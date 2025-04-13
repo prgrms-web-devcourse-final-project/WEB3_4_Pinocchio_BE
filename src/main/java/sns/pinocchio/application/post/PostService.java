@@ -12,6 +12,7 @@ import sns.pinocchio.domain.member.Member;
 import sns.pinocchio.domain.post.Hashtag;
 import sns.pinocchio.domain.post.Post;
 import sns.pinocchio.domain.post.Visibility;
+import sns.pinocchio.infrastructure.persistence.mongodb.PostLikeRepository;
 import sns.pinocchio.infrastructure.persistence.mongodb.PostRepository;
 import sns.pinocchio.infrastructure.persistence.mysql.HashtagRepository;
 import sns.pinocchio.presentation.post.exception.PostErrorCode;
@@ -19,13 +20,17 @@ import sns.pinocchio.presentation.post.exception.PostException;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Service
 @RequiredArgsConstructor
 public class PostService {
 
     private final PostRepository postRepository;
+    private final PostLikeRepository postLikeRepository;
     private final HashtagRepository hashtagRepository;
     private final MemberService memberService;
     private final ApplicationEventPublisher publisher;
@@ -43,6 +48,16 @@ public class PostService {
         return createPost(request, tsid);
     }
 
+    // 멘션 추출
+    private List<String> extractMentions(String content) {
+        List<String> mentions = new ArrayList<>();
+        Pattern pattern = Pattern.compile("@(\\S+)");
+        Matcher matcher = pattern.matcher(content);
+        while (matcher.find()) {
+            mentions.add(matcher.group(1)); // 예: "동생이랑"
+        }
+        return mentions;
+    }
 
     // 게시물 생성
     public String createPost(PostCreateRequest request, String tsid) {
@@ -52,6 +67,8 @@ public class PostService {
         if (imageUrls == null || imageUrls.size() != 1) {
             throw new IllegalArgumentException("이미지는 정확히 1장만 등록해야 합니다.");
         }
+
+        request.setMentions(extractMentions(request.getContent()));
 
         Post post = Post.builder()
                 .tsid(tsid)  // 작성자 TSID (JWT에서 추출한 고유 식별자)
@@ -159,10 +176,13 @@ public class PostService {
         post.setViews(post.getViews() + 1);
         postRepository.save(post);
 
-        // 4. 작성자 정보 (MySQL에서 조회)
+        // 4. 현재 사용자가 이 게시글에 좋아요 했는지 확인
+        boolean liked = postLikeRepository.existsByPostIdAndTsid(post.getId(), loginTsid);
+
+        // 5. 작성자 정보 (MySQL에서 조회)
         Member member = memberService.findByTsid(post.getTsid()); //  TSID 기반 조회
 
-        // 5. DTO로 응답
+        // 6. DTO로 응답
         return PostDetailResponse.builder()
                 .postId(post.getId())
                 .tsid(post.getTsid())
@@ -179,6 +199,7 @@ public class PostService {
                 .status(post.getStatus())
                 .createdAt(post.getCreatedAt())
                 .updatedAt(post.getUpdatedAt())
+                .liked(liked) //  좋아요 여부 응답에 포함
                 .build();
     }
 

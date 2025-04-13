@@ -31,10 +31,10 @@ public class CommentLikeService {
 			commentLikeId = commentLikeRepository.save(commentLike).getId();
 		} else {
 			CommentLike commentLike = optCommentLike.get();
-			boolean isActivity =  commentLike.toggleCommentLike();
-			if(isActivity){
+			boolean isActivity = commentLike.toggleCommentLike();
+			if (isActivity) {
 				commentLikeId = commentLikeRepository.save(commentLike).getId();
-			} else{
+			} else {
 				commentLikeRepository.save(commentLike);
 			}
 		}
@@ -50,5 +50,11 @@ public class CommentLikeService {
 	public Map<String, Object> findLikesByUsers(String likeId) {
 		return Map.of("CommentLikeList",
 			commentLikeRepository.findAllByUserIdAndStatus(likeId, CancellState.ACTIVE));
+	}
+
+	public boolean isLiked(String commentId, String authorId) {
+		Optional<CommentLike> optCommentLike = commentLikeRepository.findByUserIdAndCommentIdAndStatus(authorId,
+			commentId, CancellState.ACTIVE);
+		return optCommentLike.isPresent();
 	}
 }

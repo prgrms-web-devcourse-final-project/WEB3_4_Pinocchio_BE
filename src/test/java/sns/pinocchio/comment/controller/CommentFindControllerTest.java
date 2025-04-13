@@ -1,6 +1,7 @@
 package sns.pinocchio.comment.controller;
 
 import jakarta.transaction.Transactional;
+
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -12,6 +13,7 @@ import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
+
 import sns.pinocchio.application.comment.CommentService;
 import sns.pinocchio.domain.comment.Comment;
 import sns.pinocchio.domain.fixtures.TestFixture;
@@ -24,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -81,11 +84,11 @@ public class CommentFindControllerTest {
 
 		Map<String, Object> response = Map.of("message", "댓글요청에 성공하였습니다.", "comments", List.of());
 
-		when(commentService.findCommentsByPost(postId)).thenReturn(response);
+		when(commentService.findCommentsByPost(anyString(), anyString())).thenReturn(response);
 		when(postRepository.findByIdAndStatus(postId, "active")).thenReturn(Optional.of(Post.builder().build()));
 
 		mockMvc.perform(get("/comments/" + postId).contentType(MediaType.APPLICATION_JSON)
-				.header("Authorization", accessToken))
+				.header("Authorization", accessToken).header("Authorization", accessToken))
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.message").value("댓글요청에 성공하였습니다."))
 			.andExpect(jsonPath("$.comments").isEmpty())
@@ -105,11 +108,11 @@ public class CommentFindControllerTest {
 		Map<String, Object> response = Map.of("message", "댓글요청에 성공하였습니다.", "comments",
 			List.of(comment, comment, comment));
 
-		when(commentService.findCommentsByPost(postId)).thenReturn(response);
+		when(commentService.findCommentsByPost(anyString(),anyString())).thenReturn(response);
 		when(postRepository.findByIdAndStatus(postId, "active")).thenReturn(Optional.of(Post.builder().build()));
 
 		mockMvc.perform(get("/comments/" + postId).contentType(MediaType.APPLICATION_JSON)
-				.header("Authorization", accessToken))
+				.header("Authorization", accessToken).header("Authorization", accessToken))
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.message").value("댓글요청에 성공하였습니다."))
 			.andExpect(jsonPath("$.comments.length()").value(3))

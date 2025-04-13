@@ -1,14 +1,23 @@
 package sns.pinocchio.domain.member;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static sns.pinocchio.domain.report.ReportedType.POST;
+
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.servlet.http.Cookie;
 import jakarta.transaction.Transactional;
+import java.nio.charset.StandardCharsets;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
@@ -18,13 +27,6 @@ import sns.pinocchio.domain.fixtures.TestFixture;
 import sns.pinocchio.domain.report.Report;
 import sns.pinocchio.infrastructure.member.MemberRepository;
 import sns.pinocchio.presentation.member.exception.MemberException;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static sns.pinocchio.domain.report.ReportedType.POST;
 
 @Tag("integration")
 @SpringBootTest
@@ -77,12 +79,25 @@ public class MemberControllerTest {
     String updateRequestDto =
         TestFixture.updateProfileRequestJson("abc", "lol", "hello", "abc@youtube", "null", false);
 
+    MockMultipartFile requestPart =
+        new MockMultipartFile(
+            "request", "", "application/json", updateRequestDto.getBytes(StandardCharsets.UTF_8));
+
+    MockMultipartFile imagePart =
+        new MockMultipartFile("image", "", "application/octet-stream", new byte[0]);
+
     ResultActions getProfileResponse =
         mockMvc.perform(
-            put("/user")
+            multipart("/user/profile")
+                .file(requestPart)
+                .file(imagePart)
+                .with(
+                    request -> {
+                      request.setMethod("PUT");
+                      return request;
+                    })
                 .header("Authorization", accessToken)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(updateRequestDto));
+                .contentType(MediaType.MULTIPART_FORM_DATA));
 
     getProfileResponse.andExpect(status().isOk());
 

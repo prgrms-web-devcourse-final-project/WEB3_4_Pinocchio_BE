@@ -1,5 +1,6 @@
 package sns.pinocchio.config.S3img;
 
+import lombok.extern.slf4j.Slf4j;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
@@ -13,6 +14,7 @@ import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import java.io.IOException;
 import java.util.UUID;
 
+@Slf4j
 @Profile("!test")
 @Component
 @RequiredArgsConstructor
@@ -37,6 +39,11 @@ public class S3Uploader {
                         .build(),
                 RequestBody.fromBytes(file.getBytes()));
 
-        return "https://" + bucket + ".s3.ap-northeast-2.amazonaws.com/" + fileName;
+        String fileUrl = "https://" + bucket + ".s3.ap-northeast-2.amazonaws.com/" + fileName;
+
+        log.info("✅ S3 업로드 성공 - 파일명: {}, URL: {}", file.getOriginalFilename(), fileUrl);
+
+        return fileUrl;
+
     }
 }

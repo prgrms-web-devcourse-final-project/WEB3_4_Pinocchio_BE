@@ -7,7 +7,7 @@ import useConfirm from "../../hooks/useConfirm";
 const PasswordResetModal = ({isOpen, onHide}) => {
     const [email, setEmail] = useState('');
     const {openConfirm} = useConfirm();
-    const mutation = useMutation((sendData) => axios.post('/api/user/password/reset', sendData), {
+    const mutation = useMutation((sendData) => axios.post('/user/password/reset', sendData), {
         onSuccess: (response) => {
             openConfirm({
                 title: response.message
@@ -31,7 +31,7 @@ const PasswordResetModal = ({isOpen, onHide}) => {
                centered
                backdrop="static" // 백그라운드 클릭 시 닫히지 않도록
                scrollable>
-            <Modal.Header onHide={onHide}>등록한 이메일 주소</Modal.Header>
+            <Modal.Header closeButton onHide={onHide}>등록한 이메일 주소</Modal.Header>
             <Modal.Body>
                 <Form onSubmit={e => e.preventDefault()}>
                     <Form.Label className="text-secondary">가입 시 등록했던 이메일 주소를 입력해주세요.</Form.Label>

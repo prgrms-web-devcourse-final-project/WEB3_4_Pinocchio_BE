@@ -9,8 +9,9 @@ import sns.pinocchio.config.global.enums.CancellState;
 import sns.pinocchio.domain.comment.CommentLike;
 
 public interface CommentLikeRepository extends MongoRepository<CommentLike, String> {
-	Optional<CommentLike> findByUserIdAndCommentId(String userId, String postId);
+	Optional<CommentLike> findByUserIdAndCommentId(String userId, String commentId);
 	List<CommentLike> findAllByUserIdAndStatus(String userId, CancellState status);
-	void deleteByCommentId(String commentId);
+	Optional<CommentLike> findByUserIdAndCommentIdAndStatus(String userId, String commentId,CancellState status);
 
+	void deleteByCommentId(String commentId);
 }

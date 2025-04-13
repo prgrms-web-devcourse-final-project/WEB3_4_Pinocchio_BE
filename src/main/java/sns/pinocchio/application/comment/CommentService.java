@@ -9,13 +9,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
+
 import lombok.RequiredArgsConstructor;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+
 import sns.pinocchio.application.comment.commentDto.CommentCreateRequest;
 import sns.pinocchio.application.comment.commentDto.CommentDeleteRequest;
+import sns.pinocchio.application.comment.commentDto.CommentGetResponse;
 import sns.pinocchio.application.comment.commentDto.CommentLikeRequest;
 import sns.pinocchio.application.comment.commentDto.CommentModifyRequest;
 import sns.pinocchio.config.global.enums.CancellState;
@@ -94,17 +99,23 @@ public class CommentService {
 
 	//댓글 좋아요 업데이트 메서드, 댓글_좋아요 테이블에 등록 이후 댓글 좋아요 카운트 증가 or 댓글_좋아요 테이블에 삭제 이후 댓글 좋아요 카운트 감소
 	public Map<String, Object> toggleCommentLike(CommentLikeRequest request, String commentId, String authorId) {
+		Map<String, Object> response = new HashMap<>();
 		Comment comment = commentRepository.findByIdAndPostIdAndStatus(commentId, request.getPostId(),
 				CancellState.ACTIVE)
 			.orElseThrow(() -> new CommentException(COMMENT_NOT_FOUND));
-
+		if (this.isMyComment(authorId, commentId)) {
+			response.put("message", "자신의 댓글엔 좋아요가 불가능합니다.");
+			response.put("userId", authorId);
+			response.put("liked", false);
+			response.put("likes", comment.getLikes());
+			return response;
+		}
 		Optional<String> optCommentLikeId = commentLikeService.toggleCommentLike(commentId, authorId);
 		boolean isLiked = optCommentLikeId.isPresent();
 
 		int updatedLikes = comment.updateLikes(isLiked);
 		commentRepository.save(comment);
 
-		Map<String, Object> response = new HashMap<>();
 		if (isLiked) {
 			response.put("message", "좋아요 요청에 성공했습니다.");
 
@@ -119,9 +130,24 @@ public class CommentService {
 	}
 
 	//게시글로 댓글 가져오기
-	public Map<String, Object> findCommentsByPost(String postId) {
+	public Map<String, Object> findCommentsByPost(String postId,String authorId) {
 		List<Comment> commentList = commentRepository.findAllByPostIdAndStatus(postId, CancellState.ACTIVE);
-		return Map.of("message", "댓글요청에 성공하였습니다.", "comments", commentList);
+		List<CommentGetResponse> commentGetList = commentList.stream().map(comment -> {
+			boolean isLiked = commentLikeService.isLiked(comment.getId(),authorId);
+			return CommentGetResponse.builder()
+				.commentId(comment.getId())
+				.userId(comment.getUserId())
+				.postId(comment.getPostId())
+				.content(comment.getContent())
+				.parentCommentId(comment.getParentCommentId())
+				.likes(comment.getLikes())
+				.createdAt(comment.getCreatedAt())
+				.updatedAt(comment.getUpdatedAt())
+				.state(comment.getStatus())
+				.liked(isLiked)
+				.build();
+		}).toList();
+		return Map.of("message", "댓글요청에 성공하였습니다.", "comments", commentGetList);
 	}
 
 	//유저로 댓글 가져오기

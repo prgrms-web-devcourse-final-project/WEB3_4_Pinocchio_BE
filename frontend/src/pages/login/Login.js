@@ -45,8 +45,13 @@ const Login = () => {
         try {
             setIsLoading(true);
             const response = await axios.post('/auth/login', sendData);
-            // localStorage.setItem("token", response.data);
-            navigate('/board/list')
+            const authHeader = response.headers["authorization"];
+            //const authHeader = response.headers.get("Authorization");
+            if (authHeader && authHeader.startsWith("Bearer ")) {
+                const token = authHeader.substring(7);
+                localStorage.setItem("token", token);
+            }
+            navigate('/post/list')
         } catch (error) {
             console.log("error login api: ", error);
             openConfirm({
@@ -57,10 +62,6 @@ const Login = () => {
         finally {
             setIsLoading(false);
         }
-    }
-
-    const handlePasswordResetClick = () => {
-
     }
 
     // 엔터 키를 눌렀을 때 로그인 버튼 클릭 동작을 위한 훅

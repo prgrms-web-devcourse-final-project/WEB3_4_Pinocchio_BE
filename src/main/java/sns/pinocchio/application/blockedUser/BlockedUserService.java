@@ -52,12 +52,12 @@ public class BlockedUserService {
   public List<BlockedUserResponse.UserData> getBlockedUsers(Long blockerId) {
     List<BlockedUser> blockedUsers = blockedUserRepository.findByBlockerUserId(blockerId);
 
-    if (blockedUsers.isEmpty()) {
-      throw new BlockException(BlockErrorCode.BLOCK_NOT_FOUND);
-    }
-
     List<Long> blockedUserIds =
         blockedUsers.stream().map(BlockedUser::getBlockedUserId).collect(Collectors.toList());
+
+    if (blockedUserIds.isEmpty()) {
+      throw new BlockException(BlockErrorCode.BLOCK_NOT_FOUND);
+    }
 
     List<Member> blockedMembers = memberRepository.findAllById(blockedUserIds);
 

@@ -4,6 +4,7 @@ import {useMutation, useQuery} from "react-query";
 import useConfirm from "../../hooks/useConfirm";
 import {useEffect, useState} from "react";
 import {dateFormat} from "../../utils/utils";
+import {jwtDecode} from "jwt-decode";
 
 const fetchPostComments = async (postId) => {
     const response = await axios.get(`/comments/${postId}`);
@@ -11,6 +12,8 @@ const fetchPostComments = async (postId) => {
 }
 
 const DetailRightParts = ({ post }) => {
+    const token = localStorage.getItem('token');
+    const loginUser = jwtDecode(token);
     const {openConfirm} = useConfirm();
     const [newComment, setNewComment] = useState('');
     const [editComment, setEditComment] = useState('');
@@ -141,23 +144,24 @@ const DetailRightParts = ({ post }) => {
                     <strong>댓글</strong>
                     <div className="kw-view-comment m-0">
                         {comments ? comments.map((comment) => {
-                            return <div className="kw-view-comment-item">
+                            return <div key={comment.createdAt} className="kw-view-comment-item">
                                 <Stack gap={2} direction={"horizontal"}>
                                     {comment.isEditorMode ?
                                         <Form.Control style={{ height: "30px", width: "80%" }}
                                                       type="text" value={editComment}
                                                       onChange={(e) => setEditComment(e.target.value)}
                                         /> : <div>{comment.content}</div>}
-                                    <div className="ms-auto d-inline-flex gap-2">
-                                                    <span className="text-gray-200 cursor-pointer"
-                                                          onClick={() => handleEditCommentClick(comment)}>
-                                                        {comment.isEditorMode ? "저장" : "수정"}
-                                                    </span>
+                                    {loginUser.tsid === comment.userId &&
+                                        <div className="ms-auto d-inline-flex gap-2">
+                                        <span className="text-gray-200 cursor-pointer"
+                                              onClick={() => handleEditCommentClick(comment)}>
+                                            {comment.isEditorMode ? "저장" : "수정"}
+                                        </span>
                                         <span className="text-gray-200 cursor-pointer"
                                               onClick={() => handleDeleteCommentClick(comment)}>
                                             삭제
                                         </span>
-                                    </div>
+                                    </div>}
                                 </Stack>
                                 <Stack gap={2} direction={"horizontal"}>
                                     <span className={`ico-like-${comment.isLike ? 'fill' : 'empty'} cursor-pointer`}
@@ -175,15 +179,15 @@ const DetailRightParts = ({ post }) => {
                 </div>
                 <Form onSubmit={(e) => {
                     e.preventDefault();
-                    console.log('newMessage: ', newComment)
                     const createData = {
                         postId: post.postId,
                         content: newComment,
                         parentCommentId: null
                     }
-                    axios.post(`/comments`, createData).then(() => {
+                    axios.post(`/comments`, createData).then((response) => {
                         setNewComment('');
                         refetch();
+                        console.log(response.data)
                     });
                 }}>
                     <Stack direction={"horizontal"} gap={2} className={"m-2"}>

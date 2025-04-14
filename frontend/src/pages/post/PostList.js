@@ -49,7 +49,7 @@ const PostList = () => {
         <PageLayout>
             <SearchCardBox>
                 <UserProfile page={"main"}/>
-                <Button onClick={() => fetchNextPage()}>TEST</Button>
+                {/*<Button onClick={() => fetchNextPage()}>TEST</Button>*/}
             </SearchCardBox>
             <Row className="mb-4">
                 {postList.map((post) => (<PostProfile post={post} /> ))}

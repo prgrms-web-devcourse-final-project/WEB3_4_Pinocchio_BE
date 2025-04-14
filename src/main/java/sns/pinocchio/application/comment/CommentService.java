@@ -135,7 +135,7 @@ public class CommentService {
 		List<CommentGetResponse> commentGetList = commentList.stream().map(comment -> {
 			boolean isLiked = commentLikeService.isLiked(comment.getId(),authorId);
 			return CommentGetResponse.builder()
-				.commentId(comment.getId())
+				.id(comment.getId())
 				.userId(comment.getUserId())
 				.postId(comment.getPostId())
 				.content(comment.getContent())

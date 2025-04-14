@@ -20,7 +20,10 @@ import sns.pinocchio.domain.post.SearchSortType;
 import sns.pinocchio.domain.post.SearchType;
 import sns.pinocchio.infrastructure.persistence.mongodb.PostSearchRepositoryCustom;
 import sns.pinocchio.presentation.member.exception.MemberException;
+import sns.pinocchio.presentation.post.exception.PostErrorCode;
 import sns.pinocchio.presentation.post.exception.PostException;
+import sns.pinocchio.presentation.search.exception.SearchErrorCode;
+import sns.pinocchio.presentation.search.exception.SearchException;
 
 @Service
 @Slf4j
@@ -40,6 +43,9 @@ public class PostSearchService {
    * @param limit 최대 결과 개수
    * @param cursor 페이징 커서 (생성 날짜 기준)
    * @return SearchPosts 게시물 검색 결과
+   * @throws PostException 게시글 검색에 대한 권한이 없을 경우 {@link PostErrorCode#UNAUTHORIZED_POST_SEARCH_ACCESS} 예외 발생
+   * @throws PostException 커서의 날짜 형식이 올바르지 않을 경우 {@link PostErrorCode#INVALID_POST_SEARCH_CURSOR_TYPE} 예외 발생
+   * @throws PostException 검색할 유저 정보를 찾을 수 없을 경우 {@link PostErrorCode#POST_SEARCH_USER_NOT_FOUND} 예외 발생
    */
   @Transactional
   public SearchPosts searchPosts(
@@ -78,15 +84,17 @@ public class PostSearchService {
 
     switch (searchType) {
       case USERS -> {
-        if (query == null) {
+        String queryUser = query;
+
+        if (queryUser == null) {
           // 검색 키워드가 존재하지 않으면, 현재 로그인 된 유저의 게시글 조회
-          query = user.getTsid();
+          queryUser = user.getTsid();
 
         } else {
           // 검색 키워드가 존재할 경우, 검색할 유저의 정보가 존재하지 않으면 404에러 반환
           try {
-            Member targetUser = memberService.findByNickname(query);
-            query = targetUser.getTsid();
+            Member targetUser = memberService.findByNickname(queryUser);
+            queryUser = targetUser.getTsid();
 
           } catch (MemberException e) {
             log.error("Failed to search posts: 'USERS' type requires a query.");
@@ -96,7 +104,7 @@ public class PostSearchService {
 
         posts =
             postSearchRepository.searchPostsByUserTsidWithCursor(
-                query, searchType, searchSortType, limit + 1, cursorDateTime);
+                queryUser, searchType, searchSortType, limit + 1, cursorDateTime);
       }
 
       case POSTS ->
@@ -119,6 +127,6 @@ public class PostSearchService {
     // nextCursor 판단: 이후 데이터가 존재하지 않으면 null
     String nextCursor = hasNext ? sliced.getLast().getCreatedAt().toString() : null;
 
-    return new SearchPosts(nextCursor, nextCursor, hasNext, searchPostsDetails);
+    return new SearchPosts(query, nextCursor, hasNext, searchPostsDetails);
   }
 }

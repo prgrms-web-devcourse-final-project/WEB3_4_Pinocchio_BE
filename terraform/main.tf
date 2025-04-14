@@ -371,6 +371,18 @@ services:
             timeout: 5s
             retries: 5
 
+    react:
+    image: jeong6/frontend-app:latest
+    container_name: react-app-container
+    restart: always
+    ports:
+      - "3000:3000"
+    networks:
+      - app-network
+    depends_on:
+      spring:
+        condition: service_healthy
+
     nginx:
         image: nginx:latest
         container_name: nginx-container

@@ -134,6 +134,7 @@ public class MemberService {
   @Transactional
   public void changePassword(Member member, String password) {
     member.updatePassword(passwordEncoder.encode(password));
+    memberRepository.save(member);
   }
 
   @Transactional(readOnly = true)

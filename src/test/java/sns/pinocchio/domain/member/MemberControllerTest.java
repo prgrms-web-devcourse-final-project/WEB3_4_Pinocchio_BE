@@ -140,15 +140,14 @@ public class MemberControllerTest {
     String accessToken = loginResponse.andReturn().getResponse().getHeader("Authorization");
     String refreshTokenValue = getRefreshToken(loginResponse);
 
-    String passwordDto = TestFixture.createPassword("testPassword!");
+    Member member = memberService.findByEmail("example@naver.com");
 
     ResultActions deleteMemberResponse =
         mockMvc.perform(
-            delete("/user")
+            delete("/user/" + member.getId())
                 .header("Authorization", accessToken)
                 .cookie(new Cookie("refreshToken", refreshTokenValue))
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(passwordDto));
+                .contentType(MediaType.APPLICATION_JSON));
 
     deleteMemberResponse.andExpect(status().isOk());
 

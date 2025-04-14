@@ -64,7 +64,9 @@ public class MemberService {
       checkNicknameDuplicate(updateRequestDto.nickname());
     }
 
-    if (updateRequestDto.nickname().trim().isEmpty()) {
+    String nickname = updateRequestDto.nickname().trim();
+
+    if (nickname.length() < 3) {
       throw new MemberException(MemberErrorCode.NICKNAME_TOO_SHORT);
     }
 

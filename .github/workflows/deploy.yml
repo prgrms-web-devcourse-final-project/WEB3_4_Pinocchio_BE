@@ -92,28 +92,19 @@ jobs:
               with:
                   node-version: '20'
 
-            # 프론트엔드 의존성 설치 및 빌드 (단독 컨테이너로 분리되어 빌드됨)
+            # 프론트엔드 의존성 설치 및 빌드
             - name: 프론트엔드 설치 및 빌드
               working-directory: ./frontend
               run: |
                   npm ci
                   CI=false npm run build
 
-            #  DockerHub 로그인 (React 이미지 푸시 전에 이동)
-            - name: DockerHub 로그인
-              run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
-
-
-              # React용 Docker 이미지 빌드
-            - name: React Docker 이미지 빌드
-              working-directory: ./frontend
+            # 빌드된 정적 파일을 Spring Boot 프로젝트에 복사
+            - name: React 빌드 결과물을 Spring static 폴더로 복사
               run: |
-                  docker build -t ${{ secrets.DOCKER_USERNAME }}/frontend-app:latest .
-
-            # React Docker 이미지 푸시
-            - name: React Docker 이미지 푸시
-              run: |
-                  docker push ${{ secrets.DOCKER_USERNAME }}/frontend-app:latest
+                  mkdir -p ./src/main/resources/static
+                  rm -rf ./src/main/resources/static/*
+                  cp -r ./frontend/build/* ./src/main/resources/static/
 
             # 백엔드 JAR 빌드 (테스트 제외)
             - name: Spring Boot 빌드
@@ -124,6 +115,9 @@ jobs:
               id: set_tag
               run: echo "tag_time=$(TZ=Asia/Seoul date +'%Y-%m-%d-%H%M')" >> $GITHUB_OUTPUT
 
+            # DockerHub 로그인
+            - name: DockerHub 로그인
+              run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
 
             # Docker 이미지 빌드
             - name: Docker 이미지 빌드

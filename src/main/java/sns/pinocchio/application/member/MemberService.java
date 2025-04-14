@@ -2,6 +2,7 @@ package sns.pinocchio.application.member;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -21,8 +22,6 @@ import sns.pinocchio.presentation.auth.exception.AuthErrorCode;
 import sns.pinocchio.presentation.auth.exception.AuthException;
 import sns.pinocchio.presentation.member.exception.MemberErrorCode;
 import sns.pinocchio.presentation.member.exception.MemberException;
-
-import java.io.IOException;
 
 @RequiredArgsConstructor
 @Service
@@ -63,8 +62,9 @@ public class MemberService {
       throws IOException {
     Member member = findById(userId);
 
-    checkNicknameDuplicate(updateRequestDto.nickname());
-
+    if (!updateRequestDto.nickname().equals(member.getNickname())) {
+      checkNicknameDuplicate(updateRequestDto.nickname());
+    }
     // 이미지가 있을 경우 업로드
     if (image != null && !image.isEmpty()) {
       String imageUrl = s3Uploader.uploadFile(image, "post-profile/");
@@ -72,6 +72,7 @@ public class MemberService {
           updateRequestDto.withProfileImageUrl(imageUrl); // 불변 객체라면 builder 패턴 또는 with 메서드 필요
     }
     member.updateProfile(updateRequestDto);
+    memberRepository.save(member);
 
     return member;
   }

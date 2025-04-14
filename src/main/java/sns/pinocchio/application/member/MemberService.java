@@ -18,8 +18,6 @@ import sns.pinocchio.config.global.auth.util.PasswordUtil;
 import sns.pinocchio.config.global.redis.redisService.RedisService;
 import sns.pinocchio.domain.member.Member;
 import sns.pinocchio.infrastructure.member.MemberRepository;
-import sns.pinocchio.presentation.auth.exception.AuthErrorCode;
-import sns.pinocchio.presentation.auth.exception.AuthException;
 import sns.pinocchio.presentation.member.exception.MemberErrorCode;
 import sns.pinocchio.presentation.member.exception.MemberException;
 
@@ -120,9 +118,6 @@ public class MemberService {
   public void tokenClear(HttpServletRequest request, HttpServletResponse response) {
     String refreshToken = cookieService.getRefreshTokenFromCookie(request);
 
-    if (refreshToken == null) {
-      throw new AuthException(AuthErrorCode.INVALID_TOKEN);
-    }
     cookieService.clearTokenFromCookie(response);
     redisService.addBlackList(refreshToken, jwtUtil.getRefreshTokenExpirationTime());
   }

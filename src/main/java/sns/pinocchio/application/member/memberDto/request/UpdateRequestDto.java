@@ -2,8 +2,10 @@ package sns.pinocchio.application.member.memberDto.request;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+import lombok.Builder;
 
 // 사용자 프로필 정보 수정 요청 Dto
+@Builder
 public record UpdateRequestDto(
     @NotBlank(message = "이름은 필수 항목입니다.") String name,
     @NotBlank(message = "닉네임은 필수 항목입니다.")

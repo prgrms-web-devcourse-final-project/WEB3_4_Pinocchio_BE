@@ -1,5 +1,6 @@
 package sns.pinocchio.presentation.member;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -52,9 +53,14 @@ public class MemberController {
   @PutMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   public ResponseEntity<ProfileResponseDto> updateMemberInfo(
       @AuthenticationPrincipal CustomUserDetails customUserDetails,
-      @Valid @RequestPart("request") UpdateRequestDto updateRequestDto,
+      @RequestPart("request") String request,
       @RequestPart(value = "image", required = false) MultipartFile image)
       throws IOException {
+
+    // JSON 문자열을 객체로 변환
+    ObjectMapper objectMapper = new ObjectMapper();
+    UpdateRequestDto updateRequestDto = objectMapper.readValue(request, UpdateRequestDto.class);
+
     Member member =
         memberService.updateProfile(updateRequestDto, image, customUserDetails.getUserId());
 

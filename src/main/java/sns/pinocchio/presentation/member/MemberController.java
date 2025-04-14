@@ -15,7 +15,6 @@ import org.springframework.web.multipart.MultipartFile;
 import sns.pinocchio.application.auth.AuthService;
 import sns.pinocchio.application.member.MemberService;
 import sns.pinocchio.application.member.memberDto.request.ChangePasswordRequestDto;
-import sns.pinocchio.application.member.memberDto.request.DeleteRequestDto;
 import sns.pinocchio.application.member.memberDto.request.ResetPasswordRequestDto;
 import sns.pinocchio.application.member.memberDto.request.UpdateRequestDto;
 import sns.pinocchio.application.member.memberDto.response.ProfileResponseDto;
@@ -100,17 +99,10 @@ public class MemberController {
   }
 
   // 회원 탈퇴
-  @DeleteMapping
+  @DeleteMapping("/{userId}")
   public ResponseEntity<String> deleteMember(
-      @AuthenticationPrincipal CustomUserDetails customUserDetails,
-      HttpServletRequest request,
-      HttpServletResponse response,
-      @Valid @RequestBody DeleteRequestDto deleteRequestDto) {
-    Member member = customUserDetails.getMember();
-
-    authService.validatePassword(deleteRequestDto.password(), member);
-
-    memberService.deleteMember(member);
+      @PathVariable Long userId, HttpServletRequest request, HttpServletResponse response) {
+    memberService.deleteMember(userId);
 
     memberService.tokenClear(request, response);
 

@@ -123,8 +123,8 @@ public class MemberService {
   }
 
   @Transactional
-  public void deleteMember(Member member) {
-    memberRepository.deleteById(member.getId());
+  public void deleteMember(Long userId) {
+    memberRepository.deleteById(userId);
   }
 
   @Transactional

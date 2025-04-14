@@ -1,9 +1,8 @@
 import {useMutation, useQuery} from "react-query";
 import axios from "axios";
 import useConfirm from "../../hooks/useConfirm";
-import {useNavigate} from "react-router-dom";
+import {useNavigate, Link} from "react-router-dom";
 import {Button, Col, Form, Row, Stack} from "react-bootstrap";
-import profile from "../../assets/images/sample_profile.png";
 import noImage from "../../assets/images/no_image.png";
 import {jwtDecode} from "jwt-decode";
 import {useState} from "react";
@@ -73,7 +72,7 @@ const UserProfile = ({ page }) => {
                     </Col>
                     <Col >
                         <Stack direction={"horizontal"} gap={3} >
-                            {userLoading || <h4>{user?.data.nickname} ({user?.data.name})</h4>}
+                            <Link to={`/post/${loginUser.tsid}`}><h4>{loginUser.tsid}</h4></Link>
                             {renderButton()}
                         </Stack>
                         <Row>

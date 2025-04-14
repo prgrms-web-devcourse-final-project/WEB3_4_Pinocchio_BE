@@ -1,50 +1,32 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import profileImage from "../../assets/images/sample_profile.png"
 import {Button} from "react-bootstrap";
 import axios from "axios";
 
-function ProfileImageZone() {
+function ProfileImageZone({ onImageSelect, profileImageUrl }) {
     const fileInputRef = useRef(null);
-    const [previewUrl, setPreviewUrl] = useState(profileImage);
+    const [previewUrl, setPreviewUrl] = useState(profileImage); // 기본 미리보기 이미지
+
+
+    // 외부에서 profileImageUrl이 변경되었을 때 미리보기 URL 업데이트
+    useEffect(() => {
+        if (profileImageUrl) {
+            setPreviewUrl(profileImageUrl);
+        }
+    }, [profileImageUrl]);
+
 
     const handleButtonClick = () => {
-        fileInputRef.current.click();
+        fileInputRef.current.click(); // 버튼 클릭 시 숨겨진 파일 선택창 열기
     };
 
     const handleFileChange = (event) => {
         const file = event.target.files[0];
         if (!file) return;
 
-        const imageUrl = URL.createObjectURL(file);
-        setPreviewUrl(imageUrl);
-
-        const jsonData = {
-            "name": "홍길동",
-            "nickname": "gildong",
-            "bio": "안녕하세요!",
-            "website": "https://example.com",
-            "profileImageUrl": null,
-            "isActive": true
-        }
-        // json 데이터 삽입
-        const formData = new FormData();
-        formData.append("request", new Blob([JSON.stringify(jsonData)], {
-            type: "application/json",
-        }));
-        // file 데이터 삽입
-        formData.append("image", file);
-        // 여기서 file은 서버 업로드용으로 저장해둘 수 있음
-
-        // 수정 요청
-        axios.put("/api/profile", formData, {
-            headers: {
-                "Content-Type": "multipart/form-data",
-            },
-        }).then((response) => {
-            console.log(response);
-        }).catch((error) => {
-            console.log(error);
-        });
+        const imageUrl = URL.createObjectURL(file); // 브라우저에서 미리보기용 URL 생성
+        setPreviewUrl(imageUrl); // 미리보기 이미지 설정
+        onImageSelect(file);     // 부모 컴포넌트로 파일 전달
     };
 
     return (

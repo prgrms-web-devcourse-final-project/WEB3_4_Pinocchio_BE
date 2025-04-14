@@ -8,22 +8,28 @@ import {useInfiniteQuery} from "react-query";
 import axios from "axios";
 import {buildQuery} from "../../utils/utils";
 import {useEffect, useState} from "react";
+import {useInView} from "react-intersection-observer";
+import {useQueryParam} from "../../hooks/QueryParam";
 
-const fetchBoardList = async (pageParam) => {
-    const params = { cursor: pageParam.pageParam };
+const fetchBoardList = async (pageParam, queryParam) => {
+    const params = { cursor: pageParam.pageParam, ...queryParam };
+    // console.log('fetchBoardList: ', pageParam, queryParam, params);
+
     const response = await axios.get(`/posts/search${buildQuery(params)}`);
     return response.data;
 }
 
 const PostList = () => {
     const navigate = useNavigate();
+    const { ref, inView } = useInView({
+        threshold: 0.5, // 화면의 50%가 보일 때 감지
+    });
+    const [queryParam, setQueryParam] = useQueryParam();
     const { data, fetchNextPage, hasNextPage } = useInfiniteQuery({
-        queryKey: ['boardList'],
-        queryFn: fetchBoardList,
+        queryKey: ['boardList', queryParam],
+        queryFn: (pageParam) => fetchBoardList(pageParam, queryParam),
         getNextPageParam: (lastData, allData) => {
             if (lastData?.hasNext) {
-                console.log('nextCursor: ', lastData.nextCursor)
-
                 return lastData.nextCursor;
             } else {
                 return undefined;
@@ -40,20 +46,25 @@ const PostList = () => {
                     postList.push(post);
                 })
             })
-            console.log(postList);
             setPostList(postList);
         }
     }, [data])
+
+    useEffect(() => {
+        if (inView) {
+            fetchNextPage()
+        }
+    }, [inView]);
 
     return (
         <PageLayout>
             <SearchCardBox>
                 <UserProfile page={"main"}/>
-                <Button onClick={() => fetchNextPage()}>TEST</Button>
             </SearchCardBox>
             <Row className="mb-4">
                 {postList.map((post) => (<PostProfile post={post} /> ))}
             </Row>
+            <div ref={ref}></div>
         </PageLayout>
     )
 

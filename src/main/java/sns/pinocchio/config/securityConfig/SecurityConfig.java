@@ -42,51 +42,38 @@ public class SecurityConfig {
                         "/swagger-resources/**",
                         "/webjars/**")
                     .permitAll()
-                  // === [ 인증 불필요 API ] ===
-                    .requestMatchers("/login", "/login/**").permitAll()
-                    .requestMatchers(
-                        "/auth/signup",
-                        "/auth/login",
-                        "/auth/logout",
-                        "/posts/search",
-                        "/actuator/health",
+
+                // === [ 인증 불필요 API 접근 허용 ] ===
+                      .requestMatchers(
+                        "/login", "/login/**",
+                        "/auth/signup", "/auth/login", "/auth/logout",
+                        "/posts/search", "/actuator/health",
                         "/user/password/reset")
-                    .permitAll()
-   /*<Spring Security의 requestMatchers는 위에서 아래로 순차적으로 평가되므로, 특정 경로에 대한 예외 허용(permitAll)은 가장 위에 위치>*/
-                 // === [ 정적 리소스 (React 빌드 파일들)  접근 허용 ] ===
-                    .requestMatchers(
-                        "/",
-                        "/index.html",
-                        "/static/**",
-                        "/favicon.ico",
-                        "/asset-manifest.json",
-                        "/manifest.json",
-                        "/logo192.png",
-                        "/logo512.png",
+                      .permitAll()
 
-                            //  React SPA 라우터 경로도 허용
 
-                            "/signup",
-                            "/mypage",
-                            "/main",
-                            "/board/**",
-                            "/**/*.js",
-                            "/**/*.css",
-                            "/**/*.png",
-                            "/**/*.svg"
+                // === [ 정적 자원 및 React SPA 경로 접근 허용 ] ===
+                        .requestMatchers(
+                                "/", "/index.html", "/favicon.ico",
+                                "/asset-manifest.json", "/manifest.json",
+                                "/logo192.png", "/logo512.png",
+                                "/static/**", // 빌드된 정적 리소스
+                                "/**/*.js", "/**/*.css", "/**/*.png", "/**/*.svg", "/**/*.woff2",
+                                // React 라우터 경로들도 정적처럼 처리되므로 허용
+                                "/signup", "/main", "/mypage/**", "/post/**", "/board/**"
+                        ).permitAll()
 
-                            )
-                    .permitAll()
-                        // === [ 인증 필요한 API ] ===
-                    .requestMatchers("/user/**").authenticated()
-                    .requestMatchers("/posts/**").authenticated()
-                    .requestMatchers("/posts/like/**").authenticated()
-                    .requestMatchers("/comments/**").authenticated()
-                    .requestMatchers("/block/**").authenticated()
-                    .requestMatchers("/chat/**").authenticated()
-                    .requestMatchers("/search").authenticated()
-                    .requestMatchers("/notifications/settings").authenticated()
-                  // === [ 모든 나머지 요청 인증 ] ===
+                // === [ 인증 필요한 API ] ===
+                        .requestMatchers("/user/**").authenticated()
+                        .requestMatchers("/posts/**").authenticated()
+                        .requestMatchers("/posts/like/**").authenticated()
+                        .requestMatchers("/comments/**").authenticated()
+                        .requestMatchers("/block/**").authenticated()
+                        .requestMatchers("/chat/**").authenticated()
+                        .requestMatchers("/search").authenticated()
+                        .requestMatchers("/notifications/settings").authenticated()
+
+                // === [ 모든 나머지 요청 인증 ] ===
                     .anyRequest()
                     .authenticated())
         .addFilterBefore(memberAuthFilter, UsernamePasswordAuthenticationFilter.class);

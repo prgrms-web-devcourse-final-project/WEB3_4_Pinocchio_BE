@@ -3,12 +3,17 @@ import React, {useRef, useState} from "react";
 import {Button, Card, Col, Form, Row, Stack} from "react-bootstrap";
 import {useNavigate} from "react-router-dom";
 import axios from "axios";
+import noImage from "../../assets/images/no_image.png";
+import {isEmptyOrNull} from "../../utils/utils";
+import useConfirm from "../../hooks/useConfirm";
+
 
 const PostNew = () => {
     const fileInputRef = useRef(null);
     const [previewUrl, setPreviewUrl] = useState("");
     const [selectedFile, setSelectedFile] = useState(null);
     const [postInvisibility, setPostInvisivility] = useState(false);
+    const {openConfirm} = useConfirm();
     const handleButtonClick = () => {
         fileInputRef.current.click();
     };
@@ -25,6 +30,13 @@ const PostNew = () => {
     };
 
     const handleSaveClick = () => {
+        if (isEmptyOrNull(content) || isEmptyOrNull(previewUrl)) {
+            openConfirm({
+                title: "이미지 혹은 스토리가 없습니다."
+            })
+            return;
+        }
+
         const matches = content.match(/([#@][\w가-힣_]+)/g) || [];
 
         const hashtags = matches.filter(tag => tag.startsWith("#"));
@@ -69,12 +81,8 @@ const PostNew = () => {
                                     <Col>
                                         <label className="form-label"> 사진 추가 </label>
                                         <div> {/* 사진추가 부분 */}
-                                            {previewUrl ? <img src={previewUrl}
-                                                               alt="사진을 올려주세요"
-                                                               style={{ width: "100%", minHeight: "300px", objectFit: 'cover' }}
-                                            /> :
-                                                <span>아래 버튼을 눌러 사진을 업로드 해주세요</span>
-                                            }
+                                            <img src={previewUrl ? previewUrl : noImage} alt="사진을 올려주세요"
+                                                 style={{ width: "100%", minHeight: "300px", objectFit: 'cover' }}/>
                                             <br />
                                             <Button className={"w-100"} onClick={handleButtonClick}>이미지 업로드</Button>
                                             <input

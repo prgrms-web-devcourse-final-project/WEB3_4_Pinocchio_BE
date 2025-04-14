@@ -3,7 +3,7 @@ import ProfileImageZone from "./ImageDropZone";
 import {useEffect, useState} from "react";
 import axios from "axios";
 import {useNavigate} from "react-router-dom";
-import {useQuery} from "react-query";
+import {useQuery, useQueryClient} from "react-query";
 import Spinner from "../../shared/Spinner";
 import {jwtDecode} from "jwt-decode";
 
@@ -11,7 +11,8 @@ const fetchUser = async () => {
     const token = localStorage.getItem('token');
     const loginUser = jwtDecode(token);
     const response = await axios.get(`/user/${loginUser.id}`);
-    return response.data;
+    console.log(response.data.data)
+    return response.data.data;
 };
 
 const ProfileEditCard = () => {
@@ -21,17 +22,18 @@ const ProfileEditCard = () => {
     const [bio, setBio] = useState("");
     const [website, setWebsite] = useState("");
     const [isActive, setActive] = useState(true);
+    const [profileImageFile, setProfileImageFile] = useState();
+    const queryClient = useQueryClient();
     const navigate = useNavigate();
-    const userId = 1;
     const { isLoading, data } = useQuery(
         ['ProfileEditCardFetchUser'],
-        () => fetchUser(userId),
+        () => fetchUser(),
         { keepPreviousData: true, refetchOnWindowFocus: false}
     );
 
     useEffect(() => {
         if (data) {
-            const user = data.data;
+            const user = data;
             setEmail(user.email);
             setNickname(user.nickname);
             setName(user.name);
@@ -42,16 +44,30 @@ const ProfileEditCard = () => {
     }, [data])
 
     const handleClickSubmit = async () => {
-        const parmas = {
+        const updateData = {
             nickname
             , name
             , bio
             , website
             , isActive
-            , profileImageUrl: ""
         }
-        console.log('params: ', parmas)
-        const response = await axios.put("/user", parmas);
+        console.log('updateData: ', updateData)
+        // json 데이터 삽입
+        const formData = new FormData();
+        formData.append("request", new Blob([JSON.stringify(updateData)], {
+            type: "application/json",
+        }));
+        // file 데이터 삽입
+        formData.append("image", profileImageFile);
+        // 여기서 file은 서버 업로드용으로 저장해둘 수 있음
+
+        // 수정 요청
+        await axios.put("/user", formData, {
+            headers: {
+                "Content-Type": "multipart/form-data",
+            },
+        });
+        await queryClient.invalidateQueries(['ProfileEditCardFetchUser']); // 캐시 무효화
         navigate("/mypage/like");
     }
     return (
@@ -59,7 +75,7 @@ const ProfileEditCard = () => {
             <Card.Body>
                 <Row>
                     <Col xs={4} >
-                        <ProfileImageZone />
+                        <ProfileImageZone profileImageUrl={data?.profileImageUrl} handleProfileImageChange={(file) => setProfileImageFile(file)}/>
                     </Col>
                     <Col xs={8} >
                         <Form onSubmit={(e) => e.preventDefault()}>

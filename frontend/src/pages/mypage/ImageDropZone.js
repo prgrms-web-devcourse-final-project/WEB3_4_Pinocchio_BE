@@ -1,11 +1,17 @@
-import React, { useRef, useState } from 'react';
-import profileImage from "../../assets/images/sample_profile.png"
+import React, {useEffect, useRef, useState} from 'react';
+import noImage from "../../assets/images/no_image.png"
 import {Button} from "react-bootstrap";
 import axios from "axios";
 
-function ProfileImageZone() {
+function ProfileImageZone({ profileImageUrl, handleProfileImageChange }) {
     const fileInputRef = useRef(null);
-    const [previewUrl, setPreviewUrl] = useState(profileImage);
+    const [previewUrl, setPreviewUrl] = useState();
+
+    useEffect(() => {
+        if (profileImageUrl) {
+            setPreviewUrl(profileImageUrl)
+        }
+    }, [profileImageUrl])
 
     const handleButtonClick = () => {
         fileInputRef.current.click();
@@ -17,40 +23,13 @@ function ProfileImageZone() {
 
         const imageUrl = URL.createObjectURL(file);
         setPreviewUrl(imageUrl);
-
-        const jsonData = {
-            "name": "홍길동",
-            "nickname": "gildong",
-            "bio": "안녕하세요!",
-            "website": "https://example.com",
-            "profileImageUrl": null,
-            "isActive": true
-        }
-        // json 데이터 삽입
-        const formData = new FormData();
-        formData.append("request", new Blob([JSON.stringify(jsonData)], {
-            type: "application/json",
-        }));
-        // file 데이터 삽입
-        formData.append("image", file);
-        // 여기서 file은 서버 업로드용으로 저장해둘 수 있음
-
-        // 수정 요청
-        axios.put("/user", formData, {
-            headers: {
-                "Content-Type": "multipart/form-data",
-            },
-        }).then((response) => {
-            console.log(response);
-        }).catch((error) => {
-            console.log(error);
-        });
+        handleProfileImageChange(file)
     };
 
     return (
         <div>
             <img
-                src={previewUrl}
+                src={previewUrl ? previewUrl : noImage}
                 alt="프로필"
                 style={{ width: "100%", objectFit: 'cover' }}
             />

@@ -3,7 +3,7 @@ import noImage from "../../assets/images/no_image.png";
 import {dateFormat} from "../../utils/utils";
 import {useState} from "react";
 import {useMutation} from "react-query";
-import axios from "axios";
+import axios from "../../utils/axiosInstance";
 import {useNavigate} from "react-router-dom";
 import {jwtDecode} from "jwt-decode";
 import useConfirm from "../../hooks/useConfirm";
@@ -14,7 +14,7 @@ const DetailLeftParts = ({ post, postRefetch }) => {
     const [isPostLike, setPostLike] = useState(false);
     const {openConfirm} = useConfirm();
     const navigate = useNavigate();
-    const likeMutation = useMutation((postId) => axios.post(`/posts/like/${postId}/toggle`), {
+    const likeMutation = useMutation((postId) => axios.post(`/posts/like/${postId}`), {
         onSuccess: (param) => {
             console.log(param);
             postRefetch()

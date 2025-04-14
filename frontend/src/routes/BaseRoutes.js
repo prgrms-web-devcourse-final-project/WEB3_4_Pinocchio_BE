@@ -21,7 +21,8 @@ const BaseRoutes = () => {
             <Route exact path="signup" element={<Signup />} />
             <Route path="/" element={<Layout />} >
                 {/* 메인 도메인만 입력 시 로그인으로 이동*/}
-                <Route path="" element={<Navigate to="login" replace />} />
+
+                <Route index element={<Navigate to="/post/list" replace />} />
                 <Route path="post/list" element={<PostList />} />
                 <Route path="post/new" element={<PostNew />} />
                 <Route path="post/detail/:postId" element={<PostDetail />} />

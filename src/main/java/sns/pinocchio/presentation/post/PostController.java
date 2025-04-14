@@ -5,11 +5,12 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import java.io.IOException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import sns.pinocchio.application.post.PostCreateRequest;
@@ -17,6 +18,8 @@ import sns.pinocchio.application.post.PostModifyRequest;
 import sns.pinocchio.application.post.PostSearchService;
 import sns.pinocchio.application.post.PostService;
 import sns.pinocchio.config.global.auth.model.CustomUserDetails;
+
+import java.io.IOException;
 
 @Tag(name = "게시글", description = "게시글 관련 API")
 @RestController
@@ -131,11 +134,17 @@ public class PostController {
             @ApiResponse(responseCode = "500", description = "서버 내부 오류")
     })
     @GetMapping("/{postId}")
-    public ResponseEntity<?> getPostDetail(
-            @PathVariable String postId,
-            @AuthenticationPrincipal CustomUserDetails userDetails
-    ) {
-        String tsid = (userDetails != null) ? userDetails.getTsid() : null;
+    public ResponseEntity<?> getPostDetail(@PathVariable String postId) {
+        String tsid = null;
+
+        // SecurityContext에서 인증 정보 수동 추출
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.isAuthenticated()
+                && authentication.getPrincipal() instanceof CustomUserDetails) {
+            CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+            tsid = userDetails.getTsid();
+        }
+
         return ResponseEntity.ok(postService.getPostDetail(postId, tsid));
     }
 

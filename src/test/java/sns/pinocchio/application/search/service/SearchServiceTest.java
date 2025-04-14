@@ -15,7 +15,7 @@ import sns.pinocchio.application.search.dto.SearchResponseDto.SearchInfo;
 import sns.pinocchio.application.search.dto.SearchResponseDto.SearchUsers;
 import sns.pinocchio.config.global.auth.model.CustomUserDetails;
 import sns.pinocchio.domain.member.Member;
-import sns.pinocchio.infrastructure.persistence.mysql.SearchMemberRepositoryCustom;
+import sns.pinocchio.infrastructure.member.MemberRepository;
 import sns.pinocchio.presentation.search.exception.SearchException;
 
 @Tag("unit")
@@ -24,7 +24,7 @@ class SearchServiceTest {
 
   @InjectMocks private SearchService searchService;
 
-  @Mock private SearchMemberRepositoryCustom searchMemberRepository;
+  @Mock private MemberRepository searchMemberRepository;
 
   private CustomUserDetails mockUserDetails;
 
@@ -82,7 +82,7 @@ class SearchServiceTest {
     // given
     String query = "제주도";
     int limit = 2;
-    String cursor = null;
+    String cursor = "mockCursor";
 
     List<Member> mockMembers = List.of(mockMember1, mockMember2, mockMember3);
 

@@ -1,5 +1,8 @@
 package sns.pinocchio.application.notification.service;
 
+import static sns.pinocchio.presentation.notification.exception.NotificationErrorCode.INVALID_NOTIFICATION_TYPE;
+import static sns.pinocchio.presentation.notification.exception.NotificationErrorCode.UNAUTHORIZED_NOTIFICATION_USER;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -9,9 +12,9 @@ import sns.pinocchio.application.notification.dto.NotificationResponseDto.Notifi
 import sns.pinocchio.config.global.auth.model.CustomUserDetails;
 import sns.pinocchio.domain.member.Member;
 import sns.pinocchio.domain.notification.Notification;
-import sns.pinocchio.domain.notification.NotificationException.NotificationBadRequestException;
-import sns.pinocchio.domain.notification.NotificationException.NotificationUnauthorizedException;
 import sns.pinocchio.infrastructure.persistence.mysql.NotificationRepository;
+import sns.pinocchio.presentation.notification.exception.NotificationErrorCode;
+import sns.pinocchio.presentation.notification.exception.NotificationException;
 
 @Service
 @Slf4j
@@ -26,8 +29,10 @@ public class NotificationService {
    * @param userDetails 로그인한 유저 정보
    * @param updateNotifications 변경할 알림 설정 값들을 담은 DTO
    * @return NotificationInfo 변경된 알림 설정 정보를 담은 응답 DTO
-   * @throws NotificationUnauthorizedException 사용자가 인증되지 않았을 경우
-   * @throws NotificationBadRequestException 입력값이 유효하지 않을 경우
+   * @throws NotificationException 로그인한 유저 정보가 존재하지 않을 경우 {@link
+   *     NotificationErrorCode#UNAUTHORIZED_NOTIFICATION_USER} 예외 발생
+   * @throws NotificationException 설정 정보가 존재하지 않을 경우 {@link
+   *     NotificationErrorCode#INVALID_NOTIFICATION_TYPE} 예외 발생
    */
   @Transactional
   public NotificationInfo updateNotifications(
@@ -36,7 +41,7 @@ public class NotificationService {
     // 로그인한 유저 정보가 존재하지 않을 경우, 401에러 반환
     if (userDetails == null || userDetails.getMember() == null) {
       log.error("No authenticated user found.");
-      throw new NotificationUnauthorizedException("사용자가 인증되지 않았습니다. 로그인 후 다시 시도해주세요.");
+      throw new NotificationException(UNAUTHORIZED_NOTIFICATION_USER);
     }
 
     Member member = userDetails.getMember();
@@ -44,7 +49,7 @@ public class NotificationService {
     // 설정 정보가 존재하지 않을 경우, 400에러 반환
     if (!updateNotifications.checkNotifications()) {
       log.error("The requested notification settings are invalid: {}", updateNotifications);
-      throw new NotificationBadRequestException("입력값이 유효하지 않습니다.");
+      throw new NotificationException(INVALID_NOTIFICATION_TYPE);
     }
 
     // 회원의 알림 설정 조회
@@ -85,15 +90,16 @@ public class NotificationService {
    * @implNote 해당 사용자가 최초로 알림 설정 시, 모든 알림 설정은 false로 반환
    * @param userDetails 로그인한 사용자 정보
    * @return NotificationInfo 변경된 알림 설정 정보를 담은 응답 DTO
-   * @throws NotificationBadRequestException 로그인한 user 정보가 존재하지 않을 경우
+   * @throws NotificationException 로그인한 유저 정보가 존재하지 않을 경우 {@link
+   *     NotificationErrorCode#UNAUTHORIZED_NOTIFICATION_USER} 예외 발생
    */
   @Transactional(readOnly = true)
   public NotificationInfo getNotifications(CustomUserDetails userDetails) {
 
-    // 로그인한 유저 정보가 존재하지 않을 경우, 400에러 반환
+    // 로그인한 유저 정보가 존재하지 않을 경우, 401에러 반환
     if (userDetails == null || userDetails.getUserId() == null) {
       log.error("[userId] is null. Can't get notifications.");
-      throw new NotificationBadRequestException("[userId] 정보가 존재하지 않습니다.");
+      throw new NotificationException(UNAUTHORIZED_NOTIFICATION_USER);
     }
 
     Notification notification =

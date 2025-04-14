@@ -1,7 +1,9 @@
 package sns.pinocchio.presentation.chat.exception;
 
+import lombok.Getter;
 import org.springframework.http.HttpStatus;
 
+@Getter
 public class ChatException extends RuntimeException {
 
   private final ChatErrorCode chatErrorCode;
@@ -9,10 +11,6 @@ public class ChatException extends RuntimeException {
   public ChatException(ChatErrorCode chatErrorCode) {
     super(chatErrorCode.getMessage());
     this.chatErrorCode = chatErrorCode;
-  }
-
-  public ChatErrorCode getChatErrorCode() {
-    return chatErrorCode;
   }
 
   public HttpStatus getStatus() {

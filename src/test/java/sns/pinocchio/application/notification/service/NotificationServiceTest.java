@@ -20,8 +20,8 @@ import sns.pinocchio.application.notification.dto.NotificationResponseDto.Notifi
 import sns.pinocchio.config.global.auth.model.CustomUserDetails;
 import sns.pinocchio.domain.member.Member;
 import sns.pinocchio.domain.notification.Notification;
-import sns.pinocchio.domain.notification.NotificationException.NotificationBadRequestException;
 import sns.pinocchio.infrastructure.persistence.mysql.NotificationRepository;
+import sns.pinocchio.presentation.notification.exception.NotificationException;
 
 @Tag("unit")
 @ExtendWith(MockitoExtension.class)
@@ -180,13 +180,11 @@ class NotificationServiceTest {
   void getNotificationsNoUserIdTest() {
 
     // given
-    String errorMsg = "[userId] 정보가 존재하지 않습니다.";
+    String errorMsg = "사용자가 인증되지 않았습니다.";
 
     // when
-    NotificationBadRequestException exception =
-        assertThrows(
-            NotificationBadRequestException.class,
-            () -> notificationService.getNotifications(null));
+    NotificationException exception =
+        assertThrows(NotificationException.class, () -> notificationService.getNotifications(null));
 
     // then
     assertThat(exception.getMessage()).isEqualTo(errorMsg);

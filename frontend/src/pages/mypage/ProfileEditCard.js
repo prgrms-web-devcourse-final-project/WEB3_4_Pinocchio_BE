@@ -2,10 +2,11 @@ import {Button, Card, Col, Form, Row, Stack} from "react-bootstrap";
 import ProfileImageZone from "./ImageDropZone";
 import {useEffect, useState} from "react";
 import axios from "axios";
-import {useNavigate} from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import {useQuery} from "react-query";
 import Spinner from "../../shared/Spinner";
 import {jwtDecode} from "jwt-decode";
+import profileImage from "../../assets/images/sample_profile.png";
 
 const fetchUser = async () => {
     const token = localStorage.getItem('token');
@@ -21,12 +22,16 @@ const ProfileEditCard = () => {
     const [bio, setBio] = useState("");
     const [website, setWebsite] = useState("");
     const [isActive, setActive] = useState(true);
+    const [imageFile, setImageFile] = useState(null); // 🔥 이미지 파일 상태
+    const [profileImageUrl, setProfileImageUrl] = useState(profileImage); // 🔥 이미지 미리보기 상태
+
     const navigate = useNavigate();
-    const userId = 1;
+
+    // 사용자 정보 가져오기 (react-query)
     const { isLoading, data } = useQuery(
-        ['ProfileEditCardFetchUser'],
-        () => fetchUser(userId),
-        { keepPreviousData: true, refetchOnWindowFocus: false}
+        ["ProfileEditCardFetchUser"],
+        fetchUser,
+        { keepPreviousData: true, refetchOnWindowFocus: false }
     );
 
     useEffect(() => {
@@ -37,29 +42,54 @@ const ProfileEditCard = () => {
             setName(user.name);
             setBio(user.bio);
             setWebsite(user.website);
-            setActive(user.isActive)
+            setActive(user.isActive);
+            //  캐시 방지 위해 timestamp 추가
+            if (user.profileImageUrl) {
+                setProfileImageUrl(`${user.profileImageUrl}?t=${Date.now()}`);
+            }
         }
-    }, [data])
+    }, [data]);
 
+    // 수정 버튼 클릭
     const handleClickSubmit = async () => {
-        const parmas = {
-            nickname
-            , name
-            , bio
-            , website
-            , isActive
-            , profileImageUrl: ""
-        }
-        console.log('params: ', parmas)
-        const response = await axios.put("/user", parmas);
+        const jsonData = {
+            nickname,
+            name,
+            bio,
+            website,
+            isActive
+        };
+
+        const formData = new FormData();
+
+        // 텍스트 JSON을 multipart 안에 넣기
+        formData.append("request", new Blob([JSON.stringify(jsonData)], { type: "application/json" }));
+
+        // 이미지 파일도 함께 업로드
+        if (imageFile) formData.append("image", imageFile);
+
+        console.log("보내는 데이터:", jsonData);
+
+        const response = await axios.put("/user", formData, {
+            headers: {
+                "Content-Type": "multipart/form-data",
+            },
+        });
+        // 수정 후 마이페이지로 이동
         navigate("/mypage/like");
     }
+
+
     return (
         <Card className="p-5">
             <Card.Body>
                 <Row>
                     <Col xs={4} >
-                        <ProfileImageZone />
+                        {/* 이미지 업로드 및 미리보기 */}
+                        <ProfileImageZone
+                            onImageSelect={(file) => setImageFile(file)}
+                            profileImageUrl={profileImageUrl}
+                        />
                     </Col>
                     <Col xs={8} >
                         <Form onSubmit={(e) => e.preventDefault()}>

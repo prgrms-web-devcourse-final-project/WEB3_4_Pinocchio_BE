@@ -36,7 +36,7 @@ function ProfileImageZone() {
         // 여기서 file은 서버 업로드용으로 저장해둘 수 있음
 
         // 수정 요청
-        axios.put("/api/profile", formData, {
+        axios.put("/user", formData, {
             headers: {
                 "Content-Type": "multipart/form-data",
             },

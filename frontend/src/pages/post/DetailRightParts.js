@@ -1,5 +1,5 @@
 import {Button, Card, Form, Stack} from "react-bootstrap";
-import axios from "../../utils/axiosInstance";
+import axios from "axios";
 import {useMutation, useQuery} from "react-query";
 import useConfirm from "../../hooks/useConfirm";
 import {useEffect, useState} from "react";

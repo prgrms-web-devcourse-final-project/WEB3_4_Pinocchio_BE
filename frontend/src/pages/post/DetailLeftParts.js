@@ -3,7 +3,7 @@ import noImage from "../../assets/images/no_image.png";
 import {dateFormat} from "../../utils/utils";
 import {useState} from "react";
 import {useMutation} from "react-query";
-import axios from "../../utils/axiosInstance";
+import axios from "axios";
 import {useNavigate} from "react-router-dom";
 import {jwtDecode} from "jwt-decode";
 import useConfirm from "../../hooks/useConfirm";

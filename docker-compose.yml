@@ -2,10 +2,10 @@ version: "3.8"  # Docker Compose 파일의 버전 (3.8은 최신 기능들을 �
 
 services:
     mysql:  # MySQL 데이터베이스 컨테이너
-        image: mysql:8.0  # 사용할 MySQL 이미지 (버전 8.0)
-        container_name: mysql-container  # 컨테이너 이름
-        restart: always  # 컨테이너가 중단되면 항상 재시작
-        environment:  # MySQL 환경 변수
+        image: mysql:8.0
+        container_name: mysql-container
+        restart: always
+        environment:
             MYSQL_ROOT_PASSWORD: devteam9  # root 사용자 비밀번호
             MYSQL_DATABASE: pino           # 초기 생성할 데이터베이스 이름
             MYSQL_USER: dev                # 사용자 계정
@@ -15,8 +15,8 @@ services:
         volumes:
             - /data/mysql:/var/lib/mysql  # 호스트의 /data/mysql → 컨테이너 내부 데이터 저장 경로
         networks:
-            - app-network  # 같은 네트워크 그룹에 소속
-        healthcheck:  # 컨테이너 헬스 체크 (상태 확인)
+            - app-network
+        healthcheck:
             test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
             interval: 10s
             timeout: 5s
@@ -48,7 +48,7 @@ services:
         restart: always
         ports:
             - "6379:6379"  # 호스트 6379 → 컨테이너 6379
-        command: ["redis-server", "--requirepass", "devteam9"]  # Redis 비밀번호 설정
+        command: ["redis-server", "--requirepass", "devteam9"]
         volumes:
             - /data/redis:/data
         networks:
@@ -72,9 +72,8 @@ services:
                 condition: service_healthy
             redis:
                 condition: service_healthy
-        # env_file: [삭제됨] - AWS 자격 증명을 env로부터 주입하지 않음
         environment:
-            SPRING_PROFILES_ACTIVE: dev  # Spring에 dev 프로파일을 활성화함
+            SPRING_PROFILES_ACTIVE: dev
             SPRING_DATASOURCE_URL: jdbc:mysql://mysql-container:3306/pino
             SPRING_DATASOURCE_USERNAME: dev
             SPRING_DATASOURCE_PASSWORD: devteam9
@@ -85,10 +84,22 @@ services:
         networks:
             - app-network
         healthcheck:
-            test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]  # Spring Actuator로 상태 체크
+            test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
             interval: 15s
             timeout: 5s
             retries: 5
+
+    react:  # React 프론트엔드 컨테이너
+        image: jeong6/frontend-app:latest  # 빌드된 이미지 이름 (DockerHub)
+        container_name: react-app-container
+        restart: always
+        ports:
+            - "3000:3000"  # 호스트 3000 → 컨테이너 3000
+        networks:
+            - app-network
+        depends_on:
+            spring:  # API 서버가 떠야 프론트 연결 가능
+                condition: service_healthy
 
     nginx:  # 웹 서버 역할 (Reverse Proxy)
         image: nginx:latest
@@ -101,7 +112,7 @@ services:
             - ./nginx/html:/usr/share/nginx/html  # 정적 리소스 마운트
         depends_on:
             spring:
-                condition: service_healthy  # Spring이 건강해야 nginx 시작
+                condition: service_healthy
         networks:
             - app-network
 

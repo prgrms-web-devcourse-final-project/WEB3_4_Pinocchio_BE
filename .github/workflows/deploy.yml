@@ -99,7 +99,12 @@ jobs:
                   npm ci
                   CI=false npm run build
 
-            # React용 Docker 이미지 빌드
+            #  DockerHub 로그인 (React 이미지 푸시 전에 이동)
+            - name: DockerHub 로그인
+              run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+
+
+              # React용 Docker 이미지 빌드
             - name: React Docker 이미지 빌드
               working-directory: ./frontend
               run: |
@@ -119,9 +124,6 @@ jobs:
               id: set_tag
               run: echo "tag_time=$(TZ=Asia/Seoul date +'%Y-%m-%d-%H%M')" >> $GITHUB_OUTPUT
 
-            # DockerHub 로그인
-            - name: DockerHub 로그인
-              run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
 
             # Docker 이미지 빌드
             - name: Docker 이미지 빌드

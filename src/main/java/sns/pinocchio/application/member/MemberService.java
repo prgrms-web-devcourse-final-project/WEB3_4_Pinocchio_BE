@@ -63,6 +63,11 @@ public class MemberService {
     if (!updateRequestDto.nickname().equals(member.getNickname())) {
       checkNicknameDuplicate(updateRequestDto.nickname());
     }
+
+    if (updateRequestDto.nickname().trim().isEmpty()) {
+      throw new MemberException(MemberErrorCode.NICKNAME_TOO_SHORT);
+    }
+
     // 이미지가 있을 경우 업로드
     if (image != null && !image.isEmpty()) {
       String imageUrl = s3Uploader.uploadFile(image, "post-profile/");

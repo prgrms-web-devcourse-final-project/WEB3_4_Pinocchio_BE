@@ -22,7 +22,7 @@ public class EmbeddingProvider {
       }
       return HuggingFaceEmbeddingModel.builder()
               .accessToken(accessToken)
-              .modelId("sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2")
+              .modelId("intfloat/multilingual-e5-large-instruct")
               .waitForModel(true)
               .timeout(ofSeconds(60))
               .build();

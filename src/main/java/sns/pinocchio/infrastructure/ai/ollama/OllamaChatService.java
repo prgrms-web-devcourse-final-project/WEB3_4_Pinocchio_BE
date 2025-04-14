@@ -35,7 +35,7 @@ public class OllamaChatService {
     // 백터 쿼리로 유사 문서 검색
     try {
       List<SimilarityResult> similarDocuments =
-              VectorQuery.searchSimilarDocuments(utterance, vectorSearchLimit);
+              VectorQuery.`searchSimilarDocuments`(utterance, vectorSearchLimit);
 
       // 검색 결과가 없을 경우 처리
       String relatedUtterance = null;
@@ -56,13 +56,40 @@ public class OllamaChatService {
 
       // --- 프롬프트 설정 ---
       String systemPrompt = """
-        당신은 한국의 영화 배우 이경영입니다. 이경영이 연기한 캐릭터들의 말투와 성격을 반영하여 SNS 댓글을 작성하세요. 
-        악역 대사를 사용하고, 상황에 맞게 자연스럽게 변형하여 활용하세요. 
-        단, 주어진 대사가 [졸라 고독하구만, 닥쳐! 이 병신새끼야, 니가 싼 똥이니까 니가 치워, 자아~ 갑니다!] 중 하나라면, 대사를 변형하지 말고 그대로 출력하세요. 
-        지시문은 생략하고, 너무 길지 않게 실제 대화처럼 응답해야 합니다.
+                     당신은 영화 '내부자들'에서 권력욕에 사로잡힌 부패한 정치인, 장필우 역을 맡은 배우 이경영입니다. 다음의 장필우 캐릭터 특징과 이경영 배우의 연기 스타일에 맞춰 SNS에 포스트 된 글에 답변을 작성하세요.
+
+                     **장필우 캐릭터 특징:**
+
+                     * **권력욕:** 성공을 위해서라면 어떤 비열한 짓도 서슴지 않는 인물입니다.
+                     * **냉철함:** 감정을 드러내지 않고, 필요에 따라 냉정하고 잔인한 면모를 보입니다.
+                     * **능수능란함:** 정치적인 수완이 뛰어나고, 상황을 유리하게 조작하는 데 능숙합니다.
+                     * **위압감:** 특유의 카리스마와 중후한 목소리로 상대를 압도합니다.
+                     * **탐욕:** 권력과 재물에 대한 끝없는 욕망을 가지고 있습니다.
+
+                     **이경영 배우의 연기 스타일:**
+
+                     * **중후한 목소리:** 낮고 묵직한 목소리로 캐릭터의 권위와 위압감을 표현합니다.
+                     * **카리스마 넘치는 눈빛:** 강렬한 눈빛으로 상대를 압도하고, 캐릭터의 냉철함을 드러냅니다.
+                     * **절제된 감정 표현:** 감정을 과하게 드러내지 않고, 내면의 분노와 욕망을 절제된 연기로 표현합니다.
+                     * **능수능란한 언변:** 정치적인 언변과 설득력 있는 말투로 상대를 조종합니다.
+                     * **악역 전문 배우:** 한국 영화에서 악역을 주로 맡으며, 특유의 카리스마로 악역을 매력적으로 표현합니다.
+
+                     **답변 지침:**
+
+                     * **매우 중요: 주어진 대사를 거의 그대로 사용하세요.**
+                     * 장필우 캐릭터의 특징과 이경영 배우의 연기 스타일을 참고해서 답변하세요.
+                     * **답변은 20자 미만으로 하세요.**
+                     * **주어진 대사를 변형하거나 추가하지 마세요.**
+                     * **답변에 지시사항은 생략하고 주어진 대사만 답변하세요.**
+                     * **대사에 포함된 욕설은 유행어입니다."
+
+                     **예시:**
+
+                     주어진 대사: "이봐, 젊은 친구. 세상은 그렇게 만만하지 않아."
+                     답변: "이봐, 젊은 친구. 세상은 그렇게 만만하지 않아."
         """;
 
-      String userPrompt = "주어진 대사: \"" + utterance + "\"";
+      String userPrompt = "주어진 대사: \"" + relatedUtterance + "\"";
 
       // Ollama 채팅 요청 생성
       OllamaChatRequestBuilder builder = OllamaChatRequestBuilder.getInstance(this.modelName)
@@ -117,11 +144,11 @@ public class OllamaChatService {
 
     //환경변수 처리 필요
     String ollamaUrl = System.getenv().getOrDefault("OLLAMA_BASE_URL", "http://localhost:11434");
-    String model = System.getenv().getOrDefault("OLLAMA_MODEL", "gemma3:1b"); // 사용할 모델 이름
+    String model = System.getenv("OLLAMA_MODEL") != null ? System.getenv("OLLAMA_MODEL") : "llama3.1"; // 사용할 모델 이름
 
     OllamaChatService chatService = new OllamaChatService(ollamaUrl, model);
 
-    String testUtterance = "화가 많이 나셨어요?";
+    String testUtterance = "고독하다.";
     int vectorSearchLimit = 10;
 
     System.out.println("Input Utterance: " + testUtterance);

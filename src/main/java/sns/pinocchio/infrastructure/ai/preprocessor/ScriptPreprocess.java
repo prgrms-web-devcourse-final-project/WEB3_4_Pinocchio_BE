@@ -15,33 +15,14 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class ScriptPreprocess {
-  private final Set<String> stopwords;
   private final ObjectMapper objectMapper;
 
-  public ScriptPreprocess(String stopwordsPath) throws IOException {
-    this.stopwords = loadStopwords(stopwordsPath);
+  public ScriptPreprocess() {
     this.objectMapper = new ObjectMapper();
     this.objectMapper.enable(SerializationFeature.INDENT_OUTPUT); // JSON pretty print
   }
 
-  private Set<String> loadStopwords(String resourcePath) throws IOException {
-    Set<String> stopwordsSet = new HashSet<>();
-    InputStream inputStream = getClass().getClassLoader().getResourceAsStream(resourcePath);
-
-    if (inputStream == null) {
-      throw new IOException("resources 폴더 안에 불용어 사전이 없습니다. 경로:" + resourcePath);
-    }
-
-    try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
-      String line;
-      while ((line = reader.readLine()) != null) {
-        stopwordsSet.add(line.trim());
-      }
-    }
-    return stopwordsSet;
-  }
-
-  //JSON 파일에서 대화 데이터를 로드 후 utterance를 추출
+  // JSON 파일에서 대화 데이터를 로드 후 utterance를 추출
   public List<Map<String, Object>> loadAndExtract(String resourcePath, String textFieldName) throws IOException {
     List<Map<String, Object>> dataList = new ArrayList<>();
     InputStream inputStream = getClass().getClassLoader().getResourceAsStream(resourcePath);
@@ -85,23 +66,29 @@ public class ScriptPreprocess {
     List<KoreanTokenJava> tokenList = OpenKoreanTextProcessorJava.tokensToJavaKoreanTokenList(tokens);
     System.out.println("Token List: " + tokenList);
 
-    // 3. 불용어 제거
+    // 3. 품사 필터링 및 불용어 제거 (OKT 불용어 처리 로직)
     Set<String> allowedPos = Set.of(
             KoreanPosJava.Noun.toString(), KoreanPosJava.Verb.toString(), KoreanPosJava.Adjective.toString(), KoreanPosJava.Adverb.toString(),
             KoreanPosJava.Exclamation.toString(), KoreanPosJava.Modifier.toString());
 
     return tokenList.stream()
             .filter(token -> allowedPos.contains(token.getPos().toString()))
+            .filter(token -> !isStopWord(token)) // 불용어 제거 추가
             .map(KoreanTokenJava::getText)
-            .filter(tokenText -> !stopwords.contains(tokenText))
             .collect(Collectors.toList());
+  }
+
+  // OKT를 활용한 불용어 제거 로직
+  private boolean isStopWord(KoreanTokenJava token) {
+    String pos = token.getPos().toString();
+    return pos.equals("Josa") || pos.equals("Eomi") || pos.equals("Punctuation") || pos.equals("Suffix");
   }
 
   public void savePreprocessedData(List<Map<String, Object>> dataList, String outputFilePath) throws IOException {
     List<Map<String, Object>> preprocessedList = new ArrayList<>();
     for (Map<String, Object> originalData : dataList) {
-      if (originalData.containsKey("utterance")) {
-        String originalText = (String) originalData.get("utterance");
+      if (originalData.containsKey("previous_utterance")) {
+        String originalText = (String) originalData.get("previous_utterance");
         List<String> processedTokens = preprocessText(originalText);
         Map<String, Object> preprocessedData = new HashMap<>(originalData); // 기존 메타데이터 복사
         preprocessedData.put("processed_tokens", processedTokens); // processed_tokens 추가
@@ -113,13 +100,12 @@ public class ScriptPreprocess {
   }
 
   public static void main(String[] args) {
-    String stopwordsPath = "stopwords.txt"; // resources 폴더에 있어야 함
     String inputFilePath = "data1.json"; // resources 폴더에 있어야 함
     String outputFilePath = "src/main/resources/preprocessed_data.json"; // 저장될 파일 경로
 
     try {
-      ScriptPreprocess preprocess = new ScriptPreprocess(stopwordsPath);
-      List<Map<String, Object>> rawData = preprocess.loadAndExtract(inputFilePath, "utterance");
+      ScriptPreprocess preprocess = new ScriptPreprocess();
+      List<Map<String, Object>> rawData = preprocess.loadAndExtract(inputFilePath, "previous_utterance");
       preprocess.savePreprocessedData(rawData, outputFilePath);
     } catch (IOException e) {
       e.printStackTrace();

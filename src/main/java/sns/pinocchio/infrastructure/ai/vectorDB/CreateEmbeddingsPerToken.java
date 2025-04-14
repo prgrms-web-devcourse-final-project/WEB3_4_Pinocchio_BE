@@ -60,6 +60,7 @@ public class CreateEmbeddingsPerToken {
                     .append("dialogue_id", entry.get("dialogue_id"))
                     .append("scene_number", entry.get("scene_number"))
                     .append("speaker", entry.get("speaker"))
+                    .append("previous_utterance", entry.get("previous_utterance"))
                     .append("utterance", entry.get("utterance"))
                     .append("context", entry.get("context"))
                     .append("emotion", entry.get("emotion"))

@@ -17,8 +17,7 @@ import java.util.List;
         throw new IllegalStateException("ATLAS_CONNECTION_STRING env variable is not set or is empty.");
       }
 
-      // Dimensions for paraphrase-multilingual-MiniLM-L12-v2 model
-      int EMBEDDING_DIMENSIONS = 384;
+      int EMBEDDING_DIMENSIONS = 1024;
 
       // establish connection and set namespace
       try (MongoClient mongoClient = MongoClients.create(uri)) {

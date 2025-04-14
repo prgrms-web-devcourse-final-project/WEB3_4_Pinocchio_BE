@@ -204,7 +204,7 @@ public class VectorQuery {
   // 사용 예시 메서드
   public static void main(String[] args) {
     // 예시 쿼리 문자열
-    String queryString = "그걸 왜 말을 못해? 병신이야?!";
+    String queryString = "오늘도 늦었네?";
     int limit = 10;
 
     try {

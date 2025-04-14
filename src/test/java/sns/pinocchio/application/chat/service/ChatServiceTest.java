@@ -26,10 +26,6 @@ import sns.pinocchio.application.chat.dto.ChatResponseDto.SendMessageInfo;
 import sns.pinocchio.application.member.MemberService;
 import sns.pinocchio.config.global.auth.model.CustomUserDetails;
 import sns.pinocchio.domain.chat.Chat;
-import sns.pinocchio.domain.chat.ChatException.ChatBadRequestException;
-import sns.pinocchio.domain.chat.ChatException.ChatInternalServerErrorException;
-import sns.pinocchio.domain.chat.ChatException.ChatNotFoundException;
-import sns.pinocchio.domain.chat.ChatException.ChatUnauthorizedException;
 import sns.pinocchio.domain.chat.ChatStatus;
 import sns.pinocchio.domain.chatroom.ChatRoom;
 import sns.pinocchio.domain.chatroom.ChatRoomSortType;
@@ -40,6 +36,7 @@ import sns.pinocchio.infrastructure.persistence.mongodb.ChatRepository;
 import sns.pinocchio.infrastructure.persistence.mongodb.ChatRoomRepository;
 import sns.pinocchio.infrastructure.persistence.mongodb.ChatRoomRepositoryCustom;
 import sns.pinocchio.infrastructure.websocket.WebSocketHandler;
+import sns.pinocchio.presentation.chat.exception.ChatException;
 
 @Tag("unit")
 @ExtendWith(MockitoExtension.class)
@@ -166,13 +163,12 @@ class ChatServiceTest {
   void sendMessageToChatroomNoAuthenticatedUserFoundTest() {
 
     // given
-    String errorMsg = "사용자가 인증되지 않았습니다. 로그인 후 다시 시도해주세요.";
+    String errorMsg = "사용자가 인증되지 않았습니다.";
 
     // when
-    ChatUnauthorizedException exception =
+    ChatException exception =
         assertThrows(
-            ChatUnauthorizedException.class,
-            () -> chatService.sendMessageToChatroom(null, mockSendMessage));
+            ChatException.class, () -> chatService.sendMessageToChatroom(null, mockSendMessage));
 
     // then
     assertThat(exception.getMessage()).isEqualTo(errorMsg);
@@ -188,10 +184,9 @@ class ChatServiceTest {
     when(customUserDetails.getTsid()).thenReturn(testSenderTsid);
 
     // when
-    ChatBadRequestException exception =
+    ChatException exception =
         assertThrows(
-            ChatBadRequestException.class,
-            () -> chatService.sendMessageToChatroom(customUserDetails, null));
+            ChatException.class, () -> chatService.sendMessageToChatroom(customUserDetails, null));
 
     // then
     assertThat(exception.getMessage()).isEqualTo(errorMsg);
@@ -202,15 +197,15 @@ class ChatServiceTest {
   void sendMessageToChatroomFailSendMsgTest() {
 
     // given
-    String errorMsg = "메시지 전송에 실패했습니다. 다시 시도해주세요.";
+    String errorMsg = "메시지 전송에 실패했습니다.";
 
     when(chatRoomRepository.findByParticipantTsids(any())).thenReturn(Optional.of(mockChatRoom));
     when(customUserDetails.getTsid()).thenReturn(testSenderTsid);
 
     // when
-    ChatInternalServerErrorException exception =
+    ChatException exception =
         assertThrows(
-            ChatInternalServerErrorException.class,
+            ChatException.class,
             () -> chatService.sendMessageToChatroom(customUserDetails, mockSendMessage));
 
     // then
@@ -235,9 +230,9 @@ class ChatServiceTest {
     when(webSocketHandler.sendNotificationToUser(any(), any())).thenReturn(false);
 
     // when
-    ChatInternalServerErrorException exception =
+    ChatException exception =
         assertThrows(
-            ChatInternalServerErrorException.class,
+            ChatException.class,
             () -> chatService.sendMessageToChatroom(customUserDetails, mockSendMessage));
 
     // then
@@ -353,12 +348,11 @@ class ChatServiceTest {
   void findChatRoomsFailNoUserTest() {
 
     // given
-    String errorMsg = "등록된 사용자를 찾을 수 없습니다.";
+    String errorMsg = "사용자가 인증되지 않았습니다.";
 
     // when
-    ChatNotFoundException exception =
-        assertThrows(
-            ChatNotFoundException.class, () -> chatService.getChatRooms(null, 1, "latest", null));
+    ChatException exception =
+        assertThrows(ChatException.class, () -> chatService.getChatRooms(null, 1, "latest", null));
 
     // then
     assertThat(exception.getMessage()).isEqualTo(errorMsg);
@@ -453,9 +447,9 @@ class ChatServiceTest {
     when(customUserDetails.getTsid()).thenReturn(testSenderTsid);
 
     // when
-    ChatNotFoundException exception =
+    ChatException exception =
         assertThrows(
-            ChatNotFoundException.class,
+            ChatException.class,
             () -> chatService.getMessages(customUserDetails, null, 1, "latest", null));
 
     // then

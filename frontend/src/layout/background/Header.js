@@ -3,7 +3,6 @@ import {Link, useLocation, useNavigate} from "react-router-dom";
 import useConfirm from "../../hooks/useConfirm";
 import {Button} from "react-bootstrap";
 import axios from "axios";
-import {useEffect, useState} from "react";
 import Spinner from "../../shared/Spinner";
 import BoardSearch from "../../pages/share/BoardSearch";
 import {useMutation} from "react-query";
@@ -17,11 +16,11 @@ const Header = () => {
     const handleLogoutClick = async () => {
         openConfirm({
             title: "로그아웃 하시겠습니까?",
-            callback: () => {}//logoutMutation.mutate()
+            callback: () => logoutMutation.mutate()
         })
     }
 
-    const logoutMutation = useMutation(axios.post("/auth/logout", {}), {
+    const logoutMutation = useMutation(() => axios.post("/auth/logout", {}), {
         onSuccess: (param) => {
             localStorage.removeItem('token');
             openConfirm({

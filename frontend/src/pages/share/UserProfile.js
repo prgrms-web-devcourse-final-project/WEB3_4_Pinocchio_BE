@@ -4,6 +4,7 @@ import useConfirm from "../../hooks/useConfirm";
 import {useNavigate} from "react-router-dom";
 import {Button, Col, Form, Row, Stack} from "react-bootstrap";
 import profile from "../../assets/images/sample_profile.png";
+import noImage from "../../assets/images/no_image.png";
 import {jwtDecode} from "jwt-decode";
 import {useState} from "react";
 import NotificationModal from "./NotificationModal";
@@ -68,7 +69,7 @@ const UserProfile = ({ page }) => {
             <Form >
                 <Row>
                     <Col md={3}>
-                        <img src={profile} style={{ width: "150px", height: "140px" }}/>
+                        <img src={user?.data.profileImageUrl ? user?.data.profileImageUrl : noImage} style={{ width: "150px", height: "140px" }}/>
                     </Col>
                     <Col >
                         <Stack direction={"horizontal"} gap={3} >

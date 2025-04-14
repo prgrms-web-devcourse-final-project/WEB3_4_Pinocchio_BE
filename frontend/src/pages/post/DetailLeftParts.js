@@ -14,7 +14,7 @@ const DetailLeftParts = ({ post, postRefetch }) => {
     const [isPostLike, setPostLike] = useState(false);
     const {openConfirm} = useConfirm();
     const navigate = useNavigate();
-    const likeMutation = useMutation((postId) => axios.post(`/posts/like/${postId}/toggle`), {
+    const likeMutation = useMutation((postId) => axios.post(`/posts/like/${postId}`), {
         onSuccess: (param) => {
             console.log(param);
             postRefetch()

@@ -6,6 +6,7 @@ import {useNavigate} from "react-router-dom";
 import {useQuery, useQueryClient} from "react-query";
 import Spinner from "../../shared/Spinner";
 import {jwtDecode} from "jwt-decode";
+import profileImage from "../../assets/images/sample_profile.png";
 
 const fetchUser = async () => {
     const token = localStorage.getItem('token');
@@ -25,6 +26,7 @@ const ProfileEditCard = () => {
     const [profileImageFile, setProfileImageFile] = useState();
     const queryClient = useQueryClient();
     const navigate = useNavigate();
+    const [profileImageUrl, setProfileImageUrl] = useState(profileImage);
     const { isLoading, data } = useQuery(
         ['ProfileEditCardFetchUser'],
         () => fetchUser(),

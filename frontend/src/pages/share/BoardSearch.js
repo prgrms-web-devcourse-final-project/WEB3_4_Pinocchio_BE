@@ -8,10 +8,12 @@ const BoardSearch = ({ refetch, type }) => {
     const navigate = useNavigate();
     const [queryParam, setQueryParam] = useQueryParam();
     const [keyword, setKeyword] = useState(queryParam.keyword || "");
-
     useEffect(() => {
-        handleReset();
-    }, [])
+        if (isEmptyOrNull(queryParam.query)) {
+            handleReset();
+        }
+    }, [queryParam.query]);
+
     const handleReset = () => {
         setKeyword('');
         setQueryParam({}); // URL 쿼리스트링 초기화

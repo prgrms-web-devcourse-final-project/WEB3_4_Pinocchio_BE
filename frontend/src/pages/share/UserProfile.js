@@ -7,6 +7,7 @@ import noImage from "../../assets/images/no_image.png";
 import {jwtDecode} from "jwt-decode";
 import {useState} from "react";
 import NotificationModal from "./NotificationModal";
+import {buildQuery} from "../../utils/utils";
 
 const fetchUser = async (userId) => {
     const response = await axios.get(`/user/${userId}`);
@@ -72,7 +73,7 @@ const UserProfile = ({ page }) => {
                     </Col>
                     <Col >
                         <Stack direction={"horizontal"} gap={3} >
-                            <Link to={`/post/${loginUser.tsid}`}><h4>{loginUser.tsid}</h4></Link>
+                            <Link to={`/post/list${buildQuery({ type: "users", query: user?.data.nickname })}`}><h4>{loginUser.tsid}</h4></Link>
                             {renderButton()}
                         </Stack>
                         <Row>

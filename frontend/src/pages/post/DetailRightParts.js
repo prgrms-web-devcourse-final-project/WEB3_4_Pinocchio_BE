@@ -19,7 +19,7 @@ const DetailRightParts = ({ post }) => {
     const [editComment, setEditComment] = useState('');
     const [comments, setComments] = useState();
     const { isLoading, isFetching, data, refetch } = useQuery(
-        ['fetchPostComments'],
+        ['fetchPostComments', post?.postId],
         () => fetchPostComments(post.postId),
         { enabled: !!post, keepPreviousData: true, refetchOnWindowFocus: false}
     );
@@ -66,8 +66,7 @@ const DetailRightParts = ({ post }) => {
         if (data) {
             const enhancedComments = data.comments.map(item => ({
                 ...item,
-                isEditorMode: false,
-                isLike: false
+                isEditorMode: false
             }));
             setComments(enhancedComments);
         }
@@ -118,21 +117,11 @@ const DetailRightParts = ({ post }) => {
     }
 
     const handleCommentsLikeClick = (comment) => {
-        console.log('like: ', comment)
         const likeData = {
             postId: comment.postId,
             commentId: comment.id
         }
         commentLikeMutation.mutate(likeData);
-        setComments((prevState) => {
-            return prevState.map((item) => {
-                if (item.id === comment.id) {
-                    return { ...item, isLike: !item.isLike };
-                } else {
-                    return item;
-                }
-            })
-        })
     }
 
     return (
@@ -147,7 +136,7 @@ const DetailRightParts = ({ post }) => {
                             return <div key={comment.createdAt} className="kw-view-comment-item">
                                 <Stack gap={2} direction={"horizontal"}>
                                     {comment.isEditorMode ?
-                                        <Form.Control style={{ height: "30px", width: "80%" }}
+                                        <Form.Control style={{ height: "30px", width: "78%" }}
                                                       type="text" value={editComment}
                                                       onChange={(e) => setEditComment(e.target.value)}
                                         /> : <div>{comment.content}</div>}
@@ -164,7 +153,7 @@ const DetailRightParts = ({ post }) => {
                                     </div>}
                                 </Stack>
                                 <Stack gap={2} direction={"horizontal"}>
-                                    <span className={`ico-like-${comment.isLike ? 'fill' : 'empty'} cursor-pointer`}
+                                    <span className={`ico-like-${comment.liked ? 'fill' : 'empty'} cursor-pointer`}
                                           onClick={() => handleCommentsLikeClick(comment)}
                                     /><span>{comment.likes}</span>
                                     <span className="ms-auto">

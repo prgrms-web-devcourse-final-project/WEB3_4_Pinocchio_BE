@@ -1,10 +1,10 @@
 import {Button, Card, Col, Image, Row, Stack} from "react-bootstrap";
 import noImage from "../../assets/images/no_image.png";
-import {dateFormat} from "../../utils/utils";
+import {buildQuery, dateFormat} from "../../utils/utils";
 import {useState} from "react";
 import {useMutation} from "react-query";
 import axios from "axios";
-import {useNavigate} from "react-router-dom";
+import {Link, useNavigate} from "react-router-dom";
 import {jwtDecode} from "jwt-decode";
 import useConfirm from "../../hooks/useConfirm";
 
@@ -64,7 +64,7 @@ const DetailLeftParts = ({ post, postRefetch }) => {
                         <Image src={post?.profileImage ? post.profileImage : noImage} rounded fluid />
                     </Col>
                     <Col md={6} >
-                        {post?.tsid}
+                        <Link to={`/post/list${buildQuery({ type: "users", query: post?.nickname })}`}>{post?.tsid}</Link>
                         {post?.tsid === loginUser.tsid ? <Stack direction={"horizontal"} gap={4}>
                             <Button size={"sm"}
                                     onClick={() => navigate('/post/modify', {state: post})}>수정</Button>
@@ -82,7 +82,7 @@ const DetailLeftParts = ({ post, postRefetch }) => {
             </Card.Body>
             <hr/>
             <Card.Footer className="d-flex align-items-center gap-2" style={{ minHeight: "50px" }}>
-                <span className={`ico-like-${isPostLike ? 'fill' : 'empty'} cursor-pointer`}
+                <span className={`ico-like-${post?.liked ? 'fill' : 'empty'} cursor-pointer`}
                       onClick={handlePostLikeClick}
                 />
                 <span>{post?.likes}</span>

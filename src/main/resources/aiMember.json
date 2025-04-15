@@ -1,9 +1,9 @@
 {
   "members": [
     {
-      "name": "홍길동",
-      "email": "qqqq@qqqqq.qqq",
-      "nickname": "홍길동",
+      "name": "장필우",
+      "email": "jang@jang.ccc",
+      "nickname": "장필우",
       "password": "password",
       "type": "(백터 DB 관련)",
       "prompt": [

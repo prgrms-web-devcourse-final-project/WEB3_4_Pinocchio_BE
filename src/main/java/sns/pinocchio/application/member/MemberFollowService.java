@@ -4,11 +4,14 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import lombok.RequiredArgsConstructor;
@@ -25,7 +28,9 @@ public class MemberFollowService {
 	public Map<String, Object> followingUser(MemberFollowRequest request, String followingId, String authorId,
 		String authorNickname) {
 		Optional<UserFollow> optUserFollow = userFollowRepository.findByFollowerIdAndFollowingId(authorId, followingId);
-
+		if (Objects.equals(authorId, followingId)) {
+			return Map.of("message", "스스로 팔로잉 불가능.", "followed", false);
+		}
 		if (optUserFollow.isEmpty()) {
 			UserFollow newUserFollow = UserFollow.builder()
 				.followingId(followingId)
@@ -92,5 +97,12 @@ public class MemberFollowService {
 			"totalElements", totalElements,
 			"totalPages", totalPages,
 			"followings", followings);
+	}
+
+	public Map<String, Object> isFollowing(String authorId,String followingId){
+		Optional<UserFollow> optUserFollow = userFollowRepository.findByFollowerIdAndFollowingId(authorId, followingId);
+		return Map.of("message", "팔로잉 확인 조회 성공",
+			"isFollowing", optUserFollow.isPresent());
+
 	}
 }

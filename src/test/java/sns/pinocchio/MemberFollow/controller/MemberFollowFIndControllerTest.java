@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -85,7 +85,7 @@ class MemberFollowFIndControllerTest {
 		Map<String, Object> response = Map.of("message", "팔로워 조회에 성공하였습니다.", "followers", followings);
 		when(memberFollowService.findFollowers(followingId,page) ).thenReturn(response);
 
-		mockMvc.perform(post("/user/"+followingId+"/followers").contentType(MediaType.APPLICATION_JSON)
+		mockMvc.perform(get("/user/"+followingId+"/followers").contentType(MediaType.APPLICATION_JSON)
 				.header("Authorization", accessToken))
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.message").value("팔로워 조회에 성공하였습니다."))
@@ -110,7 +110,7 @@ class MemberFollowFIndControllerTest {
 		Map<String, Object> response = Map.of("message", "팔로잉 조회에 성공하였습니다.", "followings", followers);
 		when(memberFollowService.findFollowings(followerId,page) ).thenReturn(response);
 
-		mockMvc.perform(post("/user/"+followerId+"/followings").contentType(MediaType.APPLICATION_JSON)
+		mockMvc.perform(get("/user/"+followerId+"/followings").contentType(MediaType.APPLICATION_JSON)
 				.header("Authorization", accessToken))
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.message").value("팔로잉 조회에 성공하였습니다."))

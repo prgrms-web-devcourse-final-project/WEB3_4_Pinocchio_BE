@@ -8,6 +8,7 @@ import java.util.Optional;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -46,11 +47,6 @@ public class MemberFollowController {
 		@RequestBody MemberFollowRequest request) {
 		Member authorMember = userDetails.getMember();
 
-		if (Objects.equals(authorMember.getTsid(), userId)) {
-			return ResponseEntity.status(HttpStatus.FORBIDDEN)
-				.body(Map.of("message", "스스로 팔로잉 불가능"));
-		}
-
 		Map<String, Object> response = memberFollowService.followingUser(request, userId, authorMember.getTsid(),
 			authorMember.getNickname());
 
@@ -61,7 +57,7 @@ public class MemberFollowController {
 	@ApiResponses({@ApiResponse(responseCode = "200", description = "팔로워 목록 조회 성공"),
 		@ApiResponse(responseCode = "404", description = "유저 조회 실패"),
 		@ApiResponse(responseCode = "500", description = "서버 내부 오류")})
-	@PostMapping("/{userId}/followers")
+	@GetMapping("/{userId}/followers")
 	public ResponseEntity<Map<String, Object>> findFollowers(@PathVariable String userId,
 		@RequestParam(value = "page", defaultValue = "0") int page) {
 		Optional<Member> optMember = memberRepository.findByTsid(userId);
@@ -78,7 +74,7 @@ public class MemberFollowController {
 	@ApiResponses({@ApiResponse(responseCode = "200", description = "팔로잉 목록 조회 성공"),
 		@ApiResponse(responseCode = "404", description = "유저 조회 실패"),
 		@ApiResponse(responseCode = "500", description = "서버 내부 오류")})
-	@PostMapping("/{userId}/followings")
+	@GetMapping("/{userId}/followings")
 	public ResponseEntity<Map<String, Object>> findFollowings(@PathVariable String userId,
 		@RequestParam(value = "page", defaultValue = "0") int page) {
 		Optional<Member> optMember = memberRepository.findByTsid(userId);
@@ -91,4 +87,20 @@ public class MemberFollowController {
 		return ResponseEntity.status(HttpStatus.OK).body(response);
 	}
 
+	@Operation(summary = "유저 팔로잉 확인", description = "유저 팔로잉 확인")
+	@ApiResponses({@ApiResponse(responseCode = "200", description = "팔로잉 확인 성공"),
+		@ApiResponse(responseCode = "404", description = "유저 조회 실패"),
+		@ApiResponse(responseCode = "500", description = "서버 내부 오류")})
+	@GetMapping("/{userId}/isfollowings")
+	public ResponseEntity<Map<String, Object>> isFollowings(
+		@AuthenticationPrincipal CustomUserDetails userDetails,
+		@PathVariable String userId) {
+		Optional<Member> optMember = memberRepository.findByTsid(userId);
+		if (optMember.isEmpty()) {
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("message", "등록된 유저를 찾을 수 없습니다."));
+		}
+		Map<String, Object> response = memberFollowService.isFollowing(userDetails.getTsid(),userId);
+
+		return ResponseEntity.status(HttpStatus.OK).body(response);
+	}
 }

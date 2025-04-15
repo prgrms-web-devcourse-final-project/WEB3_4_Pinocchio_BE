@@ -45,22 +45,21 @@ public class SecurityConfig {
 
                 // === [ 인증 불필요 API 접근 허용 ] ===
                       .requestMatchers(
-                        "/login", "/login/**",
-                        "/auth/signup", "/auth/login", "/auth/logout",
-                        "/posts/search", "/actuator/health",
-                        "/user/password/reset")
-                      .permitAll()
+                              "/login", "/login/**",
+                              "/auth/signup", "/auth/login", "/auth/logout",
+                              "/posts/search",
+                              "/actuator/health",
+                              "/user/password/reset"
+                      ).permitAll()
 
 
                 // === [ 정적 자원 및 React SPA 경로 접근 허용 ] ===
                         .requestMatchers(
                                 "/", "/index.html", "/favicon.ico",
                                 "/asset-manifest.json", "/manifest.json",
-                                "/logo192.png", "/logo512.png",
+                                "/logo192.png", "/logo512.png", "/post/list", "/post/detail/**","/mypage/**",
                                 "/static/**", // 빌드된 정적 리소스
-                                "/**/*.js", "/**/*.css", "/**/*.png", "/**/*.svg", "/**/*.woff2",
-                                // React 라우터 경로들도 정적처럼 처리되므로 허용
-                                "/signup", "/main", "/mypage/**", "/post/**", "/board/**"
+                                "/**/*.js", "/**/*.css", "/**/*.png", "/**/*.svg", "/**/*.woff2"
                         ).permitAll()
 
                 // === [ 인증 필요한 API ] ===

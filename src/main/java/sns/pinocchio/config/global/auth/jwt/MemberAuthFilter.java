@@ -116,6 +116,8 @@ public class MemberAuthFilter extends OncePerRequestFilter {
                       || path.equals("/signup")        // ✅ React SPA 회원가입 경로
                       || path.equals("/main")
                       || path.startsWith("/board")
+                      || path.equals("/post/list")
+                      || path.startsWith("/post/detail")
                       || path.startsWith("/mypage")
                       || path.matches("/[a-zA-Z0-9\\-_/]*\\.js")
                       || path.matches("/[a-zA-Z0-9\\-_/]*\\.css")

@@ -19,7 +19,7 @@ const queryClient = new QueryClient({
 // Axios 요청 인터셉터 - 요청 전에 실행됨
 axios.interceptors.request.use(config => {
     const token = localStorage.getItem('token');
-    console.log("||| axios 요청 직전 토큰 확인:", token);
+
     if (token) {
         config.headers.Authorization = `Bearer ${token}`;
     }

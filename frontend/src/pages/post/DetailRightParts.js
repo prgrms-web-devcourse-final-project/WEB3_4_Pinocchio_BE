@@ -69,6 +69,7 @@ const DetailRightParts = ({ post }) => {
                 isEditorMode: false
             }));
             setComments(enhancedComments);
+
         }
     }, [data]);
 
@@ -157,7 +158,7 @@ const DetailRightParts = ({ post }) => {
                                           onClick={() => handleCommentsLikeClick(comment)}
                                     /><span>{comment.likes}</span>
                                     <span className="ms-auto">
-                                                {comment.userId}
+                                                {comment.nickname}
                                             </span>|
                                     <span>{dateFormat(comment.createdAt, "yyyy-MM-dd")}</span>
                                 </Stack>

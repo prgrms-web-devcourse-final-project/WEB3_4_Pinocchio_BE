@@ -1,39 +1,32 @@
 package sns.pinocchio.application.comment;
 
-import static sns.pinocchio.application.comment.DeleteType.*;
-import static sns.pinocchio.presentation.comment.exception.CommentErrorCode.*;
-
-import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
 import lombok.RequiredArgsConstructor;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-
-import sns.pinocchio.application.comment.commentDto.CommentCreateRequest;
-import sns.pinocchio.application.comment.commentDto.CommentDeleteRequest;
-import sns.pinocchio.application.comment.commentDto.CommentGetResponse;
-import sns.pinocchio.application.comment.commentDto.CommentLikeRequest;
-import sns.pinocchio.application.comment.commentDto.CommentModifyRequest;
+import sns.pinocchio.application.comment.commentDto.*;
 import sns.pinocchio.config.global.enums.CancellState;
 import sns.pinocchio.domain.comment.Comment;
+import sns.pinocchio.domain.member.Member;
+import sns.pinocchio.infrastructure.member.MemberRepository;
 import sns.pinocchio.infrastructure.persistence.mongodb.CommentRepository;
 import sns.pinocchio.presentation.comment.exception.CommentErrorCode;
 import sns.pinocchio.presentation.comment.exception.CommentException;
+
+import java.time.LocalDateTime;
+import java.util.*;
+
+import static sns.pinocchio.application.comment.DeleteType.HARD_DELETED;
+import static sns.pinocchio.application.comment.DeleteType.SOFT_DELETED;
+import static sns.pinocchio.presentation.comment.exception.CommentErrorCode.COMMENT_NOT_FOUND;
 
 @Service
 @RequiredArgsConstructor
 public class CommentService {
 	private final CommentRepository commentRepository;
 	private final CommentLikeService commentLikeService;
+    private final MemberRepository memberRepository;
 
 	//댓글 생성 메서드
 	public Map<String, Object> createComment(CommentCreateRequest request, String authorId) {
@@ -134,9 +127,14 @@ public class CommentService {
 		List<Comment> commentList = commentRepository.findAllByPostIdAndStatus(postId, CancellState.ACTIVE);
 		List<CommentGetResponse> commentGetList = commentList.stream().map(comment -> {
 			boolean isLiked = commentLikeService.isLiked(comment.getId(),authorId);
-			return CommentGetResponse.builder()
+
+            Member writer = memberRepository.findByTsid(comment.getUserId())
+                    .orElseThrow(() -> new CommentException(COMMENT_NOT_FOUND));
+
+            return CommentGetResponse.builder()
 				.id(comment.getId())
 				.userId(comment.getUserId())
+                .nickname(writer.getNickname())
 				.postId(comment.getPostId())
 				.content(comment.getContent())
 				.parentCommentId(comment.getParentCommentId())

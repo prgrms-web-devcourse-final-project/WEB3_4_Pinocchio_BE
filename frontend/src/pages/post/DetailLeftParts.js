@@ -10,10 +10,12 @@ import useConfirm from "../../hooks/useConfirm";
 
 const DetailLeftParts = ({ post, postRefetch }) => {
     const token = localStorage.getItem('token');
-    const loginUser = jwtDecode(token);
+    const loginUser = jwtDecode(token); // 로그인한 유저 정보
     const [isPostLike, setPostLike] = useState(false);
     const {openConfirm} = useConfirm();
     const navigate = useNavigate();
+
+    // 게시글 좋아요 API 호출
     const likeMutation = useMutation((postId) => axios.post(`/posts/like/${postId}`), {
         onSuccess: (param) => {
             console.log(param);
@@ -27,6 +29,7 @@ const DetailLeftParts = ({ post, postRefetch }) => {
         }
     });
 
+    // 게시글 삭제 API 호출
     const deleteMutation = useMutation((postId) => axios.delete(`/posts/delete/${postId}`), {
         onSuccess: (param) => {
             console.log(param);
@@ -45,8 +48,8 @@ const DetailLeftParts = ({ post, postRefetch }) => {
     });
 
     const handlePostLikeClick = () => {
-        setPostLike(prev => !prev);
-        likeMutation.mutate(post.postId);
+        setPostLike(prev => !prev); // UI 토글
+        likeMutation.mutate(post.postId); // 서버 요청
     }
 
     const handlePostDeleteClick = () => {
@@ -60,35 +63,50 @@ const DetailLeftParts = ({ post, postRefetch }) => {
         <Card style={{minWidth: "300px"}} >
             <Card.Header style={{ minHeight: "50px" }}>
                 <Row>
+                    {/* 작성자 프로필 이미지 */}
                     <Col md={2}>
                         <Image src={post?.profileImage ? post.profileImage : noImage} rounded fluid />
                     </Col>
-                    <Col md={6} >
-                        <Link to={`/post/list${buildQuery({ type: "users", query: post?.nickname })}`}>{post?.tsid}</Link>
-                        {post?.tsid === loginUser.tsid ? <Stack direction={"horizontal"} gap={4}>
-                            <Button size={"sm"}
-                                    onClick={() => navigate('/post/modify', {state: post})}>수정</Button>
-                            <Button size={"sm"} onClick={handlePostDeleteClick}>삭제</Button>
-                        </Stack> : null}
+
+                    {/* 작성자 닉네임 및 수정/삭제 버튼 */}
+                    <Col md={6}>
+                        {/*  닉네임으로 출력하도록 수정됨 */}
+                        <Link to={`/post/list${buildQuery({ type: "users", query: post?.nickname })}`}>
+                            {post?.nickname}
+                        </Link>
+
+                        {/* 로그인한 사용자가 작성자일 경우 수정/삭제 버튼 노출 */}
+                        {post?.tsid === loginUser.tsid && (
+                            <Stack direction={"horizontal"} gap={4}>
+                                <Button size="sm" onClick={() => navigate('/post/modify', { state: post })}>수정</Button>
+                                <Button size="sm" onClick={handlePostDeleteClick}>삭제</Button>
+                            </Stack>
+                        )}
                     </Col>
+
+                    {/* 작성일자 및 목록 버튼 */}
                     <Col md={4}>
                         {dateFormat(post?.createdAt, "yyyy-MM-dd")}
-                        <Button size={"sm"} onClick={() => navigate('/post/list')}>목록</Button>
+                        <Button size="sm" onClick={() => navigate('/post/list')}>목록</Button>
                     </Col>
                 </Row>
             </Card.Header>
+
+            {/* 게시글 이미지 */}
             <Card.Body>
                 <Image src={post?.imageUrls[0]} rounded fluid />
             </Card.Body>
-            <hr/>
+
+            <hr />
+
+            {/* 좋아요 UI */}
             <Card.Footer className="d-flex align-items-center gap-2" style={{ minHeight: "50px" }}>
                 <span className={`ico-like-${post?.liked ? 'fill' : 'empty'} cursor-pointer`}
-                      onClick={handlePostLikeClick}
-                />
+                      onClick={handlePostLikeClick} />
                 <span>{post?.likes}</span>
             </Card.Footer>
         </Card>
-    )
-}
+    );
+};
 
 export default DetailLeftParts;

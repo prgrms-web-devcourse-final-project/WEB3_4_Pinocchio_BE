@@ -26,6 +26,7 @@ const UserProfile = ({ page }) => {
         { keepPreviousData: true, refetchOnWindowFocus: false}
     );
 
+
     const deleteMutation = useMutation(() => axios.delete(`/user/${loginUser.id}`), {
         onSuccess: (param) => {
             openConfirm({
@@ -73,7 +74,9 @@ const UserProfile = ({ page }) => {
                     </Col>
                     <Col >
                         <Stack direction={"horizontal"} gap={3} >
-                            <Link to={`/post/list${buildQuery({ type: "users", query: user?.data.nickname })}`}><h4>{loginUser.tsid}</h4></Link>
+                            <Link to={`/post/list${buildQuery({ type: "users", query: user?.data.nickname })}`}>
+                                <h4>{user?.data.nickname}</h4>
+                            </Link>
                             {renderButton()}
                         </Stack>
                         <Row>

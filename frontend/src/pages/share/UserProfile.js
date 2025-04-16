@@ -14,7 +14,7 @@ const fetchUser = async (userId) => {
     return response.data;
 };
 
-const UserProfile = ({ page }) => {
+const UserProfile = ({ page, userId }) => {
     const { openConfirm } = useConfirm();
     const navigate = useNavigate();
     const [isNotificationModalOpen, setNotificationModalOpen] = useState();

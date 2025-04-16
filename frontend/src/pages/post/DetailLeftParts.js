@@ -64,7 +64,7 @@ const DetailLeftParts = ({ post, postRefetch }) => {
                         <Image src={post?.profileImage ? post.profileImage : noImage} rounded fluid />
                     </Col>
                     <Col md={6} >
-                        <Link to={`/post/list${buildQuery({ type: "users", query: post?.nickname })}`}>{post?.tsid}</Link>
+                        <Link to={`/post/list${buildQuery({ type: "users", query: post?.nickname })}`} state={{ userId: post?.tsid }}>{post?.tsid}</Link>
                         {post?.tsid === loginUser.tsid ? <Stack direction={"horizontal"} gap={4}>
                             <Button size={"sm"}
                                     onClick={() => navigate('/post/modify', {state: post})}>수정</Button>

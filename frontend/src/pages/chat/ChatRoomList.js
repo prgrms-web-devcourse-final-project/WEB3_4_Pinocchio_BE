@@ -5,17 +5,15 @@ import axios from "axios";
 import {useQuery} from "react-query";
 
 const fetchchatList = async () => {
-    const token = localStorage.getItem('token');
-    const loginUser = jwtDecode(token);
     const response = await axios.get(`/chat/list`);
-    return response.data;
+    console.log(response.data.data)
+    return response.data.data;
 }
 
 const ChatRoomList = ({isOpen, handleCloseClick, openChatRoom}) => {
     const { isLoading, data } = useQuery(
         ['fetchchatList'],
-        // () => fetchchatList(),
-        () => {},
+        () => fetchchatList(),
         { keepPreviousData: true, refetchOnWindowFocus: false}
     );
 

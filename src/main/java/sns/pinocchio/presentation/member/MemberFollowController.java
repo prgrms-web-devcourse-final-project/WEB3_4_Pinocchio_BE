@@ -57,7 +57,7 @@ public class MemberFollowController {
 	@ApiResponses({@ApiResponse(responseCode = "200", description = "팔로워 목록 조회 성공"),
 		@ApiResponse(responseCode = "404", description = "유저 조회 실패"),
 		@ApiResponse(responseCode = "500", description = "서버 내부 오류")})
-	@GetMapping("/{userId}/followers")
+	@PostMapping("/{userId}/followers")
 	public ResponseEntity<Map<String, Object>> findFollowers(@PathVariable String userId,
 		@RequestParam(value = "page", defaultValue = "0") int page) {
 		Optional<Member> optMember = memberRepository.findByTsid(userId);
@@ -74,7 +74,7 @@ public class MemberFollowController {
 	@ApiResponses({@ApiResponse(responseCode = "200", description = "팔로잉 목록 조회 성공"),
 		@ApiResponse(responseCode = "404", description = "유저 조회 실패"),
 		@ApiResponse(responseCode = "500", description = "서버 내부 오류")})
-	@GetMapping("/{userId}/followings")
+	@PostMapping("/{userId}/followings")
 	public ResponseEntity<Map<String, Object>> findFollowings(@PathVariable String userId,
 		@RequestParam(value = "page", defaultValue = "0") int page) {
 		Optional<Member> optMember = memberRepository.findByTsid(userId);

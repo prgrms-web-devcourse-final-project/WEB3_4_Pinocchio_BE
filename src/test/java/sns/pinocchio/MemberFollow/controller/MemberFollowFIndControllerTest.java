@@ -85,7 +85,7 @@ class MemberFollowFIndControllerTest {
 		Map<String, Object> response = Map.of("message", "팔로워 조회에 성공하였습니다.", "followers", followings);
 		when(memberFollowService.findFollowers(followingId,page) ).thenReturn(response);
 
-		mockMvc.perform(get("/user/"+followingId+"/followers").contentType(MediaType.APPLICATION_JSON)
+		mockMvc.perform(post("/user/"+followingId+"/followers").contentType(MediaType.APPLICATION_JSON)
 				.header("Authorization", accessToken))
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.message").value("팔로워 조회에 성공하였습니다."))
@@ -110,7 +110,7 @@ class MemberFollowFIndControllerTest {
 		Map<String, Object> response = Map.of("message", "팔로잉 조회에 성공하였습니다.", "followings", followers);
 		when(memberFollowService.findFollowings(followerId,page) ).thenReturn(response);
 
-		mockMvc.perform(get("/user/"+followerId+"/followings").contentType(MediaType.APPLICATION_JSON)
+		mockMvc.perform(post("/user/"+followerId+"/followings").contentType(MediaType.APPLICATION_JSON)
 				.header("Authorization", accessToken))
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.message").value("팔로잉 조회에 성공하였습니다."))

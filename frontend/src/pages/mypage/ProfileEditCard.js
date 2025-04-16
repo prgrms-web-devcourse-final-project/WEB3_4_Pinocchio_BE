@@ -12,7 +12,7 @@ const fetchUser = async () => {
     const token = localStorage.getItem('token');
     const loginUser = jwtDecode(token);
     const response = await axios.get(`/user/${loginUser.id}`);
-    console.log(response.data.data)
+
     return response.data.data;
 };
 

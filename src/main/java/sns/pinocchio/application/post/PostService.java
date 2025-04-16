@@ -188,6 +188,7 @@ public class PostService {
                 .tsid(post.getTsid())
                 .nickname(member.getNickname())
                 .profileImage(member.getProfileImageUrl()) // null 가능성 있음
+                .userId(member.getId())
                 .content(post.getContent())
                 .imageUrls(post.getImageUrls())
                 .hashtags(post.getHashtags())

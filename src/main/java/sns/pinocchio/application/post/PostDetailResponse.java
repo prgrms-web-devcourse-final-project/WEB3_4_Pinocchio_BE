@@ -16,6 +16,9 @@ public class PostDetailResponse {
     //  MySQL: 작성자 TSID (Mongo + MySQL 공통 식별자)
     private String tsid;
 
+    //  MySQL: 작성자 아이디
+    private Long userId;
+
     //  MySQL: 작성자 닉네임
     private String nickname;
 

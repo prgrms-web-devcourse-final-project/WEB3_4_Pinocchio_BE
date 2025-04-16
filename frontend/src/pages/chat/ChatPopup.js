@@ -1,42 +1,20 @@
 import Draggable from "react-draggable";
 import {Button, Card, Col, Form, Row, Stack} from "react-bootstrap";
 import styles from "./ChatPopup.module.scss";
-import axios from "axios";
 import {useQuery} from "react-query";
 import {dateFormat} from "../../utils/utils";
 import {useState} from "react";
 import {jwtDecode} from "jwt-decode";
+import axios from "axios";
 
 const fetchchatMessage = async (chatId) => {
-    // const response = await axios.get(`/chat/{chatId}/messages`);
-    // console.log(response.data)
-    return [
-        {
-            "msgId": "67eb94be035aef339738f859",
-            "senderId": "0KBKT85AGSNTB",
-            "receiverId": "user456",
-            "content": "안녕하세요! 첫 번째 메시지입니다.",
-            "readStatus": true,
-            "likeStatus": true,
-            "createdAt": "2025-04-09T07:22:51.404Z",
-            "createdAtForCursor": "0K93NH12Q9727",
-            "modifiedAt": "2025-04-09T07:22:51.404Z"
-        },
-        {
-            "msgId": "msg_2",
-            "senderId": "user456",
-            "receiverId": "user123",
-            "content": "반갑습니다! 두 번째 메시지입니다.",
-            "readStatus": false,
-            "likeStatus": false,
-            "createdAt": "2025-04-08T07:22:51.404Z",
-            "createdAtForCursor": "0K93NGACK9693",
-            "modifiedAt": "2025-04-08T07:22:51.404Z"
-        }
-    ];
+    const response = await axios.get(`/chat/${chatId}/messages`);
+    console.log('fetchchatMessage: ', response.data.data)
+    return response.data.data;
 };
 
 const ChatPopup = ({ room, onClose }) => {
+    console.log('room: ', room)
     const token = localStorage.getItem('token')
     const loginUser = jwtDecode(token);
     const { isLoading, data, refetch } = useQuery(
@@ -44,7 +22,10 @@ const ChatPopup = ({ room, onClose }) => {
         () => fetchchatMessage(room.roomId),
         { keepPreviousData: true, refetchOnWindowFocus: false}
     );
-
+    const [position] = useState({
+        top: Math.floor(Math.random() * 600),
+        left: Math.floor(Math.random() * 600),
+    })
     const [newMessage, setNewMessage] = useState('');
 
     return (
@@ -52,8 +33,8 @@ const ChatPopup = ({ room, onClose }) => {
             <Card className={styles.chatCard}
                 style={{
                     zIndex: 999,
-                    top: 100 + room.roomId * 30,
-                    left: 100 + room.roomId * 30
+                    top: 300 - position.top,
+                    left: 300 - position.left
                 }}
             >
                 <Card.Header
@@ -76,7 +57,7 @@ const ChatPopup = ({ room, onClose }) => {
                 }}>
                     <div className="kw-chat">
                         <div className="kw-chat__list">
-                            {data?.map((message) => {
+                            {data?.chatMessages.map((message) => {
                                 const isMyMessage = message.senderId === loginUser.tsid; // 내 글인지 판별
                                 return <div key={message.msgId} className={isMyMessage ? "chat__me" : "chat__other"}>
                                     {/* 채팅 본문*/}

@@ -1,23 +1,49 @@
 import {Card, Col, Image, ListGroup, Row, Stack} from "react-bootstrap";
-import sampleProfile from "../../assets/images/sample_profile.png";
-import {jwtDecode} from "jwt-decode";
+import noImage from "../../assets/images/no_image.png";
 import axios from "axios";
-import {useQuery} from "react-query";
+import {useInfiniteQuery, useQuery} from "react-query";
+import {useEffect, useState} from "react";
+import {useInView} from "react-intersection-observer";
 
-const fetchchatList = async () => {
-    const token = localStorage.getItem('token');
-    const loginUser = jwtDecode(token);
+const fetchChatRoomList = async (pageParam) => {
     const response = await axios.get(`/chat/list`);
-    return response.data;
+    return response.data.data;
 }
 
 const ChatRoomList = ({isOpen, handleCloseClick, openChatRoom}) => {
-    const { isLoading, data } = useQuery(
-        ['fetchchatList'],
-        // () => fetchchatList(),
-        () => {},
-        { keepPreviousData: true, refetchOnWindowFocus: false}
-    );
+    const [chatList, setChatList] = useState([]);
+    const { ref, inView } = useInView({
+        threshold: 0.5, // 화면의 50%가 보일 때 감지
+    });
+    const { data, fetchNextPage, hasNextPage } = useInfiniteQuery({
+        queryKey: ['ChatRoomList'],
+        queryFn: (pageParam) => fetchChatRoomList(pageParam),
+        getNextPageParam: (lastData, allData) => {
+            if (lastData?.hasNext) {
+                return lastData.nextCursor;
+            } else {
+                return undefined;
+            }
+        },
+    });
+
+    useEffect(() => {
+        if (data) {
+            const chatList = [];
+            data?.pages.map((page) => {
+                page.chatrooms.map((room) => {
+                    chatList.push(room);
+                })
+            })
+            setChatList(chatList);
+        }
+    }, [data])
+
+    useEffect(() => {
+        if (inView) {
+            fetchNextPage()
+        }
+    }, [inView]);
 
     return (
         isOpen &&
@@ -33,17 +59,18 @@ const ChatRoomList = ({isOpen, handleCloseClick, openChatRoom}) => {
                 </Stack>
             </Card.Header>
             <ListGroup style={{ overflowY: "auto", overflowX: "hidden" }}>
-                {[{roomId: 1}, {roomId: 2}, {roomId: 3}].map(room => {
+                {chatList.map(room => {
                     return <ListGroup.Item action>
                         <Row className={"cursor-pointer"} onClick={() => openChatRoom(room)}>
-                            <Col xs={3} ><Image src={sampleProfile} rounded fluid /></Col>
-                            <Col xs={"auto"} >userId<br />
-                                <div className={"text-gray-200"}>마지막 챗 내용</div>
+                            <Col xs={3} ><Image src={room.targetUserProfileImageUrl ? room.targetUserProfileImageUrl : noImage} rounded fluid /></Col>
+                            <Col xs={"auto"} >{room.targetUserNickName}<br />
+                                <div className={"text-gray-200"}>{room.lastMessage}</div>
                             </Col>
                         </Row>
                     </ListGroup.Item>
                 })}
             </ListGroup>
+            <div ref={ref}></div>
         </Card>
     );
 }

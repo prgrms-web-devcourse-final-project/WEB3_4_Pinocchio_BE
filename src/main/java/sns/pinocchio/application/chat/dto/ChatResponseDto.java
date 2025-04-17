@@ -162,4 +162,18 @@ public class ChatResponseDto {
           .build();
     }
   }
+
+  @Builder
+  public record ChatroomInfo(
+      String roomId, String roomIdForSearch, String createdAt, List<String> participants) {
+
+    public static ChatroomInfo fromChatroom(ChatRoom chatroom) {
+      return ChatroomInfo.builder()
+          .roomId(chatroom.getId())
+          .roomIdForSearch(chatroom.getTsid())
+          .createdAt(chatroom.getCreatedAt().toString())
+          .participants(chatroom.getParticipantTsids())
+          .build();
+    }
+  }
 }

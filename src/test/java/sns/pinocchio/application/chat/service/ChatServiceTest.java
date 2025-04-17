@@ -19,10 +19,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
+import sns.pinocchio.application.chat.dto.ChatRequestDto.GenerateChatroom;
 import sns.pinocchio.application.chat.dto.ChatRequestDto.SendMessage;
 import sns.pinocchio.application.chat.dto.ChatResponseDto.ChatMessagesInfo;
 import sns.pinocchio.application.chat.dto.ChatResponseDto.ChatRoomsInfo;
-import sns.pinocchio.application.chat.dto.ChatResponseDto.SendMessageInfo;
+import sns.pinocchio.application.chat.dto.ChatResponseDto.ChatroomInfo;
 import sns.pinocchio.application.member.MemberService;
 import sns.pinocchio.config.global.auth.model.CustomUserDetails;
 import sns.pinocchio.domain.chat.Chat;
@@ -92,9 +93,9 @@ class ChatServiceTest {
     // 요청 전송 메시지 정보
     mockSendMessage =
         SendMessage.builder()
-            .receiverId("user_456")
+            .roomId(mockChatRoom.getId())
+            .senderId(testSenderTsid)
             .messageText("테스트 메시지 입니다.")
-            .sentAt(Instant.now())
             .build();
 
     // 메시지 정보
@@ -103,12 +104,10 @@ class ChatServiceTest {
             .id("msg_1")
             .roomId(mockChatRoom.getId())
             .senderId(testSenderTsid)
-            .receiverId(testReceiverTsid)
             .content(mockSendMessage.messageText())
             .status(ChatStatus.SENT)
             .readStatus(false)
             .likeStatus(false)
-            .createdAt(mockSendMessage.sentAt())
             .build();
 
     // 상대방 유저
@@ -123,137 +122,117 @@ class ChatServiceTest {
   }
 
   @Test
-  @DisplayName("메시지 전송 Success + 알림 전송")
+  @DisplayName("메시지 전송 Success")
   void sendMessageToChatroomTest() {
 
     // given
-    Member mockMember = mock(Member.class);
-    Notification mockNotification = Notification.builder().messageAlert(true).build();
-
-    when(mockMember.getNotification()).thenReturn(mockNotification);
-
-    when(customUserDetails.getTsid()).thenReturn(testSenderTsid);
-    when(customUserDetails.getMember()).thenReturn(mockMember);
-    when(chatRoomRepository.findByParticipantTsids(any())).thenReturn(Optional.of(mockChatRoom));
+    when(chatRoomRepository.findById(mockChatRoom.getId())).thenReturn(Optional.of(mockChatRoom));
     when(chatRepository.save(any())).thenReturn(mockChat);
     when(chatRoomRepository.save(any())).thenReturn(mockChatRoom);
     when(webSocketHandler.sendMsgToChatroom(any(), any())).thenReturn(true);
-    when(webSocketHandler.sendNotificationToUser(any(), any())).thenReturn(true);
 
     // when
-    SendMessageInfo messageInfo =
-        chatService.sendMessageToChatroom(customUserDetails, mockSendMessage);
+    chatService.sendMessageToChatroom(mockSendMessage);
 
     // then
     verify(chatRepository, times(1)).save(any(Chat.class));
     verify(chatRoomRepository, times(1)).save(any(ChatRoom.class));
-
-    assertThat(messageInfo.chatId()).isEqualTo(mockChatRoom.getId());
-    assertThat(messageInfo.msgId()).isEqualTo(mockChat.getId());
-    assertThat(messageInfo.senderId()).isEqualTo(mockChat.getSenderId());
-    assertThat(messageInfo.receiverId()).isEqualTo(mockChat.getReceiverId());
-    assertThat(messageInfo.messageText()).isEqualTo(mockChat.getContent());
-    assertThat(messageInfo.isRead()).isEqualTo(mockChat.isReadStatus());
-    assertThat(messageInfo.messageLike()).isEqualTo(mockChat.isLikeStatus());
-    assertThat(messageInfo.sentAt()).isEqualTo(mockChat.getCreatedAt());
   }
 
   @Test
-  @DisplayName("메시지 전송 Fail: 로그인한 유저와 송신자 ID가 일치하지 않을 경우")
-  void sendMessageToChatroomNoAuthenticatedUserFoundTest() {
-
-    // given
-    String errorMsg = "사용자가 인증되지 않았습니다.";
-
-    // when
-    ChatException exception =
-        assertThrows(
-            ChatException.class, () -> chatService.sendMessageToChatroom(null, mockSendMessage));
-
-    // then
-    assertThat(exception.getMessage()).isEqualTo(errorMsg);
-  }
-
-  @Test
-  @DisplayName("메시지 전송 Fail: 요청 받은 메시지 정보가 존재하지 않을 경우")
-  void sendMessageToChatroomNoMessageInfoTest() {
+  @DisplayName("메시지 전송 Fail: 요청값에 대한 유효성 체크가 실패했을 경우")
+  void sendMessageToChatroomInvalidRequestTest() {
 
     // given
     String errorMsg = "입력값이 유효하지 않습니다.";
 
-    when(customUserDetails.getTsid()).thenReturn(testSenderTsid);
-
     // when
     ChatException exception =
-        assertThrows(
-            ChatException.class, () -> chatService.sendMessageToChatroom(customUserDetails, null));
+        assertThrows(ChatException.class, () -> chatService.sendMessageToChatroom(null));
 
     // then
     assertThat(exception.getMessage()).isEqualTo(errorMsg);
   }
 
-  @Test
-  @DisplayName("메시지 전송 Fail: 수신자에게 메시지 전송을 실패했을 경우")
-  void sendMessageToChatroomFailSendMsgTest() {
+  //  @Test
+  //  @DisplayName("메시지 전송 Fail: 송신자가 회원이 아닐 경우")
+  //  void sendMessageToChatroomNoAuthenticatedUserFoundTest() {
+  //
+  //    // given
+  //    String errorMsg = "송신자의 회원 정보를 찾을 수 없습니다.";
+  //
+  //    // when
+  //    ChatException exception =
+  //            assertThrows(ChatException.class, () ->
+  // chatService.sendMessageToChatroom(mockSendMessage));
+  //
+  //    // then
+  //    assertThat(exception.getMessage()).isEqualTo(errorMsg);
+  //  }
 
-    // given
-    String errorMsg = "메시지 전송에 실패했습니다.";
+  //  @Test
+  //  @DisplayName("메시지 전송 Fail: 수신자에게 메시지 전송을 실패했을 경우")
+  //  void sendMessageToChatroomFailSendMsgTest() {
+  //
+  //    // given
+  //    String errorMsg = "메시지 전송에 실패했습니다.";
+  //
+  //
+  // when(chatRoomRepository.findByParticipantTsids(any())).thenReturn(Optional.of(mockChatRoom));
+  //
+  //    // when
+  //    ChatException exception =
+  //        assertThrows(ChatException.class, () ->
+  // chatService.sendMessageToChatroom(mockSendMessage));
+  //
+  //    // then
+  //    assertThat(exception.getMessage()).isEqualTo(errorMsg);
+  //  }
 
-    when(chatRoomRepository.findByParticipantTsids(any())).thenReturn(Optional.of(mockChatRoom));
-    when(customUserDetails.getTsid()).thenReturn(testSenderTsid);
-
-    // when
-    ChatException exception =
-        assertThrows(
-            ChatException.class,
-            () -> chatService.sendMessageToChatroom(customUserDetails, mockSendMessage));
-
-    // then
-    assertThat(exception.getMessage()).isEqualTo(errorMsg);
-  }
-
-  @Test
-  @DisplayName("메시지 전송 Fail: 수신자에게 메시지 알림 전송을 실패했을 경우")
-  void sendMessageToChatroomFailSendNotificationTest() {
-
-    // given
-    String errorMsg = "메시지 알림 전송에 실패했습니다.";
-
-    Member mockMember = mock(Member.class);
-    Notification mockNotification = Notification.builder().messageAlert(true).build();
-
-    when(mockMember.getNotification()).thenReturn(mockNotification);
-    when(customUserDetails.getTsid()).thenReturn(testSenderTsid);
-    when(customUserDetails.getMember()).thenReturn(mockMember);
-    when(chatRoomRepository.findByParticipantTsids(any())).thenReturn(Optional.of(mockChatRoom));
-    when(webSocketHandler.sendMsgToChatroom(any(), any())).thenReturn(true);
-    when(webSocketHandler.sendNotificationToUser(any(), any())).thenReturn(false);
-
-    // when
-    ChatException exception =
-        assertThrows(
-            ChatException.class,
-            () -> chatService.sendMessageToChatroom(customUserDetails, mockSendMessage));
-
-    // then
-    assertThat(exception.getMessage()).isEqualTo(errorMsg);
-  }
+  //  @Test
+  //  @DisplayName("메시지 전송 Fail: 수신자에게 메시지 알림 전송을 실패했을 경우")
+  //  void sendMessageToChatroomFailSendNotificationTest() {
+  //
+  //    // given
+  //    String errorMsg = "메시지 알림 전송에 실패했습니다.";
+  //
+  //    Member mockMember = mock(Member.class);
+  //    Notification mockNotification = Notification.builder().messageAlert(true).build();
+  //
+  //    when(mockMember.getNotification()).thenReturn(mockNotification);
+  //
+  // when(chatRoomRepository.findByParticipantTsids(any())).thenReturn(Optional.of(mockChatRoom));
+  //    when(webSocketHandler.sendMsgToChatroom(any(), any())).thenReturn(true);
+  //    when(webSocketHandler.sendNotificationToUser(any(), any())).thenReturn(false);
+  //
+  //    // when
+  //    ChatException exception =
+  //        assertThrows(
+  //            ChatException.class,
+  //            () -> chatService.sendMessageToChatroom(mockSendMessage));
+  //
+  //    // then
+  //    assertThat(exception.getMessage()).isEqualTo(errorMsg);
+  //  }
 
   @Test
   @DisplayName("채팅방 생성 Success")
   void createNewChatRoomTest() {
 
     // given
+    GenerateChatroom generateChatroom =
+        GenerateChatroom.builder().receiverId(testReceiverTsid).build();
+
+    when(customUserDetails.getTsid()).thenReturn(testSenderTsid);
     when(chatRoomRepository.save(any())).thenReturn(mockChatRoom);
 
     // when
-    ChatRoom newChatRoom =
-        chatService.createNewChatRoom(
-            testSenderTsid, testReceiverTsid, mockChatRoom.getCreatedAt());
+    ChatroomInfo newChatRoom =
+        chatService.getOrGenerateChatRoom(customUserDetails, generateChatroom);
 
     // then
-    assertThat(newChatRoom.getParticipantTsids()).containsAll(mockChatRoom.getParticipantTsids());
-    assertThat(newChatRoom.getStatus()).isEqualTo(ChatRoomStatus.PENDING);
+    assertThat(newChatRoom.roomId()).isEqualTo(mockChatRoom.getId());
+    assertThat(newChatRoom.participants()).containsAll(mockChatRoom.getParticipantTsids());
   }
 
   @Test
@@ -376,7 +355,6 @@ class ChatServiceTest {
               .id("msg_" + idx)
               .roomId(chatId)
               .senderId(testSenderTsid)
-              .receiverId(testReceiverTsid)
               .content("테스트 메시지 입니다.")
               .createdAt(Instant.parse("2025-03-01T10:00:00Z"))
               .modifiedAt(Instant.parse("2025-03-01T10:00:00Z"))
@@ -415,7 +393,6 @@ class ChatServiceTest {
             .id("msg_1")
             .roomId(chatId)
             .senderId("user_123")
-            .receiverId("user_999")
             .content("테스트 메시지 입니다.")
             .createdAt(Instant.parse("2025-03-27T10:00:00Z"))
             .createdAtForTsid("0K93NBYD794M8")

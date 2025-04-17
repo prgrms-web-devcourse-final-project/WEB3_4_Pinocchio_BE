@@ -50,7 +50,7 @@ public class ChatService {
    * @return ChatRoom 채팅방 정보
    * @throws ChatException 채팅방 생성을 요청한 유저 정보가 존재하지 않을 경우 {@link
    *     ChatErrorCode#UNAUTHORIZED_CHAT_USER} 예외 발생
-   * @throws ChatException 수신자가 회원이 아닐 경우 {@link ChatErrorCode#CHAT_NOT_FOUND} 예외 발생
+   * @throws ChatException 수신자가 회원이 아닐 경우 {@link ChatErrorCode#CHAT_RECEIVER_NOT_FOUND} 예외 발생
    */
   @Transactional
   public ChatroomInfo getOrGenerateChatRoom(
@@ -70,7 +70,7 @@ public class ChatService {
 
     } catch (MemberException e) {
       log.error("Receiver User {} not found: {}", generateChatroom.receiverId(), e.getMessage());
-      throw new ChatException(CHAT_NOT_FOUND);
+      throw new ChatException(CHAT_RECEIVER_NOT_FOUND);
     }
 
     List<String> participants = List.of(senderTsid, generateChatroom.receiverId());
@@ -170,7 +170,7 @@ public class ChatService {
 
     } catch (MemberException e) {
       log.error("Sender User {} not found: {}", sendMessage.senderId(), e.getMessage());
-      throw new ChatException(CHAT_NOT_FOUND);
+      throw new ChatException(CHAT_SENDER_NOT_FOUND);
     }
 
     // 채팅방이 존재하지 않을 경우, 404에러 반환

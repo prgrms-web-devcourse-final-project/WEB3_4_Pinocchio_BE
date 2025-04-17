@@ -127,8 +127,6 @@ public class ChatResponseDto {
 
     private String senderId;
 
-    private String receiverId;
-
     private String content;
 
     private boolean readStatus;
@@ -152,7 +150,6 @@ public class ChatResponseDto {
       return ChatMessageDetail.builder()
           .msgId(chatMessage.getId())
           .senderId(chatMessage.getSenderId())
-          .receiverId(chatMessage.getReceiverId())
           .content(chatMessage.getContent())
           .readStatus(chatMessage.isReadStatus())
           .likeStatus(chatMessage.isLikeStatus())

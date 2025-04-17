@@ -11,17 +11,22 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import sns.pinocchio.application.chat.dto.ChatRequestDto.GenerateChatroom;
+import sns.pinocchio.application.chat.dto.ChatRequestDto.SendMessage;
 import sns.pinocchio.application.chat.dto.ChatResponseDto.*;
 import sns.pinocchio.application.member.MemberService;
 import sns.pinocchio.config.global.auth.model.CustomUserDetails;
 import sns.pinocchio.domain.chat.Chat;
+import sns.pinocchio.domain.chat.ChatStatus;
 import sns.pinocchio.domain.chatroom.ChatRoom;
 import sns.pinocchio.domain.chatroom.ChatRoomSortType;
 import sns.pinocchio.domain.chatroom.ChatRoomStatus;
+import sns.pinocchio.domain.chatroom.LastMessage;
 import sns.pinocchio.domain.member.Member;
+import sns.pinocchio.infrastructure.persistence.mongodb.ChatRepository;
 import sns.pinocchio.infrastructure.persistence.mongodb.ChatRoomRepository;
 import sns.pinocchio.infrastructure.persistence.mongodb.ChatRoomRepositoryCustom;
 import sns.pinocchio.infrastructure.shared.util.TsidUtil;
+import sns.pinocchio.infrastructure.websocket.WebSocketHandler;
 import sns.pinocchio.presentation.chat.exception.ChatErrorCode;
 import sns.pinocchio.presentation.chat.exception.ChatException;
 import sns.pinocchio.presentation.member.exception.MemberException;
@@ -33,53 +38,9 @@ public class ChatService {
 
   private final ChatRoomRepository chatRoomRepository;
   private final ChatRoomRepositoryCustom chatRoomRepositoryCustom;
+  private final ChatRepository chatRepository;
   private final MemberService memberService;
-
-  //  // Chat 저장
-  //  Chat savedChat =
-  //          chatRepository.save(
-  //                  Chat.builder()
-  //                          .roomId(chatRoom.getId())
-  //                          .roomTsid(chatRoom.getTsid())
-  //                          .senderId(senderTsid)
-  //                          .receiverId(sendMessage.receiverId())
-  //                          .content(sendMessage.messageText())
-  //                          .status(ChatStatus.SENT)
-  //                          .readStatus(false)
-  //                          .likeStatus(false)
-  //                          .createdAt(sendMessage.sentAt())
-  //                          .createdAtForTsid(TsidUtil.createTsid())
-  //                          .modifiedAt(sendMessage.sentAt())
-  //                          .build());
-  //
-  //    log.debug("Saved Chat: {}", savedChat);
-  //
-  //  // ChatRoom 컬렉션 내 마지막 메시지 내용 수정
-  //    chatRoom.updateLastMsg(
-  //            LastMessage.builder()
-  //            .senderId(senderTsid)
-  //            .content(sendMessage.messageText())
-  //          .createdAt(sendMessage.sentAt())
-  //          .readStatus(false)
-  //            .status(ChatStatus.SENT)
-  //            .build());
-  //
-  //  // ChatRoom 수정 사항 반영
-  //  ChatRoom savedChatRoom = chatRoomRepository.save(chatRoom);
-  //    log.debug("Saved ChatRoom: {}", savedChatRoom);
-  //
-  //    log.info("Success to send message: ChatRoom Id[{}] {}", chatRoom.getId(), sendMessage);
-  //
-  //    return SendMessageInfo.builder()
-  //            .chatId(savedChatRoom.getId())
-  //          .msgId(savedChat.getId())
-  //          .senderId(savedChat.getSenderId())
-  //          .receiverId(savedChat.getReceiverId())
-  //          .messageText(savedChat.getContent())
-  //          .isRead(false)
-  //        .messageLike(false)
-  //        .sentAt(savedChat.getCreatedAt())
-  //          .build();
+  private final WebSocketHandler webSocketHandler;
 
   /**
    * 채팅방 생성
@@ -188,6 +149,81 @@ public class ChatService {
             .toList();
 
     return new ChatRoomsInfo(nextCursor, hasNext, chatroomDetails);
+  }
+
+  /**
+   * 메시지 전송
+   *
+   * @param sendMessage 채팅방에 보낼 메시지 정보
+   */
+  public void sendMessageToChatroom(SendMessage sendMessage) {
+
+    // 요청 값에 대한 유효성 체크가 실패 했을 경우, 400에러 반환
+    if (sendMessage == null || !sendMessage.validateRequest()) {
+      log.error("The requested send message info are invalid: {}", sendMessage);
+      throw new ChatException(INVALID_CHAT_REQUEST);
+    }
+
+    // 송신자가 회원이 아닐 경우, 404에러 반환
+    try {
+      memberService.findByTsid(sendMessage.senderId());
+
+    } catch (MemberException e) {
+      log.error("Sender User {} not found: {}", sendMessage.senderId(), e.getMessage());
+      throw new ChatException(CHAT_NOT_FOUND);
+    }
+
+    // 채팅방이 존재하지 않을 경우, 404에러 반환
+    ChatRoom chatRoom =
+        chatRoomRepository
+            .findById(sendMessage.roomId())
+            .orElseThrow(
+                () -> {
+                  log.error("Room {} not found.", sendMessage.roomId());
+                  return new ChatException(CHATROOM_NOT_FOUND);
+                });
+
+    // 수신자에게 메시지 전송 (실패 시, 500에러 반환)
+    if (!webSocketHandler.sendMsgToChatroom(chatRoom.getId(), sendMessage.messageText())) {
+      log.error("Failed to send Message: {}", sendMessage);
+      throw new ChatException(MESSAGE_SEND_FAILED);
+    }
+
+    Instant currTime = Instant.now();
+
+    // Chat 저장
+    Chat savedChat =
+        chatRepository.save(
+            Chat.builder()
+                .roomId(chatRoom.getId())
+                .roomTsid(chatRoom.getTsid())
+                .senderId(sendMessage.senderId())
+                .content(sendMessage.messageText())
+                .status(ChatStatus.SENT)
+                .readStatus(false)
+                .likeStatus(false)
+                .createdAt(currTime)
+                .createdAtForTsid(TsidUtil.createTsid())
+                .modifiedAt(currTime)
+                .build());
+
+    log.debug("Saved Chat: {}", savedChat);
+
+    // ChatRoom 컬렉션 내 마지막 메시지 내용 수정
+    chatRoom.updateLastMsg(
+        LastMessage.builder()
+            .senderId(sendMessage.senderId())
+            .content(sendMessage.messageText())
+            .createdAt(currTime)
+            .readStatus(false)
+            .status(ChatStatus.SENT)
+            .build());
+
+    // ChatRoom 수정 사항 반영
+    ChatRoom savedChatRoom = chatRoomRepository.save(chatRoom);
+    log.debug("Saved ChatRoom: {}", savedChatRoom);
+
+    log.info("Success to send message: ChatRoom Id[{}] {}", chatRoom.getId(), sendMessage);
   }
 
   /**

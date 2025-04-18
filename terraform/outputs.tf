@@ -1,3 +1,9 @@
+output "team-key-pem" {
+  description = "Private .pem 키"
+  value = tls_private_key.team_key.private_key_pem
+  sensitive = true
+}
+
 output "ec2_public_ip" {
   description = "EC2 인스턴스의 Public IP"
   value       = aws_instance.ec2.public_ip

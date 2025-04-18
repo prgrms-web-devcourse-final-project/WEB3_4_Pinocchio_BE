@@ -18,6 +18,27 @@ provider "aws" {
 }
 
 # ----------------------------------------
+# RSA 키 쌍 생성 (.pem 용도)
+# ----------------------------------------
+resource "tls_private_key" "team_key" {
+  algorithm = "RSA"
+  rsa_bits  = 2048
+}
+
+# ----------------------------------------
+# AWS에 키페어 등록 (공개키만 등록)
+# ----------------------------------------
+resource "aws_key_pair" "team_key" {
+  key_name   = "${var.prefix}-api-server-pem-key"
+  public_key = tls_private_key.team_key.public_key_openssh
+
+  tags = {
+    Name         = "${var.prefix}-pem-key"
+    (var.tagKey) = var.tagValue
+  }
+}
+
+# ----------------------------------------
 # VPC 설정
 # ----------------------------------------
 resource "aws_vpc" "vpc" {
@@ -162,6 +183,27 @@ resource "aws_security_group" "sg" {
   ingress {
     from_port = 3000
     to_port   = 3000
+    protocol  = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    from_port = 6379
+    to_port   = 6379
+    protocol  = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    from_port = 27017
+    to_port   = 27017
+    protocol  = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    from_port = 3306
+    to_port   = 3306
     protocol  = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
@@ -540,3 +582,22 @@ resource "aws_s3_bucket_policy" "image_bucket_policy" {
     ]
   })
 }
+
+# ----------------------------------------
+# S3 버킷 내 디렉토리 생성
+# ----------------------------------------
+resource "aws_s3_object" "post_image_folder_post_image" {
+  bucket = aws_s3_bucket.image_bucket.id
+  key    = "post-image/"
+}
+
+resource "aws_s3_object" "post_image_folder_post_profile" {
+  bucket = aws_s3_bucket.image_bucket.id
+  key    = "post-profile/"
+}
+
+resource "aws_s3_object" "post_image_folder_user_profile" {
+  bucket = aws_s3_bucket.image_bucket.id
+  key    = "user-profile/"
+}
+

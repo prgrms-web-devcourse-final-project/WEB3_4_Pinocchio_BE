@@ -436,14 +436,32 @@ networks:
         driver: bridge
 EOF2
 
-# 9. .env 파일 복사
+# 9. Nginx conf 파일 작성
+sudo -u devuser -i bash <<'EOC_NGINX'
+mkdir -p ~/app/nginx/conf.d
+
+cat <<EOF_CONF > ~/app/nginx/conf.d/default.conf
+server {
+    listen 80;
+    server_name pinoccheat.shop www.pinoccheat.shop;
+
+    location / {
+        proxy_pass http://spring:8080;
+        proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+    }
+}
+EOF_CONF
+EOC_NGINX
+
+# 10. .env 파일 복사
 mkdir -p /home/devuser/app
 cat <<EOF_ENV > /home/devuser/app/.env
 ${replace(local.env_file_content, "$", "\\$")}
 EOF_ENV
 chown devuser:devuser /home/devuser/app/.env
 
-# 10. docker 이미지 pull & 실행
+# 11. docker 이미지 pull & 실행
 docker-compose pull
 docker-compose up -d
 EOC

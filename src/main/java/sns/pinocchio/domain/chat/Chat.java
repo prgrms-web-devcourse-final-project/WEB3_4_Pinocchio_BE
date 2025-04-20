@@ -24,8 +24,6 @@ public class Chat {
 
   private String senderId; // 송신자 ID
 
-  private String receiverId; // 발신자 ID
-
   private String type; // 메시지 유형 (TEXT)
 
   private String content; // 메시지 내용

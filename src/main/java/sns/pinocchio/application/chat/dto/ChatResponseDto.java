@@ -127,8 +127,6 @@ public class ChatResponseDto {
 
     private String senderId;
 
-    private String receiverId;
-
     private String content;
 
     private boolean readStatus;
@@ -152,13 +150,26 @@ public class ChatResponseDto {
       return ChatMessageDetail.builder()
           .msgId(chatMessage.getId())
           .senderId(chatMessage.getSenderId())
-          .receiverId(chatMessage.getReceiverId())
           .content(chatMessage.getContent())
           .readStatus(chatMessage.isReadStatus())
           .likeStatus(chatMessage.isLikeStatus())
           .createdAt(chatMessage.getCreatedAt().toString())
           .createdAtForCursor(chatMessage.getCreatedAtForTsid())
           .modifiedAt(chatMessage.getModifiedAt().toString())
+          .build();
+    }
+  }
+
+  @Builder
+  public record ChatroomInfo(
+      String roomId, String roomIdForSearch, String createdAt, List<String> participants) {
+
+    public static ChatroomInfo fromChatroom(ChatRoom chatroom) {
+      return ChatroomInfo.builder()
+          .roomId(chatroom.getId())
+          .roomIdForSearch(chatroom.getTsid())
+          .createdAt(chatroom.getCreatedAt().toString())
+          .participants(chatroom.getParticipantTsids())
           .build();
     }
   }

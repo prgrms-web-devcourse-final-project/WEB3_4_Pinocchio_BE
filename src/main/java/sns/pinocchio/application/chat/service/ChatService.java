@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import sns.pinocchio.application.chat.dto.ChatRequestDto.GenerateChatroom;
 import sns.pinocchio.application.chat.dto.ChatRequestDto.SendMessage;
 import sns.pinocchio.application.chat.dto.ChatResponseDto.*;
 import sns.pinocchio.application.member.MemberService;
@@ -38,152 +39,63 @@ public class ChatService {
   private final ChatRoomRepository chatRoomRepository;
   private final ChatRoomRepositoryCustom chatRoomRepositoryCustom;
   private final ChatRepository chatRepository;
-  private final WebSocketHandler webSocketHandler;
   private final MemberService memberService;
-
-  /**
-   * 해당 채팅방에 메시지 전송
-   *
-   * @param senderDetails 발신자 정보
-   * @param sendMessage 메시지 전송 정보
-   * @return SendMessageInfo 전송된 메시지 정보
-   * @throws ChatException 사용자가 인증되지 않았을 경우 {@link ChatErrorCode#UNAUTHORIZED_CHAT_USER} 예외 발생
-   * @throws ChatException 요청 값에 대한 유효성 체크가 실패 했을 경우 {@link ChatErrorCode#INVALID_CHAT_REQUEST} 예외
-   *     발생
-   * @throws ChatException 수신자가 회원이 아닐 경우 {@link ChatErrorCode#CHAT_NOT_FOUND} 예외 발생
-   * @throws ChatException 수신자에게 메시지 전송에 실패했을 경우 {@link ChatErrorCode#MESSAGE_SEND_FAILED} 예외 발생
-   * @throws ChatException 수신자에게 메시지 알람 전송에 실패했을 경우 {@link ChatErrorCode#MESSAGE_ALERT_SEND_FAILED}
-   *     예외 발생
-   */
-  @Transactional
-  public SendMessageInfo sendMessageToChatroom(
-      CustomUserDetails senderDetails, SendMessage sendMessage) {
-
-    // 로그인한 유저 정보가 존재하지 않을 경우, 401에러 반환
-    if (senderDetails == null || senderDetails.getTsid().isEmpty()) {
-      log.error("No authenticated user found: {}", sendMessage);
-      throw new ChatException(UNAUTHORIZED_CHAT_USER);
-    }
-
-    String senderTsid = senderDetails.getTsid();
-
-    // 요청 값에 대한 유효성 체크가 실패 했을 경우, 400에러 반환
-    if (sendMessage == null || !sendMessage.validateRequest()) {
-      log.error("The requested send message info are invalid: {}", sendMessage);
-      throw new ChatException(INVALID_CHAT_REQUEST);
-    }
-
-    // 수신자가 회원이 아닐 경우, 404에러 반환
-    try {
-      memberService.findByTsid(sendMessage.receiverId());
-
-    } catch (MemberException e) {
-      log.error("Receiver User {} not found: {}", sendMessage.receiverId(), e.getMessage());
-      throw new ChatException(CHAT_NOT_FOUND);
-    }
-
-    // sender와 receiver가 속한 RoomId를 조회 (존재하지 않으면, 새로 생성)
-    ChatRoom chatRoom =
-        chatRoomRepository
-            .findByParticipantTsids(List.of(senderTsid, sendMessage.receiverId()))
-            .orElseGet(
-                () ->
-                    createNewChatRoom(senderTsid, sendMessage.receiverId(), sendMessage.sentAt()));
-
-    // 수신자에게 메시지 전송 (실패 시, 500에러 반환)
-    if (!webSocketHandler.sendMsgToChatroom(chatRoom.getId(), sendMessage.messageText())) {
-      log.error("Failed to send Message: {}", sendMessage);
-      throw new ChatException(MESSAGE_SEND_FAILED);
-    }
-
-    Member loginUser = senderDetails.getMember();
-
-    // 메시지 알림 설정 여부에 따라 알림 전송 (실패 시, 500에러 반환)
-    if (loginUser != null
-        && loginUser.getNotification() != null
-        && loginUser.getNotification().isMessageAlert()) {
-      if (!webSocketHandler.sendNotificationToUser(sendMessage.receiverId(), "새로운 메시지 도착")) {
-        log.error("Failed to send Notification: {}", sendMessage);
-        throw new ChatException(MESSAGE_ALERT_SEND_FAILED);
-      }
-
-    } else {
-      log.info(
-          "Message Notifications are not setting. Skipping notification: {}",
-          sendMessage.receiverId());
-    }
-
-    // Chat 저장
-    Chat savedChat =
-        chatRepository.save(
-            Chat.builder()
-                .roomId(chatRoom.getId())
-                .roomTsid(chatRoom.getTsid())
-                .senderId(senderTsid)
-                .receiverId(sendMessage.receiverId())
-                .content(sendMessage.messageText())
-                .status(ChatStatus.SENT)
-                .readStatus(false)
-                .likeStatus(false)
-                .createdAt(sendMessage.sentAt())
-                .createdAtForTsid(TsidUtil.createTsid())
-                .modifiedAt(sendMessage.sentAt())
-                .build());
-
-    log.debug("Saved Chat: {}", savedChat);
-
-    // ChatRoom 컬렉션 내 마지막 메시지 내용 수정
-    chatRoom.updateLastMsg(
-        LastMessage.builder()
-            .senderId(senderTsid)
-            .content(sendMessage.messageText())
-            .createdAt(sendMessage.sentAt())
-            .readStatus(false)
-            .status(ChatStatus.SENT)
-            .build());
-
-    // ChatRoom 수정 사항 반영
-    ChatRoom savedChatRoom = chatRoomRepository.save(chatRoom);
-    log.debug("Saved ChatRoom: {}", savedChatRoom);
-
-    log.info("Success to send message: ChatRoom Id[{}] {}", chatRoom.getId(), sendMessage);
-
-    return SendMessageInfo.builder()
-        .chatId(savedChatRoom.getId())
-        .msgId(savedChat.getId())
-        .senderId(savedChat.getSenderId())
-        .receiverId(savedChat.getReceiverId())
-        .messageText(savedChat.getContent())
-        .isRead(false)
-        .messageLike(false)
-        .sentAt(savedChat.getCreatedAt())
-        .build();
-  }
+  private final WebSocketHandler webSocketHandler;
 
   /**
    * 채팅방 생성
    *
-   * @param senderTsid 발신자 TSID
-   * @param receiverTsid 송신자 TSID
-   * @param createdAt 채팅방 생성 날짜
+   * @param userDetails 채팅방 생성 요청 유저 정보
+   * @param generateChatroom 채팅방 생성 정보
    * @return ChatRoom 채팅방 정보
+   * @throws ChatException 채팅방 생성을 요청한 유저 정보가 존재하지 않을 경우 {@link
+   *     ChatErrorCode#UNAUTHORIZED_CHAT_USER} 예외 발생
+   * @throws ChatException 수신자가 회원이 아닐 경우 {@link ChatErrorCode#CHAT_RECEIVER_NOT_FOUND} 예외 발생
    */
   @Transactional
-  public ChatRoom createNewChatRoom(String senderTsid, String receiverTsid, Instant createdAt) {
-    ChatRoom newChatRoom =
-        ChatRoom.builder()
-            .id(ChatRoom.generateChatRoomId(senderTsid, receiverTsid))
-            .tsid(TsidUtil.createTsid())
-            .participantTsids(List.of(senderTsid, receiverTsid))
-            .status(ChatRoomStatus.PENDING)
-            .createdAt(createdAt)
-            .createdAtTsid(TsidUtil.createTsid())
-            .build();
+  public ChatroomInfo getOrGenerateChatRoom(
+      CustomUserDetails userDetails, GenerateChatroom generateChatroom) {
 
-    ChatRoom savedChatRoom = chatRoomRepository.save(newChatRoom);
-    log.info("New ChatRoom Created: {}", savedChatRoom);
+    // 로그인한 유저 정보가 존재하지 않을 경우, 401에러 반환
+    if (userDetails == null || userDetails.getTsid().isEmpty()) {
+      log.error("[{}] No authenticated user found.", this.getClass().getName());
+      throw new ChatException(UNAUTHORIZED_CHAT_USER);
+    }
 
-    return savedChatRoom;
+    String senderTsid = userDetails.getTsid();
+
+    // 수신자가 회원이 아닐 경우, 404에러 반환
+    try {
+      memberService.findByTsid(generateChatroom.receiverId());
+
+    } catch (MemberException e) {
+      log.error("Receiver User {} not found: {}", generateChatroom.receiverId(), e.getMessage());
+      throw new ChatException(CHAT_RECEIVER_NOT_FOUND);
+    }
+
+    List<String> participants = List.of(senderTsid, generateChatroom.receiverId());
+
+    // 채팅방 유무에 따라 조회 or 생성
+    ChatRoom savedChatRoom =
+        chatRoomRepository
+            .findByParticipantTsids(participants)
+            .orElseGet(
+                () ->
+                    chatRoomRepository.save(
+                        ChatRoom.builder()
+                            .id(
+                                ChatRoom.generateChatRoomId(
+                                    senderTsid, generateChatroom.receiverId()))
+                            .tsid(TsidUtil.createTsid())
+                            .participantTsids(participants)
+                            .status(ChatRoomStatus.PENDING)
+                            .createdAt(Instant.now())
+                            .createdAtTsid(TsidUtil.createTsid())
+                            .build()));
+
+    log.info("ChatRoom Created: {}", savedChatRoom);
+
+    return ChatroomInfo.fromChatroom(savedChatRoom);
   }
 
   /**
@@ -237,6 +149,81 @@ public class ChatService {
             .toList();
 
     return new ChatRoomsInfo(nextCursor, hasNext, chatroomDetails);
+  }
+
+  /**
+   * 메시지 전송
+   *
+   * @param sendMessage 채팅방에 보낼 메시지 정보
+   */
+  public void sendMessageToChatroom(SendMessage sendMessage) {
+
+    // 요청 값에 대한 유효성 체크가 실패 했을 경우, 400에러 반환
+    if (sendMessage == null || !sendMessage.validateRequest()) {
+      log.error("The requested send message info are invalid: {}", sendMessage);
+      throw new ChatException(INVALID_CHAT_REQUEST);
+    }
+
+    // 송신자가 회원이 아닐 경우, 404에러 반환
+    try {
+      memberService.findByTsid(sendMessage.senderId());
+
+    } catch (MemberException e) {
+      log.error("Sender User {} not found: {}", sendMessage.senderId(), e.getMessage());
+      throw new ChatException(CHAT_SENDER_NOT_FOUND);
+    }
+
+    // 채팅방이 존재하지 않을 경우, 404에러 반환
+    ChatRoom chatRoom =
+        chatRoomRepository
+            .findById(sendMessage.roomId())
+            .orElseThrow(
+                () -> {
+                  log.error("Room {} not found.", sendMessage.roomId());
+                  return new ChatException(CHATROOM_NOT_FOUND);
+                });
+
+    // 수신자에게 메시지 전송 (실패 시, 500에러 반환)
+    if (!webSocketHandler.sendMsgToChatroom(chatRoom.getId(), sendMessage.messageText())) {
+      log.error("Failed to send Message: {}", sendMessage);
+      throw new ChatException(MESSAGE_SEND_FAILED);
+    }
+
+    Instant currTime = Instant.now();
+
+    // Chat 저장
+    Chat savedChat =
+        chatRepository.save(
+            Chat.builder()
+                .roomId(chatRoom.getId())
+                .roomTsid(chatRoom.getTsid())
+                .senderId(sendMessage.senderId())
+                .content(sendMessage.messageText())
+                .status(ChatStatus.SENT)
+                .readStatus(false)
+                .likeStatus(false)
+                .createdAt(currTime)
+                .createdAtForTsid(TsidUtil.createTsid())
+                .modifiedAt(currTime)
+                .build());
+
+    log.debug("Saved Chat: {}", savedChat);
+
+    // ChatRoom 컬렉션 내 마지막 메시지 내용 수정
+    chatRoom.updateLastMsg(
+        LastMessage.builder()
+            .senderId(sendMessage.senderId())
+            .content(sendMessage.messageText())
+            .createdAt(currTime)
+            .readStatus(false)
+            .status(ChatStatus.SENT)
+            .build());
+
+    // ChatRoom 수정 사항 반영
+    ChatRoom savedChatRoom = chatRoomRepository.save(chatRoom);
+    log.debug("Saved ChatRoom: {}", savedChatRoom);
+
+    log.info("Success to send message: ChatRoom Id[{}] {}", chatRoom.getId(), sendMessage);
   }
 
   /**

@@ -11,4 +11,6 @@ public interface ChatRoomRepository extends MongoRepository<ChatRoom, String> {
 
   @Query("{ 'participantTsids': { $all: ?0 } }")
   Optional<ChatRoom> findByParticipantTsids(List<String> participantTsids);
+
+  Optional<ChatRoom> findById(String roomId);
 }

@@ -40,3 +40,5 @@ out/
 /src/main/generated/
 .env
 /src/main/resources/static/
+/terraform/*.pem
+/terraform/.env

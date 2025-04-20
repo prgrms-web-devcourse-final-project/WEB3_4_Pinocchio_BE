@@ -18,6 +18,27 @@ provider "aws" {
 }
 
 # ----------------------------------------
+# RSA 키 쌍 생성 (.pem 용도)
+# ----------------------------------------
+resource "tls_private_key" "team_key" {
+  algorithm = "RSA"
+  rsa_bits  = 2048
+}
+
+# ----------------------------------------
+# AWS에 키페어 등록 (공개키만 등록)
+# ----------------------------------------
+resource "aws_key_pair" "team_key" {
+  key_name   = "${var.prefix}-api-server-pem-key"
+  public_key = tls_private_key.team_key.public_key_openssh
+
+  tags = {
+    Name         = "${var.prefix}-pem-key"
+    (var.tagKey) = var.tagValue
+  }
+}
+
+# ----------------------------------------
 # VPC 설정
 # ----------------------------------------
 resource "aws_vpc" "vpc" {
@@ -166,6 +187,27 @@ resource "aws_security_group" "sg" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
+  ingress {
+    from_port = 6379
+    to_port   = 6379
+    protocol  = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    from_port = 27017
+    to_port   = 27017
+    protocol  = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    from_port = 3306
+    to_port   = 3306
+    protocol  = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
   # 아웃바운드 규칙 (나가는 트래픽)
   egress {
     from_port = 0
@@ -234,6 +276,7 @@ resource "aws_iam_instance_profile" "instance_profile" {
 # EC2 User Data (도커 허브 이미지 기반으로 서버 실행)
 # ----------------------------------------
 locals {
+  env_file_content = file(var.env_file_path)
   ec2_user_data_base = <<-END_OF_FILE
 #!/bin/bash
 
@@ -264,6 +307,7 @@ mkdir -p /data/mysql /data/mongodb /data/redis
 
 # 5. devuser 계정 생성 + Docker 권한 부여 + 환경변수 설정
 useradd -m devuser
+echo "devuser:devteam9" | chpasswd
 echo "devuser ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 usermod -aG docker devuser
 echo 'export PATH=$PATH:/usr/local/bin' >> /home/devuser/.bash_profile
@@ -281,7 +325,6 @@ sudo -u devuser -i bash <<'EOC'
 mkdir -p ~/app && cd ~/app
 
 cat <<EOF2 > docker-compose.yml
-version: "3.8"
 
 services:
     mysql:
@@ -348,6 +391,8 @@ services:
         restart: always
         ports:
             - "8080:8080"
+        env_file:
+            - .env
         depends_on:
             mysql:
                 condition: service_healthy
@@ -391,6 +436,14 @@ networks:
         driver: bridge
 EOF2
 
+# 9. .env 파일 복사
+mkdir -p /home/devuser/app
+cat <<EOF_ENV > /home/devuser/app/.env
+${replace(local.env_file_content, "$", "\\$")}
+EOF_ENV
+chown devuser:devuser /home/devuser/app/.env
+
+# 10. docker 이미지 pull & 실행
 docker-compose pull
 docker-compose up -d
 EOC
@@ -425,6 +478,7 @@ resource "aws_instance" "ec2" {
   subnet_id                   = aws_subnet.subnet_2.id
   vpc_security_group_ids = [aws_security_group.sg.id]
   associate_public_ip_address = true
+  key_name = aws_key_pair.team_key.key_name
 
   iam_instance_profile = aws_iam_instance_profile.instance_profile.name
 
@@ -540,3 +594,22 @@ resource "aws_s3_bucket_policy" "image_bucket_policy" {
     ]
   })
 }
+
+# ----------------------------------------
+# S3 버킷 내 디렉토리 생성
+# ----------------------------------------
+resource "aws_s3_object" "post_image_folder_post_image" {
+  bucket = aws_s3_bucket.image_bucket.id
+  key    = "post-image/"
+}
+
+resource "aws_s3_object" "post_image_folder_post_profile" {
+  bucket = aws_s3_bucket.image_bucket.id
+  key    = "post-profile/"
+}
+
+resource "aws_s3_object" "post_image_folder_user_profile" {
+  bucket = aws_s3_bucket.image_bucket.id
+  key    = "user-profile/"
+}
+

@@ -17,3 +17,7 @@ variable "tagValue" {
   description = "Essential Tag Value"
   default     = "devcos4-team09"
 }
+
+variable "env_file_path" {
+  default = "./.env"
+}

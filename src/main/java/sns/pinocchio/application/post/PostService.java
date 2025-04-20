@@ -8,6 +8,7 @@ import org.springframework.web.multipart.MultipartFile;
 import sns.pinocchio.application.member.MemberService;
 import sns.pinocchio.config.S3img.S3Uploader;
 import sns.pinocchio.config.global.event.PostEvent;
+import sns.pinocchio.config.localImg.LocalUploader;
 import sns.pinocchio.domain.member.Member;
 import sns.pinocchio.domain.post.Hashtag;
 import sns.pinocchio.domain.post.Post;
@@ -34,7 +35,7 @@ public class PostService {
     private final HashtagRepository hashtagRepository;
     private final MemberService memberService;
     private final ApplicationEventPublisher publisher;
-    private final S3Uploader s3Uploader;
+    private final LocalUploader localUploader;
 
     // 이미지 업로드
     public String createPostWithImage(PostCreateRequest request, MultipartFile image, String tsid) throws IOException {
@@ -42,7 +43,7 @@ public class PostService {
             throw new IllegalArgumentException("이미지는 반드시 1장 첨부해야 합니다.");
         }
 
-        String imageUrl = s3Uploader.uploadFile(image, "post-image");
+        String imageUrl = localUploader.uploadFile(image, "post-image");
         request.setImageUrls(List.of(imageUrl)); // 기존 로직 재활용
 
         return createPost(request, tsid);
